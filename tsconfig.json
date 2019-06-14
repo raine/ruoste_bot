@@ -6,16 +6,16 @@
     "lib": ["dom", "es2017"],
     "module": "commonjs",
     "moduleResolution": "node",
-    "noEmit": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noImplicitAny": true,
     "preserveConstEnums": true,
     "removeComments": false,
     "skipLibCheck": true,
-    "sourceMap": true,
+    "sourceMap": false,
     "strict": true,
     "target": "esnext",
     "resolveJsonModule": true
-  }
+  },
+  "include": ["index.ts", "lib/**/*"]
 }

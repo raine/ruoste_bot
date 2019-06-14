@@ -19,6 +19,8 @@
     "typescript": "^3.5.2"
   },
   "scripts": {
+    "start": "node index.js",
+    "build": "tsc",
     "dev": "ts-node-dev --no-notify --respawn index.ts"
   }
 }
