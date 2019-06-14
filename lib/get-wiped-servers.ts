@@ -51,6 +51,7 @@ export type Server = {
   playersCurrent: number
   playersMax: number
   map: string
+  maxGroup: number | null
 }
 
 const parseYesNo = (str: string): boolean => (str === 'Yes' ? true : false)
@@ -89,6 +90,10 @@ const parseServers = (html: string): Server[] => {
       const map = $('.i-map .value', elem)
         .text()
         .trim()
+      const maxGroupStr = $('.i-max-group .value', elem)
+        .text()
+        .trim()
+      const maxGroup = maxGroupStr ? parseInt(maxGroupStr) : null
       return {
         country,
         name,
@@ -99,7 +104,8 @@ const parseServers = (html: string): Server[] => {
         modded,
         playersCurrent,
         playersMax,
-        map
+        map,
+        maxGroup
       } as Server
     })
     .get()

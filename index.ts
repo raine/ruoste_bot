@@ -14,6 +14,13 @@ const link = (text: string, href: string) => `<a href="${href}">${text}</a>`
 const truncate = (n: number, str: string) =>
   str.length > n ? str.slice(0, n) + `…` : str
 
+const formatMaxGroup = (count: number | null) => {
+  if (count === 1) return 'solo'
+  else if (count === 2) return 'duo'
+  else if (count === 3) return 'trio'
+  else if (count && count > 3) return count
+}
+
 const formatServer = ({
   name,
   lastWipe,
