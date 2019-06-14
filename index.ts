@@ -1,6 +1,7 @@
-import Telegraf from 'telegraf'
+import Telegraf, { ContextMessageUpdate } from 'telegraf'
 import getWipedServers, { Server } from './lib/get-wiped-servers'
 import { DateTime } from 'luxon'
+import { Message } from 'telegram-typings'
 const TimeAgo = require('javascript-time-ago')
 
 TimeAgo.addLocale(require('javascript-time-ago/locale/en'))
@@ -28,28 +29,40 @@ const formatServer = ({
   playersMax,
   mapSize,
   rating,
-  url
+  url,
+  maxGroup
 }: Server): string =>
   [
     bold(formatRelativeDate(lastWipe, 'twitter')),
-    '/',
+    '|',
     link(truncate(25, name), url),
-    bold(`[${playersCurrent}/${playersMax}, ${mapSize}, ${rating}%]`)
+    bold(
+      '[' +
+        [
+          `${playersCurrent}/${playersMax}`,
+          mapSize,
+          `${rating}%`,
+          formatMaxGroup(maxGroup)
+        ]
+          .filter(Boolean)
+          .join(', ') +
+        ']'
+    )
   ].join(' ')
 
 const bot = new Telegraf(process.env.BOT_TOKEN as string)
-
-bot.command('wipet', (ctx) =>
+const replyWithServers = (ctx: ContextMessageUpdate) =>
   getWipedServers().then((servers) =>
     ctx.replyWithHTML(
       servers
-        .slice(0, 5)
+        .slice(0, 8)
         .map(formatServer)
         .join('\n'),
       { disable_web_page_preview: true }
     )
   )
-)
+
+bot.command('wipet', replyWithServers)
 
 bot.launch().then(() => {
   console.log('bot started')
