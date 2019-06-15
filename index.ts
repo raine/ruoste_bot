@@ -48,16 +48,12 @@ bot.launch().then(() => {
   console.log('bot started')
 })
 
-// getWipedServers().then((servers) => {
-//   bot.telegram.sendMessage(
-//     -328381794,
-//     servers
-//       .slice(0, 5)
-//       .map(formatServer)
-//       .join('\n'),
-//     {
-//       parse_mode: 'HTML',
-//       disable_web_page_preview: true
-//     }
-//   )
-// })
+bot.on('sticker', (ctx) => {
+  const { sticker } = ctx.update.message as Message
+  if (
+    sticker &&
+    (sticker.emoji === '🏉' || sticker.emoji === '😱') &&
+    sticker.set_name === 'Rust_pack'
+  )
+    replyWithServers(ctx)
+})
