@@ -2,7 +2,7 @@ import Telegraf, { ContextMessageUpdate } from 'telegraf'
 import getWipedServers, { Server } from './lib/get-wiped-servers'
 import { DateTime } from 'luxon'
 import { Message } from 'telegram-typings'
-const TimeAgo = require('javascript-time-ago')
+import TimeAgo from 'javascript-time-ago'
 
 TimeAgo.addLocale(require('javascript-time-ago/locale/en'))
 const timeAgo = new TimeAgo('en-US')
