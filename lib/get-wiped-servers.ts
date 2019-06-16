@@ -45,7 +45,7 @@ export type Server = {
   maxGroup: number | null
 }
 
-const parseYesNo = (str: string): boolean => (str === 'Yes' ? true : false)
+const parseYesNo = (str: string): boolean => str === 'Yes'
 
 // TODO: check parsed item with io-ts?
 const parseServers = (html: string): Server[] => {
