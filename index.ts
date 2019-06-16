@@ -70,7 +70,7 @@ bot.launch().then(() => {
   console.log('bot started')
 })
 
-async function loop() {
+async function updateLoop() {
   const now = DateTime.local()
   const repliesToBeUpdated = updatedServerListReplies.filter(
     (reply) =>
@@ -87,7 +87,7 @@ async function loop() {
         console.log(`updated ${repliesToBeUpdated.length} messages`)
       })
       .catch((err) => {
-        console.error('failed to update messages')
+        console.error('failed to update messages', err)
       })
 
   updatedServerListReplies = updatedServerListReplies
@@ -96,7 +96,7 @@ async function loop() {
       repliesToBeUpdated.includes(reply) ? { ...reply, updated: now } : reply
     )
 
-  setTimeout(loop, 1000)
+  setTimeout(updateLoop, 1000)
 }
 
-loop()
+updateLoop()
