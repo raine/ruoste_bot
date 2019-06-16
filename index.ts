@@ -1,3 +1,6 @@
+const Sentry = require('@sentry/node')
+Sentry.init({ dsn: process.env.SENTRY_DSN })
+
 import Telegraf, { ContextMessageUpdate } from 'telegraf'
 import getWipedServers from './lib/get-wiped-servers'
 import { Message } from 'telegram-typings'
