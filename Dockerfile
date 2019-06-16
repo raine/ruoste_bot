@@ -2,8 +2,9 @@ FROM node:12-alpine
 
 WORKDIR /usr/src/app
 
-COPY package.json yarn.lock tsconfig.json ./
+COPY package.json yarn.lock ./
 RUN yarn install
+COPY tsconfig.json ./
 COPY lib ./lib
 COPY types ./types
 COPY index.ts ./index.ts
