@@ -103,3 +103,9 @@ async function updateLoop() {
 }
 
 updateLoop()
+
+process.on('unhandledRejection', (err) => {
+  console.error(err)
+  Sentry.captureException(err)
+  process.exit(1)
+})
