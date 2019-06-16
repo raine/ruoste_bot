@@ -44,6 +44,10 @@ const replyWithServers = (ctx: ContextMessageUpdate) =>
             updated: null
           })
       })
+      .catch((err) => {
+        Sentry.captureException(err)
+        console.error(err)
+      })
   )
 
 const updateRepliedServerList = async (msg: Message) => {
