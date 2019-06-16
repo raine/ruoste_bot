@@ -24,11 +24,11 @@ export const formatServersPageUrl = () =>
     min_rating: '60',
     min_wipe_cycle: '0',
     min_world_size: '1000',
-    q: '',
     region: 'europe',
     s_type: 'vanilla_only',
     uptime_badge: '1',
-    wipe_regularity_badge: '0'
+    wipe_regularity_badge: '0',
+    q: ''
   })
 
 export type Server = {
@@ -47,6 +47,7 @@ export type Server = {
 
 const parseYesNo = (str: string): boolean => (str === 'Yes' ? true : false)
 
+// TODO: check parsed item with io-ts?
 const parseServers = (html: string): Server[] => {
   const $ = cheerio.load(html)
   const $servers = $('.servers .server')
