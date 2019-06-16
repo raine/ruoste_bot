@@ -58,4 +58,8 @@ export const formatServerListReply = (servers: Server[]): string =>
 export const formatServerListReplyWithUpdatedAt = (servers: Server[]): string =>
   formatServerListReply(servers) +
   '\n' +
-  code(`last updated at ${DateTime.local().toFormat('HH:mm:ss')}`)
+  code(
+    `last updated at ${DateTime.local()
+      .setZone('Europe/Helsinki')
+      .toFormat('HH:mm:ss')}`
+  )
