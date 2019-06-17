@@ -2,7 +2,7 @@ const Sentry = require('@sentry/node')
 Sentry.init({ dsn: process.env.SENTRY_DSN })
 
 import Telegraf, { ContextMessageUpdate } from 'telegraf'
-import getWipedServers from './lib/get-wiped-servers'
+import { getWipedServers } from './lib/just-wiped'
 import { Message } from 'telegram-typings'
 import {
   formatServerListReply,
@@ -28,6 +28,11 @@ const REPLY_UPDATE_INTERVAL_SECS = 180
 const REPLY_UPDATE_EXPIRES_AFTER_SECS = 3600
 
 const bot = new Telegraf(process.env.BOT_TOKEN as string)
+
+bot.catch((err: any) => {
+  console.error('Something went wrong', err)
+})
+
 const replyWithServers = (ctx: ContextMessageUpdate) =>
   getWipedServers().then((servers) =>
     ctx
@@ -46,7 +51,7 @@ const replyWithServers = (ctx: ContextMessageUpdate) =>
       })
       .catch((err) => {
         Sentry.captureException(err)
-        console.error(err)
+        console.error('Failed to reply with servers', err)
       })
   )
 
@@ -73,9 +78,15 @@ bot.on('sticker', (ctx) => {
     replyWithServers(ctx)
 })
 
-bot.launch().then(() => {
-  console.log('bot started')
-})
+bot
+  .launch()
+  .then(() => {
+    console.log('bot started')
+  })
+  .catch((err) => {
+    console.error('failed to start bot', err)
+    process.exit(1)
+  })
 
 async function updateLoop() {
   const now = DateTime.local()
@@ -109,7 +120,7 @@ async function updateLoop() {
 updateLoop()
 
 process.on('unhandledRejection', (err) => {
-  console.error(err)
+  console.error('Unhandled rejection', err)
   Sentry.captureException(err)
   process.exit(1)
 })

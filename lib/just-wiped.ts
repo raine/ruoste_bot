@@ -3,9 +3,29 @@ import * as qs from 'querystring'
 import * as cheerio from 'cheerio'
 import { DateTime } from 'luxon'
 
+export type ListServer = {
+  country: string
+  name: string
+  url: string
+  mapSize: number
+  lastWipe: DateTime
+  rating: number
+  modded: boolean
+  playersCurrent: number
+  playersMax: number
+  map: string
+  maxGroup: number | null
+}
+
+export type FullServer = {
+  wipes: DateTime[]
+}
+
 const JUST_WIPED_BASE_URL = 'https://just-wiped.net'
 
-export const formatServersPageUrl = () =>
+export const formatServerPageUrl = (id: number) =>
+  JUST_WIPED_BASE_URL + `/rust_servers/${id}`
+export const formatServerListPageUrl = () =>
   JUST_WIPED_BASE_URL +
   '/rust_servers?' +
   qs.stringify({
@@ -31,24 +51,10 @@ export const formatServersPageUrl = () =>
     q: ''
   })
 
-export type Server = {
-  country: string
-  name: string
-  url: string
-  mapSize: number
-  lastWipe: DateTime
-  rating: number
-  modded: boolean
-  playersCurrent: number
-  playersMax: number
-  map: string
-  maxGroup: number | null
-}
-
 const parseYesNo = (str: string): boolean => str === 'Yes'
 
 // TODO: check parsed item with io-ts?
-const parseServers = (html: string): Server[] => {
+const parseServerList = (html: string): ListServer[] => {
   const $ = cheerio.load(html)
   const $servers = $('.servers .server')
   return $servers
@@ -98,16 +104,41 @@ const parseServers = (html: string): Server[] => {
         playersMax,
         map,
         maxGroup
-      } as Server
+      } as ListServer
     })
     .get()
 }
 
-const getWipedServers = (): Promise<Server[]> => {
-  const url = formatServersPageUrl()
+export const getWipedServers = (): Promise<ListServer[]> => {
+  const url = formatServerListPageUrl()
   return got(url)
     .then((res) => res.body)
-    .then(parseServers)
+    .then(parseServerList)
 }
 
-export default getWipedServers
+export const parseRawWipeDate = (str: string): DateTime =>
+  DateTime.fromFormat(str, 'dd.MM.yyyy - HH:mm UTC').setZone('UTC', {
+    keepLocalTime: true
+  })
+
+const parseServerPage = (html: string): FullServer => {
+  const $ = cheerio.load(html)
+  const wipes = $('.wipe-history .wipe-date')
+    .map((_, elem) =>
+      parseRawWipeDate(
+        $(elem)
+          .text()
+          .trim()
+      )
+    )
+    .get()
+
+  return { wipes } as FullServer
+}
+
+export const getServer = async (id: number): Promise<FullServer> => {
+  const url = formatServerPageUrl(id)
+  return got(url)
+    .then((res) => res.body)
+    .then(parseServerPage)
+}

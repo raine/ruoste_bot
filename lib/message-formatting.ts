@@ -1,4 +1,4 @@
-import { Server } from './get-wiped-servers'
+import { ListServer } from './just-wiped'
 import { DateTime } from 'luxon'
 import TimeAgo from 'javascript-time-ago'
 
@@ -30,7 +30,7 @@ const formatServer = ({
   rating,
   url,
   maxGroup
-}: Server): string =>
+}: ListServer): string =>
   [
     bold(formatRelativeDate(lastWipe, 'twitter')),
     '|',
@@ -49,13 +49,13 @@ const formatServer = ({
     )
   ].join(' ')
 
-export const formatServerListReply = (servers: Server[]): string =>
+export const formatServerListReply = (servers: ListServer[]): string =>
   servers
     .slice(0, 8)
     .map(formatServer)
     .join('\n')
 
-export const formatServerListReplyWithUpdatedAt = (servers: Server[]): string =>
+export const formatServerListReplyWithUpdatedAt = (servers: ListServer[]): string =>
   formatServerListReply(servers) +
   '\n' +
   code(
