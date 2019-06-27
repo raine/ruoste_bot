@@ -71,6 +71,9 @@ const updateRepliedServerList = async (msg: Message) => {
 }
 
 bot.command('wipet', replyWithServers)
+bot.command('error', (ctx: ContextMessageUpdate) => {
+  throw new Error('test')
+})
 
 bot.on('sticker', (ctx) => {
   const { sticker } = ctx.update.message as Message
