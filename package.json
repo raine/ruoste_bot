@@ -35,6 +35,7 @@
     "dev": "ts-node-dev --no-notify --respawn index.ts"
   },
   "jest": {
+    "bail": true,
     "preset": "ts-jest",
     "testEnvironment": "node",
     "transform": {

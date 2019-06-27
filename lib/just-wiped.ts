@@ -2,6 +2,7 @@ import * as got from 'got'
 import * as qs from 'querystring'
 import * as cheerio from 'cheerio'
 import { DateTime } from 'luxon'
+import { fromFormatUTC } from './date'
 
 export type ListServer = {
   country: string
@@ -117,9 +118,7 @@ export const getWipedServers = (): Promise<ListServer[]> => {
 }
 
 export const parseRawWipeDate = (str: string): DateTime =>
-  DateTime.fromFormat(str, 'dd.MM.yyyy - HH:mm UTC').setZone('UTC', {
-    keepLocalTime: true
-  })
+  fromFormatUTC(str, 'dd.MM.yyyy - HH:mm UTC')
 
 const parseServerPage = (html: string): FullServer => {
   const $ = cheerio.load(html)
