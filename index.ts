@@ -36,26 +36,28 @@ bot.catch((err: any) => {
 })
 
 const replyWithServers = (ctx: ContextMessageUpdate) =>
-  getWipedServers().then((servers) =>
-    ctx
-      .replyWithHTML(formatServerListReply(servers), EXTRA_OPTS)
-      .then((msg) => {
-        updatedServerListReplies = updatedServerListReplies
-          .filter(({ message }) => message.chat.id !== msg.chat.id)
-          .concat({
-            message: msg,
-            sent: DateTime.local(),
-            expires: DateTime.local().plus({
-              seconds: REPLY_UPDATE_EXPIRES_AFTER_SECS
-            }),
-            updated: null
-          })
-      })
-      .catch((err) => {
-        Sentry.captureException(err)
-        log.error('failed to reply with servers', err)
-      })
-  )
+  getWipedServers()
+    .then((servers) =>
+      ctx
+        .replyWithHTML(formatServerListReply(servers), EXTRA_OPTS)
+        .then((msg) => {
+          updatedServerListReplies = updatedServerListReplies
+            .filter(({ message }) => message.chat.id !== msg.chat.id)
+            .concat({
+              message: msg,
+              sent: DateTime.local(),
+              expires: DateTime.local().plus({
+                seconds: REPLY_UPDATE_EXPIRES_AFTER_SECS
+              }),
+              updated: null
+            })
+        })
+    )
+    .catch((err) => {
+      Sentry.captureException(err)
+      log.error('failed to reply with servers', err)
+      ctx.reply('something went wrong 😳')
+    })
 
 const updateRepliedServerList = async (msg: Message) => {
   const servers = await getWipedServers()
