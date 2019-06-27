@@ -25,12 +25,13 @@ const JUST_WIPED_BASE_URL = 'https://just-wiped.net'
 
 export const formatServerPageUrl = (id: number) =>
   JUST_WIPED_BASE_URL + `/rust_servers/${id}`
+
 export const formatServerListPageUrl = () =>
   JUST_WIPED_BASE_URL +
   '/rust_servers?' +
   qs.stringify({
     country: 'Any',
-    map: 'Any',
+    map: 'Procedural Map',
     max_active_player: '500',
     max_hours_since_wipe: '73',
     max_max_group: '11',
