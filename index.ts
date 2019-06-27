@@ -9,6 +9,7 @@ import {
   formatServerListReplyWithUpdatedAt
 } from './lib/message-formatting'
 import { DateTime, Interval } from 'luxon'
+import log from './lib/logger'
 
 type ServerListReply = {
   message: Message
@@ -30,7 +31,8 @@ const REPLY_UPDATE_EXPIRES_AFTER_SECS = 3600
 const bot = new Telegraf(process.env.BOT_TOKEN as string)
 
 bot.catch((err: any) => {
-  console.error('Something went wrong', err)
+  Sentry.captureException(err)
+  log.error('something went wrong', err)
 })
 
 const replyWithServers = (ctx: ContextMessageUpdate) =>
@@ -51,7 +53,7 @@ const replyWithServers = (ctx: ContextMessageUpdate) =>
       })
       .catch((err) => {
         Sentry.captureException(err)
-        console.error('Failed to reply with servers', err)
+        log.error('failed to reply with servers', err)
       })
   )
 
@@ -81,10 +83,10 @@ bot.on('sticker', (ctx) => {
 bot
   .launch()
   .then(() => {
-    console.log('bot started')
+    log.info('bot started')
   })
   .catch((err) => {
-    console.error('failed to start bot', err)
+    log.error('failed to start bot', err)
     process.exit(1)
   })
 
@@ -102,10 +104,10 @@ async function updateLoop() {
       repliesToBeUpdated.map(({ message }) => updateRepliedServerList(message))
     )
       .then(() => {
-        console.log(`updated ${repliesToBeUpdated.length} messages`)
+        log.info('updated %s messages', repliesToBeUpdated.length)
       })
       .catch((err) => {
-        console.error('failed to update messages', err)
+        log.error('failed to update messages', err)
       })
 
   updatedServerListReplies = updatedServerListReplies
@@ -120,7 +122,7 @@ async function updateLoop() {
 updateLoop()
 
 process.on('unhandledRejection', (err) => {
-  console.error('Unhandled rejection', err)
+  log.error('unhandled rejection', err)
   Sentry.captureException(err)
   process.exit(1)
 })
