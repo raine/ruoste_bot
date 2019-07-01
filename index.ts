@@ -2,7 +2,7 @@ const Sentry = require('@sentry/node')
 Sentry.init({ dsn: process.env.SENTRY_DSN })
 
 import Telegraf, { ContextMessageUpdate } from 'telegraf'
-import { getWipedServers } from './lib/just-wiped'
+import { getWipedServers, SERVER_LIST_PAGE_URL } from './lib/just-wiped'
 import { Message } from 'telegram-typings'
 import {
   formatServerListReply,
@@ -39,7 +39,10 @@ const replyWithServers = (ctx: ContextMessageUpdate) =>
   getWipedServers()
     .then((servers) =>
       ctx
-        .replyWithHTML(formatServerListReply(servers), EXTRA_OPTS)
+        .replyWithHTML(
+          formatServerListReply(servers, SERVER_LIST_PAGE_URL),
+          EXTRA_OPTS
+        )
         .then((msg) => {
           updatedServerListReplies = updatedServerListReplies
             .filter(({ message }) => message.chat.id !== msg.chat.id)
@@ -65,7 +68,7 @@ const updateRepliedServerList = async (msg: Message) => {
     msg.chat.id,
     msg.message_id,
     undefined,
-    formatServerListReplyWithUpdatedAt(servers),
+    formatServerListReplyWithUpdatedAt(servers, SERVER_LIST_PAGE_URL),
     { ...EXTRA_OPTS, parse_mode: 'HTML' }
   )
 }

@@ -49,17 +49,26 @@ const formatServer = ({
     )
   ].join(' ')
 
-export const formatServerListReply = (servers: ListServer[]): string =>
+const formatServerList = (servers: ListServer[]) =>
   servers
     .slice(0, 10)
     .map(formatServer)
     .join('\n')
 
-export const formatServerListReplyWithUpdatedAt = (servers: ListServer[]): string =>
-  formatServerListReply(servers) +
+export const formatServerListReply = (
+  servers: ListServer[],
+  serverListUrl: string
+): string =>
+  formatServerList(servers) + '\n' + link('Open full server list', serverListUrl)
+
+export const formatServerListReplyWithUpdatedAt = (
+  servers: ListServer[],
+  serverListUrl: string
+): string =>
+  formatServerListReply(servers, serverListUrl) +
   '\n' +
   code(
-    `last updated at ${DateTime.local()
+    `Last updated at ${DateTime.local()
       .setZone('Europe/Helsinki')
       .toFormat('HH:mm:ss')}`
   )

@@ -23,10 +23,7 @@ export type FullServer = {
 
 const JUST_WIPED_BASE_URL = 'https://just-wiped.net'
 
-export const formatServerPageUrl = (id: number) =>
-  JUST_WIPED_BASE_URL + `/rust_servers/${id}`
-
-export const formatServerListPageUrl = () =>
+export const SERVER_LIST_PAGE_URL =
   JUST_WIPED_BASE_URL +
   '/rust_servers?' +
   qs.stringify({
@@ -51,6 +48,9 @@ export const formatServerListPageUrl = () =>
     wipe_regularity_badge: '0',
     q: ''
   })
+
+export const formatServerPageUrl = (id: number) =>
+  JUST_WIPED_BASE_URL + `/rust_servers/${id}`
 
 const parseYesNo = (str: string): boolean => str === 'Yes'
 
@@ -111,8 +111,7 @@ const parseServerList = (html: string): ListServer[] => {
 }
 
 export const getWipedServers = (): Promise<ListServer[]> => {
-  const url = formatServerListPageUrl()
-  return got(url)
+  return got(SERVER_LIST_PAGE_URL)
     .then((res) => res.body)
     .then(parseServerList)
 }
