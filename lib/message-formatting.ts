@@ -51,7 +51,7 @@ const formatServer = ({
 
 export const formatServerListReply = (servers: ListServer[]): string =>
   servers
-    .slice(0, 8)
+    .slice(0, 10)
     .map(formatServer)
     .join('\n')
 
