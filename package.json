@@ -9,9 +9,9 @@
     "got": "^9.6.0",
     "javascript-time-ago": "^2.0.1",
     "luxon": "^1.16.0",
+    "pino": "^5.12.6",
     "ramda": "^0.26.1",
-    "telegraf": "^3.30.1",
-    "winston": "^3.2.1"
+    "telegraf": "^3.30.1"
   },
   "devDependencies": {
     "@types/cheerio": "^0.22.11",
@@ -19,9 +19,11 @@
     "@types/got": "^9.4.4",
     "@types/jest": "^24.0.15",
     "@types/luxon": "^1.15.1",
+    "@types/pino": "^5.8.8",
     "@types/ramda": "^0.26.9",
     "dedent": "^0.7.0",
     "jest": "^24.8.0",
+    "pino-pretty": "^3.2.0",
     "ts-jest": "^24.0.2",
     "ts-node": "^8.2.0",
     "ts-node-dev": "^1.0.0-pre.40",

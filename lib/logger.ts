@@ -1,18 +1,4 @@
-import * as winston from 'winston'
+import * as pino from 'pino'
 
-const { createLogger, format, transports } = winston
-const { combine } = format
-
-const logger = createLogger({
-  format: combine(
-    format.timestamp({
-      format: 'YYYY-MM-DD HH:mm:ss'
-    }),
-    format.errors({ stack: true }),
-    format.splat(),
-    format.json()
-  ),
-  transports: [new transports.Console()]
-})
-
+const logger = pino({ prettyPrint: true })
 export default logger
