@@ -45,7 +45,21 @@ describe('parseServerList', () => {
       playersCurrent: 4,
       playersMax: 100,
       rating: 76,
-      url: 'https://just-wiped.net/rust_servers/490501'
+      url: 'https://just-wiped.net/rust_servers/490501',
+      inactive: false
+    })
+  })
+
+  test('parses inactive server', () => {
+    servers = parseServerList(
+      fs.readFileSync(
+        `${__dirname}/../test/data/server-list-with-inactive.html`,
+        'utf8'
+      )
+    )
+
+    expect(objDateTimeToISO(servers[1])).toMatchObject({
+      inactive: true
     })
   })
 })
@@ -64,6 +78,7 @@ describe('parseServerPage', () => {
   test('parses server data', () => {
     expect(objDateTimeToISO(server)).toEqual({
       country: 'DE',
+      inactive: false,
       lastWipe: '2019-07-07T12:00:00.000+03:00',
       map: 'Procedural Map',
       mapSize: 3500,

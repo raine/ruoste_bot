@@ -17,6 +17,7 @@ export type ListServer = {
   playersMax: number
   map: string
   maxGroup: number | null
+  inactive: boolean
 }
 
 export type FullServer = ListServer & {
@@ -63,6 +64,7 @@ const parseServerBoxElement = (elem: any) => {
   const name = $('a.name h1', elem).length
     ? getText($('a.name h1', elem))
     : getText($('a.name', elem)).split('\n')[0]
+  const inactive = Boolean($('a.name *:contains("Inactive")', elem).length)
   const mapImgAlt = $('.map a img', elem).attr('alt')
   const mapSizeMatches = mapImgAlt.match(/Size: (\d+)/)
   const mapSize = mapSizeMatches ? parseInt(mapSizeMatches[1]) : null
@@ -80,6 +82,7 @@ const parseServerBoxElement = (elem: any) => {
   const maxGroup = maxGroupStr ? parseInt(maxGroupStr) : null
   return {
     country,
+    inactive,
     name,
     url,
     mapSize,
