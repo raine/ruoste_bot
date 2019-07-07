@@ -25,9 +25,12 @@ export const objDateTimeToISO = (obj: any) =>
     obj
   )
 
-export const formatShortDate = (date: DateTime): string => date.toFormat('d.L')
+export const formatShortDate = (date: DateTime): string =>
+  date.setZone('Europe/Helsinki').toFormat('d.L')
+
 export const formatShortDateTime = (date: DateTime): string => {
   const today = DateTime.local()
+  date = date.setZone('Europe/Helsinki')
   return date.hasSame(today, 'day')
     ? date.toFormat('HH:mm')
     : date.toFormat('d.L. HH:mm')
