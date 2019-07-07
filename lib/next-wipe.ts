@@ -137,8 +137,9 @@ const nextWipe = (wipes: DateTime[]): NextWipe => {
   // adding the wipe interval in days until we have a date that is today or future.
   // That is the next wipe date.
   let nextWipeDate = lastWipeDateWithinInterval!.startOf('day')
-  const midnight = DateTime.utc().startOf('day')
-  while (nextWipeDate.toMillis() < midnight.toMillis()) {
+  const now = DateTime.utc()
+  const midnight = now.startOf('day')
+  while (nextWipeDate.toMillis() < (wipeTime ? now : midnight).toMillis()) {
     nextWipeDate = nextWipeDate.plus({ days: wipeIntervalInDays })
   }
 
