@@ -3,6 +3,7 @@ import * as qs from 'querystring'
 import * as cheerio from 'cheerio'
 import { DateTime } from 'luxon'
 import { fromFormatUTC } from './date'
+import log from './logger'
 
 export type ListServer = {
   country: string
@@ -18,7 +19,7 @@ export type ListServer = {
   maxGroup: number | null
 }
 
-export type FullServer = {
+export type FullServer = ListServer & {
   wipes: DateTime[]
 }
 
@@ -54,64 +55,53 @@ export const formatServerPageUrl = (id: number) =>
   JUST_WIPED_BASE_URL + `/rust_servers/${id}`
 
 const parseYesNo = (str: string): boolean => str === 'Yes'
+const getText = (c: Cheerio) => c.text().trim()
+
+const parseServerBoxElement = (elem: any) => {
+  const $ = cheerio
+  const country = $('.flag', elem).attr('title')
+  const name = $('a.name h1', elem).length
+    ? getText($('a.name h1', elem))
+    : getText($('a.name', elem)).split('\n')[0]
+  const mapImgAlt = $('.map a img', elem).attr('alt')
+  const mapSizeMatches = mapImgAlt.match(/Size: (\d+)/)
+  const mapSize = mapSizeMatches ? parseInt(mapSizeMatches[1]) : null
+  const url = JUST_WIPED_BASE_URL + $('.name', elem).attr('href')
+  const lastWipe = DateTime.fromISO(
+    $('.i-last-wipe time', elem).attr('datetime')
+  )
+  const rating = parseInt(getText($('.i-rating .value', elem)))
+  const modded = parseYesNo(getText($('.i-modded .value', elem)))
+  const [playersCurrent, playersMax] = getText($('.i-player .value', elem))
+    .split('/')
+    .map((str) => parseInt(str))
+  const map = getText($('.i-map .value', elem))
+  const maxGroupStr = getText($('.i-max-group .value', elem))
+  const maxGroup = maxGroupStr ? parseInt(maxGroupStr) : null
+  return {
+    country,
+    name,
+    url,
+    mapSize,
+    lastWipe,
+    rating,
+    modded,
+    playersCurrent,
+    playersMax,
+    map,
+    maxGroup
+  } as ListServer
+}
 
 // TODO: check parsed item with io-ts?
-const parseServerList = (html: string): ListServer[] => {
+export const parseServerList = (html: string): ListServer[] => {
   const $ = cheerio.load(html)
   const $servers = $('.servers .server')
-  return $servers
-    .map((_, elem) => {
-      const country = $('.flag', elem).attr('title')
-      const name = $('.name', elem)
-        .text()
-        .split(/\n/)[0]
-      const mapImgAlt = $('.map a img', elem).attr('alt')
-      const mapSizeMatches = mapImgAlt.match(/Size: (\d+)/)
-      const mapSize = mapSizeMatches ? parseInt(mapSizeMatches[1]) : null
-      const url = JUST_WIPED_BASE_URL + $('.name', elem).attr('href')
-      const lastWipe = DateTime.fromISO(
-        $('.i-last-wipe time', elem).attr('datetime')
-      )
-      const rating = parseInt(
-        $('.i-rating .value', elem)
-          .text()
-          .trim()
-      )
-      const modded = parseYesNo(
-        $('.i-modded .value', elem)
-          .text()
-          .trim()
-      )
-      const [playersCurrent, playersMax] = $('.i-player .value', elem)
-        .text()
-        .trim()
-        .split('/')
-        .map((str) => parseInt(str))
-      const map = $('.i-map .value', elem)
-        .text()
-        .trim()
-      const maxGroupStr = $('.i-max-group .value', elem)
-        .text()
-        .trim()
-      const maxGroup = maxGroupStr ? parseInt(maxGroupStr) : null
-      return {
-        country,
-        name,
-        url,
-        mapSize,
-        lastWipe,
-        rating,
-        modded,
-        playersCurrent,
-        playersMax,
-        map,
-        maxGroup
-      } as ListServer
-    })
-    .get()
+  return $servers.map((_, elem) => parseServerBoxElement(elem)).get()
 }
 
 export const getWipedServers = (): Promise<ListServer[]> => {
+  log.info({ url: SERVER_LIST_PAGE_URL }, 'getting server list')
   return got(SERVER_LIST_PAGE_URL)
     .then((res) => res.body)
     .then(parseServerList)
@@ -120,7 +110,7 @@ export const getWipedServers = (): Promise<ListServer[]> => {
 export const parseRawWipeDate = (str: string): DateTime =>
   fromFormatUTC(str, 'dd.MM.yyyy - HH:mm UTC')
 
-const parseServerPage = (html: string): FullServer => {
+export const parseServerPage = (html: string): FullServer => {
   const $ = cheerio.load(html)
   const wipes = $('.wipe-history .wipe-date')
     .map((_, elem) =>
@@ -132,11 +122,15 @@ const parseServerPage = (html: string): FullServer => {
     )
     .get()
 
-  return { wipes } as FullServer
+  return {
+    ...parseServerBoxElement($('.server.server-head')),
+    wipes
+  } as FullServer
 }
 
 export const getServer = async (id: number): Promise<FullServer> => {
   const url = formatServerPageUrl(id)
+  log.info({ url }, 'getting server page')
   return got(url)
     .then((res) => res.body)
     .then(parseServerPage)
