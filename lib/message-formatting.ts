@@ -1,6 +1,8 @@
-import { ListServer } from './just-wiped'
+import { ListServer, FullServer } from './just-wiped'
 import { DateTime } from 'luxon'
+import { formatShortDate, formatShortDateTime } from './date'
 import TimeAgo from 'javascript-time-ago'
+import * as R from 'ramda'
 
 TimeAgo.addLocale(require('javascript-time-ago/locale/en'))
 const timeAgo = new TimeAgo('en-US')
@@ -59,7 +61,9 @@ export const formatServerListReply = (
   servers: ListServer[],
   serverListUrl: string
 ): string =>
-  formatServerList(servers) + '\n' + link('Open full server list', serverListUrl)
+  formatServerList(servers) +
+  '\n' +
+  link('Open full server list', serverListUrl)
 
 export const formatServerListReplyWithUpdatedAt = (
   servers: ListServer[],
@@ -72,3 +76,37 @@ export const formatServerListReplyWithUpdatedAt = (
       .setZone('Europe/Helsinki')
       .toFormat('HH:mm:ss')}`
   )
+
+const formatWipeListServer = ({
+  name,
+  playersMax,
+  mapSize,
+  url,
+  maxGroup,
+  nextWipe
+}: FullServer): string =>
+  [
+    bold(
+      nextWipe!.accuracy === 'DATE'
+        ? formatShortDate(nextWipe!.date)
+        : formatShortDateTime(nextWipe!.date)
+    ),
+    '|',
+    link(truncate(25, name), url),
+    bold(
+      '[' +
+        [playersMax, mapSize, formatMaxGroup(maxGroup)]
+          .filter(Boolean)
+          .join(', ') +
+        ']'
+    )
+  ].join(' ')
+
+export const formatUpcomingWipeList = (servers: FullServer[]): string => {
+  const sortedByNextWipe = R.sortWith(
+    [R.ascend(({ nextWipe }) => (nextWipe ? nextWipe.date : 0))],
+    servers
+  )
+
+  return sortedByNextWipe.map(formatWipeListServer).join('\n')
+}

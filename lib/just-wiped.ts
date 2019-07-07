@@ -1,12 +1,15 @@
 import * as got from 'got'
+import * as R from 'ramda'
 import * as qs from 'querystring'
 import * as cheerio from 'cheerio'
 import { DateTime } from 'luxon'
 import { fromFormatUTC } from './date'
 import log from './logger'
+import nextWipe, { NextWipe } from './next-wipe'
 
 export type ListServer = {
   country: string
+  id: number
   name: string
   url: string
   mapSize: number
@@ -22,38 +25,40 @@ export type ListServer = {
 
 export type FullServer = ListServer & {
   wipes: DateTime[]
+  nextWipe: NextWipe
 }
 
 const JUST_WIPED_BASE_URL = 'https://just-wiped.net'
+export const SERVER_SEARCH_PARAMS = {
+  country: 'Any',
+  map: 'Procedural Map',
+  max_active_player: '500',
+  max_hours_since_wipe: '73',
+  max_max_group: '11',
+  max_players_max: '500',
+  max_wipe_cycle: '31',
+  max_world_size: '6000',
+  min_active_player: '0',
+  min_hours_since_wipe: '0',
+  min_max_group: '1',
+  min_players_max: '24',
+  min_rating: '60',
+  min_wipe_cycle: '0',
+  min_world_size: '1000',
+  region: 'europe',
+  s_type: 'vanilla_only',
+  uptime_badge: '1',
+  wipe_regularity_badge: '0',
+  q: ''
+}
 
-export const SERVER_LIST_PAGE_URL =
-  JUST_WIPED_BASE_URL +
-  '/rust_servers?' +
-  qs.stringify({
-    country: 'Any',
-    map: 'Procedural Map',
-    max_active_player: '500',
-    max_hours_since_wipe: '73',
-    max_max_group: '11',
-    max_players_max: '500',
-    max_wipe_cycle: '31',
-    max_world_size: '6000',
-    min_active_player: '0',
-    min_hours_since_wipe: '0',
-    min_max_group: '1',
-    min_players_max: '24',
-    min_rating: '60',
-    min_wipe_cycle: '0',
-    min_world_size: '1000',
-    region: 'europe',
-    s_type: 'vanilla_only',
-    uptime_badge: '1',
-    wipe_regularity_badge: '0',
-    q: ''
-  })
+type SearchParams = Partial<typeof SERVER_SEARCH_PARAMS>
 
 export const formatServerPageUrl = (id: number) =>
   JUST_WIPED_BASE_URL + `/rust_servers/${id}`
+
+export const formatServerListUrl = (params: SearchParams) =>
+  JUST_WIPED_BASE_URL + '/rust_servers?' + qs.stringify(params)
 
 const parseYesNo = (str: string): boolean => str === 'Yes'
 const getText = (c: Cheerio) => c.text().trim()
@@ -65,10 +70,14 @@ const parseServerBoxElement = (elem: any) => {
     ? getText($('a.name h1', elem))
     : getText($('a.name', elem)).split('\n')[0]
   const inactive = Boolean($('a.name *:contains("Inactive")', elem).length)
-  const mapImgAlt = $('.map a img', elem).attr('alt')
-  const mapSizeMatches = mapImgAlt.match(/Size: (\d+)/)
-  const mapSize = mapSizeMatches ? parseInt(mapSizeMatches[1]) : null
+  let mapSize = null
+  if ($('.map a', elem).length) {
+    const mapImgAlt = $('.map a img', elem).attr('alt')
+    const mapSizeMatches = mapImgAlt.match(/Size: (\d+)/)
+    mapSize = mapSizeMatches ? parseInt(mapSizeMatches[1]) : null
+  }
   const url = JUST_WIPED_BASE_URL + $('.name', elem).attr('href')
+  const id = parseInt(R.last(url.split('/'))!)
   const lastWipe = DateTime.fromISO(
     $('.i-last-wipe time', elem).attr('datetime')
   )
@@ -81,6 +90,7 @@ const parseServerBoxElement = (elem: any) => {
   const maxGroupStr = getText($('.i-max-group .value', elem))
   const maxGroup = maxGroupStr ? parseInt(maxGroupStr) : null
   return {
+    id,
     country,
     inactive,
     name,
@@ -103,11 +113,14 @@ export const parseServerList = (html: string): ListServer[] => {
   return $servers.map((_, elem) => parseServerBoxElement(elem)).get()
 }
 
-export const getWipedServers = (): Promise<ListServer[]> => {
-  log.info({ url: SERVER_LIST_PAGE_URL }, 'getting server list')
-  return got(SERVER_LIST_PAGE_URL)
+export const getWipedServers = (
+  params?: SearchParams
+): Promise<ListServer[]> => {
+  const url = formatServerListUrl({ ...SERVER_SEARCH_PARAMS, ...params })
+  log.info({ url }, 'getting server list')
+  return got(url)
     .then((res) => res.body)
-    .then(parseServerList)
+    .then((html) => parseServerList(html).filter((server) => !server.inactive))
 }
 
 export const parseRawWipeDate = (str: string): DateTime =>
@@ -127,8 +140,9 @@ export const parseServerPage = (html: string): FullServer => {
 
   return {
     ...parseServerBoxElement($('.server.server-head')),
-    wipes
-  } as FullServer
+    wipes,
+    nextWipe: nextWipe(wipes)
+  }
 }
 
 export const getServer = async (id: number): Promise<FullServer> => {

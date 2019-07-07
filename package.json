@@ -9,8 +9,12 @@
     "got": "^9.6.0",
     "javascript-time-ago": "^2.0.1",
     "luxon": "^1.16.0",
+    "memoizee": "^0.4.14",
+    "p-map": "^2.1.0",
+    "partial.lenses": "^14.17.0",
     "pino": "^5.12.6",
     "ramda": "^0.26.1",
+    "regex-iso-date": "^1.0.0",
     "telegraf": "^3.30.1"
   },
   "devDependencies": {
@@ -19,6 +23,7 @@
     "@types/got": "^9.4.4",
     "@types/jest": "^24.0.15",
     "@types/luxon": "^1.15.1",
+    "@types/memoizee": "^0.4.2",
     "@types/pino": "^5.8.8",
     "@types/ramda": "^0.26.9",
     "dedent": "^0.7.0",

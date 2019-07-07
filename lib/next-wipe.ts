@@ -36,10 +36,10 @@ const getIntervalDayCounts = R.pipe<
 
 type TimeCount = { count: number; time: string }
 
-type NextWipe =
-  | { nextWipeDateTime: DateTime }
-  | { nextWipeDate: DateTime }
-  | null
+export type NextWipe = {
+  date: DateTime
+  accuracy: 'DATE' | 'TIME'
+} | null
 
 const getWipeTimeFromDates = (dates: DateTime[]): DateTime | null =>
   R.pipe<
@@ -134,15 +134,11 @@ const nextWipe = (wipes: DateTime[]): NextWipe => {
   )
 
   // Take last wipe date that matches the determined wipe interval, and keep
-  // adding the wipe interval in days until we have a date that is in future.
+  // adding the wipe interval in days until we have a date that is today or future.
   // That is the next wipe date.
-  let nextWipeDate = lastWipeDateWithinInterval!.set({
-    hour: 0,
-    minute: 0,
-    second: 0
-  })
-  const now = DateTime.local()
-  while (nextWipeDate < now) {
+  let nextWipeDate = lastWipeDateWithinInterval!.startOf('day')
+  const midnight = DateTime.utc().startOf('day')
+  while (nextWipeDate.toMillis() < midnight.toMillis()) {
     nextWipeDate = nextWipeDate.plus({ days: wipeIntervalInDays })
   }
 
@@ -157,8 +153,12 @@ const nextWipe = (wipes: DateTime[]): NextWipe => {
       : null
   })
 
-  if (nextWipeDateTime) return { nextWipeDateTime }
-  else return { nextWipeDate }
+  return nextWipeDate
+    ? {
+        date: nextWipeDateTime || nextWipeDate,
+        accuracy: nextWipeDateTime ? 'TIME' : 'DATE'
+      }
+    : null
 }
 
 export default nextWipe

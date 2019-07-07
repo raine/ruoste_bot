@@ -46,6 +46,7 @@ describe('parseServerList', () => {
       playersMax: 100,
       rating: 76,
       url: 'https://just-wiped.net/rust_servers/490501',
+      id: 490501,
       inactive: false
     })
   })
@@ -89,6 +90,7 @@ describe('parseServerPage', () => {
       playersMax: 250,
       rating: 88,
       url: 'https://just-wiped.net/rust_servers/424678',
+      id: 424678,
       wipes: [
         '2019-07-07T09:00:00.000Z',
         '2019-06-30T09:00:00.000Z',

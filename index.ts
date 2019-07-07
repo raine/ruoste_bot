@@ -2,14 +2,32 @@ const Sentry = require('@sentry/node')
 Sentry.init({ dsn: process.env.SENTRY_DSN })
 
 import Telegraf, { ContextMessageUpdate } from 'telegraf'
-import { getWipedServers, SERVER_LIST_PAGE_URL } from './lib/just-wiped'
+import {
+  getWipedServers,
+  getServer,
+  formatServerListUrl,
+  SERVER_SEARCH_PARAMS,
+  FullServer,
+  ListServer
+} from './lib/just-wiped'
 import { Message } from 'telegram-typings'
 import {
   formatServerListReply,
-  formatServerListReplyWithUpdatedAt
+  formatServerListReplyWithUpdatedAt,
+  formatUpcomingWipeList
 } from './lib/message-formatting'
 import { DateTime, Interval } from 'luxon'
 import log from './lib/logger'
+import * as memoize from 'memoizee'
+import * as LEGIT_SERVERS from './lib/legit-servers.json'
+import * as R from 'ramda'
+import pMap from 'p-map'
+
+const getWipedServersCached = memoize(getWipedServers, {
+  promise: true,
+  maxAge: 1000 * 60 * 60,
+  normalizer: (args: any) => JSON.stringify(args)
+})
 
 type ServerListReply = {
   message: Message
@@ -36,11 +54,14 @@ bot.catch((err: any) => {
 })
 
 const replyWithServers = (ctx: ContextMessageUpdate) =>
-  getWipedServers()
+  getWipedServers(SERVER_SEARCH_PARAMS)
     .then((servers) =>
       ctx
         .replyWithHTML(
-          formatServerListReply(servers, SERVER_LIST_PAGE_URL),
+          formatServerListReply(
+            servers,
+            formatServerListUrl(SERVER_SEARCH_PARAMS)
+          ),
           EXTRA_OPTS
         )
         .then((msg) => {
@@ -58,22 +79,45 @@ const replyWithServers = (ctx: ContextMessageUpdate) =>
     )
     .catch((err) => {
       Sentry.captureException(err)
-      log.error('failed to reply with servers', err)
+      log.error(err, 'failed to reply with servers')
       ctx.reply('something went wrong 😳')
     })
 
 const updateRepliedServerList = async (msg: Message) => {
-  const servers = await getWipedServers()
+  const servers = await getWipedServers(SERVER_SEARCH_PARAMS)
   await bot.telegram.editMessageText(
     msg.chat.id,
     msg.message_id,
     undefined,
-    formatServerListReplyWithUpdatedAt(servers, SERVER_LIST_PAGE_URL),
+    formatServerListReplyWithUpdatedAt(
+      servers,
+      formatServerListUrl(SERVER_SEARCH_PARAMS)
+    ),
     { ...EXTRA_OPTS, parse_mode: 'HTML' }
   )
 }
 
-bot.command('wipet', replyWithServers)
+const replyWithNextWipes = (ctx: ContextMessageUpdate) =>
+  Promise.all(LEGIT_SERVERS.map((query) => getWipedServersCached({ q: query })))
+    .then(R.unnest)
+    .then((servers) =>
+      pMap(servers, (s) => getServer(s.id), { concurrency: 2 })
+    )
+    .then((servers) => {
+      ctx.replyWithHTML(
+        formatUpcomingWipeList(servers.filter((server) => server.nextWipe)),
+        EXTRA_OPTS
+      )
+    })
+    .catch((err) => {
+      Sentry.captureException(err)
+      log.error(err, 'failed to reply with servers')
+      ctx.reply('something went wrong 😳')
+    })
+
+bot.command('wipes', replyWithServers)
+bot.command('nextwipes', replyWithNextWipes)
+
 bot.command('error', (ctx: ContextMessageUpdate) => {
   throw new Error('test')
 })
@@ -134,3 +178,15 @@ process.on('unhandledRejection', (err) => {
   Sentry.captureException(err)
   process.exit(1)
 })
+
+// const regexISODate = require('regex-iso-date')()
+// const serverData = L.modify(
+//   L.satisfying((x: any) => typeof x === 'string' && regexISODate.test(x)),
+//   (x: any) => DateTime.fromISO(x),
+//   require('./servers.json')
+// ).filter((server: FullServer) => server.nextWipe)
+
+// bot.telegram.sendMessage(-328381794, formatUpcomingWipeList(serverData), {
+//   parse_mode: 'HTML',
+//   disable_web_page_preview: true
+// })
