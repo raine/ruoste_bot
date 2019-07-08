@@ -133,14 +133,11 @@ const nextWipe = (wipes: DateTime[]): NextWipe => {
     R.sortBy((dt) => dt.valueOf(), wipeDates)
   )
 
-  // Take last wipe date that matches the determined wipe interval, and keep
-  // adding the wipe interval in days until we have a date that is today or future.
-  // That is the next wipe date.
+  const lastWipe = R.last(sortedUniqWipes)!
   let nextWipeDate = lastWipeDateWithinInterval!.startOf('day')
-  const now = DateTime.utc()
-  const midnight = now.startOf('day')
-  while (nextWipeDate.toMillis() < (wipeTime ? now : midnight).toMillis()) {
+  while (nextWipeDate < lastWipe) {
     nextWipeDate = nextWipeDate.plus({ days: wipeIntervalInDays })
+    log.info(`next wipe date ${nextWipeDate.toISO()}`)
   }
 
   const nextWipeDateTime = wipeTime

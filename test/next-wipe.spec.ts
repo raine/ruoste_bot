@@ -2,12 +2,12 @@ import * as d from 'dedent'
 import { parseRawWipeDate } from '../lib/just-wiped'
 import _nextWipe from '../lib/next-wipe'
 import { DateTime } from 'luxon'
-import { roundDateTimeHour } from '../lib/date'
+import { roundDateTimeHour, objDateTimeToISO } from '../lib/date'
 import * as R from 'ramda'
 
 const nextWipe = R.pipe(
   _nextWipe,
-  R.map((dt: DateTime) => dt.toISO()) as any
+  objDateTimeToISO
 )
 
 const toDateTimes = (str: string) =>
@@ -25,7 +25,8 @@ describe('nextWipe', () => {
       05.06.2019 - 13:25 UTC
       29.05.2019 - 12:00 UTC`)
     expect(nextWipe(wipes)).toEqual({
-      nextWipeDateTime: '2019-07-10T12:00:00.000Z'
+      date: '2019-06-26T12:00:00.000Z',
+      accuracy: 'TIME'
     })
   })
 
@@ -37,7 +38,8 @@ describe('nextWipe', () => {
       12.06.2019 - 14:00 UTC
       29.05.2019 - 14:00 UTC`)
     expect(nextWipe(wipes)).toEqual({
-      nextWipeDate: '2019-07-10T00:00:00.000Z'
+      date: '2019-07-10T00:00:00.000Z',
+      accuracy: 'DATE'
     })
   })
 
@@ -49,7 +51,8 @@ describe('nextWipe', () => {
       15.06.2019 - 13:57 UTC
       08.06.2019 - 15:54 UTC`)
     expect(nextWipe(wipes)).toEqual({
-      nextWipeDateTime: '2019-07-13T14:00:00.000Z'
+      date: '2019-07-13T14:00:00.000Z',
+      accuracy: 'TIME'
     })
   })
 
@@ -61,7 +64,8 @@ describe('nextWipe', () => {
       15.06.2019 - 14:00 UTC
       08.06.2019 - 14:00 UTC`)
     expect(nextWipe(wipes)).toEqual({
-      nextWipeDateTime: '2019-07-13T14:00:00.000Z'
+      date: '2019-07-13T14:00:00.000Z',
+      accuracy: 'TIME'
     })
   })
 
@@ -73,7 +77,21 @@ describe('nextWipe', () => {
       22.06.2019 - 10:00 UTC
       15.06.2019 - 17:40 UTC`)
     expect(nextWipe(wipes)).toEqual({
-      nextWipeDateTime: '2019-07-13T10:00:00.000Z'
+      date: '2019-07-13T10:00:00.000Z',
+      accuracy: 'TIME'
+    })
+  })
+
+  test('6', () => {
+    const wipes = toDateTimes(d`
+      04.07.2019 - 20:27 UTC
+      04.07.2019 - 20:22 UTC
+      01.07.2019 - 12:11 UTC
+      24.06.2019 - 12:00 UTC
+      17.06.2019 - 12:00 UTC`)
+    expect(nextWipe(wipes)).toEqual({
+      date: '2019-07-08T12:00:00.000Z',
+      accuracy: 'TIME'
     })
   })
 })
