@@ -116,10 +116,6 @@ const replyWithNextWipes = (ctx: ContextMessageUpdate) =>
 bot.command('wipes', replyWithServers)
 bot.command('nextwipes', replyWithNextWipes)
 
-bot.command('error', (ctx: ContextMessageUpdate) => {
-  throw new Error('test')
-})
-
 bot.on('sticker', (ctx) => {
   const { sticker } = ctx.update.message as Message
   if (
