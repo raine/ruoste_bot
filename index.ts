@@ -6,9 +6,7 @@ import {
   getWipedServers,
   getServer,
   formatServerListUrl,
-  SERVER_SEARCH_PARAMS,
-  FullServer,
-  ListServer
+  SERVER_SEARCH_PARAMS
 } from './lib/just-wiped'
 import { Message } from 'telegram-typings'
 import {
@@ -178,15 +176,3 @@ process.on('unhandledRejection', (err) => {
   Sentry.captureException(err)
   process.exit(1)
 })
-
-// const regexISODate = require('regex-iso-date')()
-// const serverData = L.modify(
-//   L.satisfying((x: any) => typeof x === 'string' && regexISODate.test(x)),
-//   (x: any) => DateTime.fromISO(x),
-//   require('./servers.json')
-// ).filter((server: FullServer) => server.nextWipe)
-
-// bot.telegram.sendMessage(-328381794, formatUpcomingWipeList(serverData), {
-//   parse_mode: 'HTML',
-//   disable_web_page_preview: true
-// })
