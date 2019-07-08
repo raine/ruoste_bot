@@ -1,10 +1,13 @@
-import * as memoize from 'memoizee'
+import * as memoizee from 'memoizee'
 
-const pMemoize = (fn: any, opts = {}) =>
-  memoize(fn, {
+const pMemoize = <F extends Function>(
+  fn: F,
+  maxAge: number
+): F & memoizee.Memoized<F> =>
+  memoizee(fn, {
     promise: true,
     normalizer: (args: any) => JSON.stringify(args),
-    ...opts
+    maxAge
   })
 
 export default pMemoize

@@ -21,11 +21,10 @@ import * as R from 'ramda'
 import pMemoize from './lib/p-memoize'
 import pMap from 'p-map'
 
-const getWipedServersCached = pMemoize(getWipedServers, {
-  maxAge: 1000 * 60 * 60
-})
-
-const getServerCached = pMemoize(getServer, { maxAge: 1000 * 60 })
+const MINUTE = 1000 * 60
+const getWipedServersCached1m = pMemoize(getWipedServers, MINUTE)
+const getWipedServersCached1h = pMemoize(getWipedServers, MINUTE * 60)
+const getServerCached = pMemoize(getServer, MINUTE)
 
 type ServerListReply = {
   message: Message
@@ -52,7 +51,7 @@ bot.catch((err: any) => {
 })
 
 const replyWithServers = (ctx: ContextMessageUpdate) =>
-  getWipedServers(SERVER_SEARCH_PARAMS)
+  getWipedServersCached1m(SERVER_SEARCH_PARAMS)
     .then((servers) =>
       ctx
         .replyWithHTML(
@@ -82,7 +81,7 @@ const replyWithServers = (ctx: ContextMessageUpdate) =>
     })
 
 const updateRepliedServerList = async (msg: Message) => {
-  const servers = await getWipedServers(SERVER_SEARCH_PARAMS)
+  const servers = await getWipedServersCached1m(SERVER_SEARCH_PARAMS)
   await bot.telegram.editMessageText(
     msg.chat.id,
     msg.message_id,
@@ -96,7 +95,9 @@ const updateRepliedServerList = async (msg: Message) => {
 }
 
 const replyWithNextWipes = (ctx: ContextMessageUpdate) =>
-  Promise.all(LEGIT_SERVERS.map((query) => getWipedServersCached({ q: query })))
+  Promise.all(
+    LEGIT_SERVERS.map((query) => getWipedServersCached1h({ q: query }))
+  )
     .then(R.unnest)
     .then((servers) =>
       pMap(servers, (s) => getServerCached(s.id), { concurrency: 2 })
