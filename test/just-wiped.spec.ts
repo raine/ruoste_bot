@@ -13,7 +13,8 @@ const objDateTimeToISO = (obj: any) =>
   R.map(
     R.pipe(
       dateTimeToISO,
-      (x) => (R.type(x) === 'Array' ? R.map(dateTimeToISO, x) : x)
+      (x) =>
+        ['Array', 'Object'].includes(R.type(x)) ? R.map(dateTimeToISO, x) : x
     ),
     obj
   )
@@ -91,6 +92,10 @@ describe('parseServerPage', () => {
       rating: 88,
       url: 'https://just-wiped.net/rust_servers/424678',
       id: 424678,
+      nextWipe: {
+        accuracy: 'TIME',
+        date: '2019-07-14T09:00:00.000Z'
+      },
       wipes: [
         '2019-07-07T09:00:00.000Z',
         '2019-06-30T09:00:00.000Z',
