@@ -48,7 +48,7 @@ const bot = new Telegraf(process.env.BOT_TOKEN as string)
 
 bot.catch((err: any) => {
   Sentry.captureException(err)
-  log.error('something went wrong', err)
+  log.error(err, 'something went wrong')
 })
 
 const replyWithServers = (ctx: ContextMessageUpdate) =>
