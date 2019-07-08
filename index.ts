@@ -16,16 +16,16 @@ import {
 } from './lib/message-formatting'
 import { DateTime, Interval } from 'luxon'
 import log from './lib/logger'
-import * as memoize from 'memoizee'
 import * as LEGIT_SERVERS from './lib/legit-servers.json'
 import * as R from 'ramda'
+import pMemoize from './lib/p-memoize'
 import pMap from 'p-map'
 
-const getWipedServersCached = memoize(getWipedServers, {
-  promise: true,
-  maxAge: 1000 * 60 * 60,
-  normalizer: (args: any) => JSON.stringify(args)
+const getWipedServersCached = pMemoize(getWipedServers, {
+  maxAge: 1000 * 60 * 60
 })
+
+const getServerCached = pMemoize(getServer, { maxAge: 1000 * 60 })
 
 type ServerListReply = {
   message: Message
@@ -99,7 +99,7 @@ const replyWithNextWipes = (ctx: ContextMessageUpdate) =>
   Promise.all(LEGIT_SERVERS.map((query) => getWipedServersCached({ q: query })))
     .then(R.unnest)
     .then((servers) =>
-      pMap(servers, (s) => getServer(s.id), { concurrency: 2 })
+      pMap(servers, (s) => getServerCached(s.id), { concurrency: 2 })
     )
     .then((servers) => {
       ctx.replyWithHTML(
