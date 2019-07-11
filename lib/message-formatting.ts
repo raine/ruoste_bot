@@ -23,16 +23,19 @@ const formatMaxGroup = (count: number | null) => {
   else if (count && count > 3) return count
 }
 
-const formatServer = ({
-  name,
-  lastWipe,
-  playersCurrent,
-  playersMax,
-  mapSize,
-  rating,
-  url,
-  maxGroup
-}: ListServer): string =>
+const formatServer = (
+  {
+    name,
+    lastWipe,
+    playersCurrent,
+    playersMax,
+    mapSize,
+    rating,
+    url,
+    maxGroup
+  }: ListServer,
+  idx: number
+): string =>
   [
     bold(formatRelativeDate(lastWipe, 'twitter')),
     '|',
@@ -48,7 +51,8 @@ const formatServer = ({
           .filter(Boolean)
           .join(', ') +
         ']'
-    )
+    ),
+    `/${idx + 1}`
   ].join(' ')
 
 const formatServerList = (servers: ListServer[]) =>
@@ -76,6 +80,9 @@ export const formatServerListReplyWithUpdatedAt = (
       .setZone('Europe/Helsinki')
       .toFormat('HH:mm:ss')}`
   )
+
+export const formatServerConnectReply = (server: FullServer) =>
+  code(`client.connect ${server.address}`)
 
 const formatWipeListServer = ({
   name,

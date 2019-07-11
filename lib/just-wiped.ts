@@ -25,6 +25,7 @@ export type ListServer = {
 
 export type FullServer = ListServer & {
   wipes: DateTime[]
+  address: string
   nextWipe: NextWipe
 }
 
@@ -138,9 +139,13 @@ export const parseServerPage = (html: string): FullServer => {
     )
     .get()
 
+  const steamConnectUrl = $('.steam-connect-button').attr('href')
+  const address = R.last(steamConnectUrl.split('/'))!
+
   return {
     ...parseServerBoxElement($('.server.server-head')),
     wipes,
+    address,
     nextWipe: nextWipe(wipes)
   }
 }

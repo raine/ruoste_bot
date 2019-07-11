@@ -6,13 +6,15 @@ import {
   getWipedServers,
   getServer,
   formatServerListUrl,
-  SERVER_SEARCH_PARAMS
+  SERVER_SEARCH_PARAMS,
+  ListServer
 } from './lib/just-wiped'
 import { Message } from 'telegram-typings'
 import {
   formatServerListReply,
   formatServerListReplyWithUpdatedAt,
-  formatUpcomingWipeList
+  formatUpcomingWipeList,
+  formatServerConnectReply
 } from './lib/message-formatting'
 import { DateTime, Interval } from 'luxon'
 import log from './lib/logger'
@@ -31,6 +33,7 @@ type ServerListReply = {
   sent: DateTime
   expires: DateTime
   updated: DateTime | null
+  servers: ListServer[]
 }
 
 let updatedServerListReplies: ServerListReply[] = []
@@ -70,7 +73,8 @@ const replyWithServers = (ctx: ContextMessageUpdate) =>
               expires: DateTime.local().plus({
                 seconds: REPLY_UPDATE_EXPIRES_AFTER_SECS
               }),
-              updated: null
+              updated: null,
+              servers
             })
         })
     )
@@ -115,6 +119,26 @@ const replyWithNextWipes = (ctx: ContextMessageUpdate) =>
     })
 
 bot.command('wipes', replyWithServers)
+
+bot.command(
+  R.range(1, 11).map((n) => '/' + n),
+  async (ctx: ContextMessageUpdate) => {
+    const text = ctx.update.message!.text!
+    const num = parseInt(text.match(/^\/(\d+)/)![1])
+    const chatId = ctx.update.message!.chat.id
+    const reply = updatedServerListReplies.find(
+      ({ message }) => message.chat.id === chatId
+    )
+    if (reply) {
+      const server = reply.servers[num - 1]
+      if (server) {
+        const fullServer = await getServerCached(server.id)
+        return ctx.replyWithHTML(formatServerConnectReply(fullServer), EXTRA_OPTS)
+      }
+    }
+  }
+)
+
 bot.command('nextwipes', replyWithNextWipes)
 
 bot.on('sticker', (ctx) => {

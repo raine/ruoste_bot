@@ -91,6 +91,7 @@ describe('parseServerPage', () => {
       playersMax: 250,
       rating: 88,
       url: 'https://just-wiped.net/rust_servers/424678',
+      address: '148.251.47.222:28015',
       id: 424678,
       nextWipe: {
         accuracy: 'TIME',
