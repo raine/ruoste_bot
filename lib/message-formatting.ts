@@ -7,7 +7,7 @@ import * as R from 'ramda'
 TimeAgo.addLocale(require('javascript-time-ago/locale/en'))
 const timeAgo = new TimeAgo('en-US')
 const formatRelativeDate = (date: DateTime, style: string): string =>
-  timeAgo.format(date.toMillis(), style)
+  timeAgo.format(date.toMillis(), style) || '1m'
 
 const bold = (str: string) => `<b>${str}</b>`
 const code = (str: string) => `<code>${str}</code>`
