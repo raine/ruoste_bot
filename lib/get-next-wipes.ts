@@ -5,6 +5,7 @@ import {
   getWipedServersCached1h,
   getServerCached1m
 } from './just-wiped'
+import { DateTime } from 'luxon'
 
 const LEGIT_SERVERS = require('./legit-servers.json') as string[]
 
@@ -17,6 +18,10 @@ export const getNextWipes = (): B.Observable<FullServer[]> =>
     .flatMapWithConcurrencyLimit(1, (server: ListServer) =>
       B.fromPromise(getServerCached1m(server.id))
     )
-    .filter((server: FullServer) => server.nextWipe !== null)
+    .filter(
+      (server: FullServer) =>
+        server.nextWipe !== null &&
+        server.nextWipe.date.startOf('day') >= DateTime.utc().startOf('day')
+    )
     .scan([], (acc: FullServer[], s) => acc.concat(s))
     .filter((servers: FullServer[]) => servers.length > 0)
