@@ -15,6 +15,7 @@ const link = (text: string, href: string) => `<a href="${href}">${text}</a>`
 
 const truncate = (n: number, str: string) =>
   str.length > n ? str.slice(0, n) + `…` : str
+const unlines = (xs: any[]) => xs.filter(Boolean).join('\n')
 
 // prettier-ignore
 const formatMaxGroup = (count: number | null) => 
@@ -109,11 +110,20 @@ const formatWipeListServer = ({
     )
   ].join(' ')
 
-export const formatUpcomingWipeList = (servers: FullServer[]): string => {
+export const formatUpcomingWipeList = (
+  serverCount: number,
+  fetchedCount: number,
+  servers: FullServer[]
+): string => {
   const sortedByNextWipe = R.sortWith(
     [R.ascend(({ nextWipe }) => (nextWipe ? nextWipe.date : 0))],
     servers
   )
 
-  return sortedByNextWipe.map(formatWipeListServer).join('\n')
+  return unlines([
+    ...sortedByNextWipe.map(formatWipeListServer),
+    fetchedCount < serverCount
+      ? `Loading... ${((fetchedCount / serverCount) * 100).toFixed(0)}%`
+      : null
+  ])
 }

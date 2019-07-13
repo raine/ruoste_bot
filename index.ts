@@ -7,7 +7,8 @@ import {
   SERVER_SEARCH_PARAMS,
   ListServer,
   getWipedServersCached1m,
-  getServerCached1m
+  getServerCached1m,
+  FullServer
 } from './lib/just-wiped'
 import { Message } from 'telegram-typings'
 import {
@@ -92,16 +93,19 @@ const updateRepliedServerList = async (msg: Message) => {
 }
 
 const replyWithNextWipes = async (ctx: ContextMessageUpdate) => {
-  const msg = await ctx.reply('Hang tight...')
+  const msg = await ctx.reply('Loading...')
   const updateMessage = (html: string) =>
     bot.telegram.editMessageText(msg.chat.id, msg.message_id, undefined, html, {
       ...EXTRA_OPTS,
       parse_mode: 'HTML'
     })
 
-  getNextWipes().onValue((servers) => {
-    updateMessage(formatUpcomingWipeList(servers))
-  })
+  getNextWipes()
+    .skip(1)
+    .throttle(1000)
+    .onValue(({ serverCount, fetchedCount, servers }) => {
+      updateMessage(formatUpcomingWipeList(serverCount, fetchedCount, servers))
+    })
 }
 
 bot.command('wipes', replyWithServers)
