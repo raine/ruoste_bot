@@ -5,6 +5,7 @@
   "license": "MIT",
   "dependencies": {
     "@sentry/node": "5.4.0",
+    "baconjs": "^3.0.6",
     "cheerio": "^1.0.0-rc.3",
     "got": "^9.6.0",
     "javascript-time-ago": "^2.0.1",

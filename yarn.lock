@@ -730,6 +730,11 @@ babel-preset-jest@^24.6.0:
     "@babel/plugin-syntax-object-rest-spread" "^7.0.0"
     babel-plugin-jest-hoist "^24.6.0"
 
+baconjs@^3.0.6:
+  version "3.0.6"
+  resolved "https://registry.yarnpkg.com/baconjs/-/baconjs-3.0.6.tgz#cd951aa08aaa871cd6f651147f5a6e16bb7586ab"
+  integrity sha512-udI68YURbbVmBN5dbeaGUjGv3uZCqz4Ul3udl3oSOVQhcmPL3GGQiX6P8EZH28ciJzN9HUhh7bFy6zUEdGuh9Q==
+
 balanced-match@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.0.tgz#89b4d199ab2bee49de164ea02b89ce462d71b767"

@@ -3,11 +3,11 @@ Sentry.init({ dsn: process.env.SENTRY_DSN })
 
 import Telegraf, { ContextMessageUpdate } from 'telegraf'
 import {
-  getWipedServers,
-  getServer,
   formatServerListUrl,
   SERVER_SEARCH_PARAMS,
-  ListServer
+  ListServer,
+  getWipedServersCached1m,
+  getServerCached1m
 } from './lib/just-wiped'
 import { Message } from 'telegram-typings'
 import {
@@ -18,15 +18,8 @@ import {
 } from './lib/message-formatting'
 import { DateTime, Interval } from 'luxon'
 import log from './lib/logger'
-import * as LEGIT_SERVERS from './lib/legit-servers.json'
 import * as R from 'ramda'
-import pMemoize from './lib/p-memoize'
-import pMap from 'p-map'
-
-const MINUTE = 1000 * 60
-const getWipedServersCached1m = pMemoize(getWipedServers, MINUTE)
-const getWipedServersCached1h = pMemoize(getWipedServers, MINUTE * 60)
-const getServerCached = pMemoize(getServer, MINUTE)
+import { getNextWipes } from './lib/get-next-wipes'
 
 type ServerListReply = {
   message: Message
@@ -98,25 +91,18 @@ const updateRepliedServerList = async (msg: Message) => {
   )
 }
 
-const replyWithNextWipes = (ctx: ContextMessageUpdate) =>
-  Promise.all(
-    LEGIT_SERVERS.map((query) => getWipedServersCached1h({ q: query }))
-  )
-    .then(R.unnest)
-    .then((servers) =>
-      pMap(servers, (s) => getServerCached(s.id), { concurrency: 2 })
-    )
-    .then((servers) => {
-      ctx.replyWithHTML(
-        formatUpcomingWipeList(servers.filter((server) => server.nextWipe)),
-        EXTRA_OPTS
-      )
+const replyWithNextWipes = async (ctx: ContextMessageUpdate) => {
+  const msg = await ctx.reply('Hang tight...')
+  const updateMessage = (html: string) =>
+    bot.telegram.editMessageText(msg.chat.id, msg.message_id, undefined, html, {
+      ...EXTRA_OPTS,
+      parse_mode: 'HTML'
     })
-    .catch((err) => {
-      Sentry.captureException(err)
-      log.error(err, 'failed to reply with servers')
-      ctx.reply('something went wrong 😳')
-    })
+
+  getNextWipes().onValue((servers) => {
+    updateMessage(formatUpcomingWipeList(servers))
+  })
+}
 
 bot.command('wipes', replyWithServers)
 
@@ -132,8 +118,11 @@ bot.command(
     if (reply) {
       const server = reply.servers[num - 1]
       if (server) {
-        const fullServer = await getServerCached(server.id)
-        return ctx.replyWithHTML(formatServerConnectReply(fullServer), EXTRA_OPTS)
+        const fullServer = await getServerCached1m(server.id)
+        return ctx.replyWithHTML(
+          formatServerConnectReply(fullServer),
+          EXTRA_OPTS
+        )
       }
     }
   }

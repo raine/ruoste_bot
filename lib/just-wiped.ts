@@ -6,6 +6,7 @@ import { DateTime } from 'luxon'
 import { fromFormatUTC } from './date'
 import log from './logger'
 import nextWipe, { NextWipe } from './next-wipe'
+import pMemoize from './p-memoize'
 
 export type ListServer = {
   country: string
@@ -157,3 +158,9 @@ export const getServer = async (id: number): Promise<FullServer> => {
     .then((res) => res.body)
     .then(parseServerPage)
 }
+
+const MINUTE = 1000 * 60
+
+export const getWipedServersCached1m = pMemoize(getWipedServers, MINUTE)
+export const getServerCached1m = pMemoize(getServer, MINUTE)
+export const getWipedServersCached1h = pMemoize(getWipedServers, MINUTE * 60)
