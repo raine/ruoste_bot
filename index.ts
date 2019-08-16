@@ -7,8 +7,7 @@ import {
   SERVER_SEARCH_PARAMS,
   ListServer,
   getWipedServersCached1m,
-  getServerCached1m,
-  FullServer
+  getServerCached1m
 } from './lib/just-wiped'
 import { Message } from 'telegram-typings'
 import {
@@ -78,7 +77,7 @@ const replyWithServers = (ctx: ContextMessageUpdate) =>
       ctx.reply('something went wrong 😳')
     })
 
-const updateRepliedServerList = async (msg: Message) => {
+const updateRepliedServerList = async (msg: Message): Promise<ListServer[]> => {
   const servers = await getWipedServersCached1m(SERVER_SEARCH_PARAMS)
   await bot.telegram.editMessageText(
     msg.chat.id,
@@ -90,6 +89,7 @@ const updateRepliedServerList = async (msg: Message) => {
     ),
     { ...EXTRA_OPTS, parse_mode: 'HTML' }
   )
+  return servers
 }
 
 const replyWithNextWipes = async (ctx: ContextMessageUpdate) => {
@@ -165,7 +165,11 @@ async function updateLoop() {
 
   if (repliesToBeUpdated.length)
     await Promise.all(
-      repliesToBeUpdated.map(({ message }) => updateRepliedServerList(message))
+      repliesToBeUpdated.map((reply) =>
+        updateRepliedServerList(reply.message).then((servers) => {
+          reply.servers = servers
+        })
+      )
     )
       .then(() => {
         log.info('updated %s messages', repliesToBeUpdated.length)
