@@ -24,35 +24,32 @@ const formatMaxGroup = (count: number | null) =>
   count === 3 ? '👪' :
   count && count > 3 ? count : null
 
-const formatServer = (
-  {
-    name,
-    lastWipe,
-    playersCurrent,
-    playersMax,
-    mapSize,
-    rating,
-    url,
-    maxGroup
-  }: ListServer,
-  idx: number
-): string =>
+const formatServerInfoSection = ({
+  playersCurrent,
+  playersMax,
+  mapSize,
+  rating,
+  maxGroup
+}: ListServer): string =>
+  bold(
+    '[' +
+      [
+        `${playersCurrent}/${playersMax}`,
+        mapSize,
+        `${rating}%`,
+        formatMaxGroup(maxGroup)
+      ]
+        .filter(Boolean)
+        .join(', ') +
+      ']'
+  )
+
+const formatServer = (server: ListServer, idx: number): string =>
   [
-    bold(formatRelativeDate(lastWipe, 'twitter')),
+    bold(formatRelativeDate(server.lastWipe, 'twitter')),
     '|',
-    link(truncate(25, name), url),
-    bold(
-      '[' +
-        [
-          `${playersCurrent}/${playersMax}`,
-          mapSize,
-          `${rating}%`,
-          formatMaxGroup(maxGroup)
-        ]
-          .filter(Boolean)
-          .join(', ') +
-        ']'
-    ),
+    link(truncate(25, server.name), server.url),
+    formatServerInfoSection(server),
     `/${idx + 1}`
   ].join(' ')
 
@@ -83,6 +80,10 @@ export const formatServerListReplyWithUpdatedAt = (
   )
 
 export const formatServerConnectReply = (server: FullServer) =>
+  link(server.name, server.url) +
+  ' ' +
+  formatServerInfoSection(server) +
+  '\n' +
   code(`client.connect ${server.address}`)
 
 const formatWipeListServer = ({
