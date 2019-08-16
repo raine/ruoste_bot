@@ -19,9 +19,9 @@ const unlines = (xs: any[]) => xs.filter(Boolean).join('\n')
 
 // prettier-ignore
 const formatMaxGroup = (count: number | null) => 
-  count === 1 ? 'solo' :
-  count === 2 ? 'duo' :
-  count === 3 ? 'trio' :
+  count === 1 ? '🚶' :
+  count === 2 ? '👬' :
+  count === 3 ? '👪' :
   count && count > 3 ? count : null
 
 const formatServer = (
