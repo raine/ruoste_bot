@@ -4,6 +4,8 @@ import { formatShortDate, formatShortDateTime } from './date'
 import TimeAgo from 'javascript-time-ago'
 import * as R from 'ramda'
 
+const LAGGY_SERVERS = (process.env.LAGGY_SERVERS || '').split(',')
+
 TimeAgo.addLocale(require('javascript-time-ago/locale/en'))
 const timeAgo = new TimeAgo('en-US')
 const formatRelativeDate = (date: DateTime, style: string): string =>
@@ -24,17 +26,14 @@ const formatMaxGroup = (count: number | null) =>
   count === 3 ? '👪' :
   count && count > 3 ? count : null
 
-const formatServerInfoSection = ({
-  playersCurrent,
-  playersMax,
-  mapSize,
-  rating,
-  maxGroup
-}: ListServer): string =>
+const formatServerInfoSection = (
+  { playersCurrent, playersMax, mapSize, rating, maxGroup }: ListServer,
+  noCurrentPlayers = false
+): string =>
   bold(
     '[' +
       [
-        `${playersCurrent}/${playersMax}`,
+        noCurrentPlayers ? playersMax : `${playersCurrent}/${playersMax}`,
         mapSize,
         `${rating}%`,
         formatMaxGroup(maxGroup)
@@ -80,21 +79,17 @@ export const formatServerListReplyWithUpdatedAt = (
   )
 
 export const formatServerConnectReply = (server: FullServer) =>
-  link(server.name, server.url) +
-  ' ' +
-  formatServerInfoSection(server) +
-  '\n' +
-  code(`client.connect ${server.address}`)
-
-const formatWipeListServer = ({
-  name,
-  playersMax,
-  mapSize,
-  url,
-  maxGroup,
-  nextWipe
-}: FullServer): string =>
   [
+    link(server.name, server.url) + ' ' + formatServerInfoSection(server),
+    code(`client.connect ${server.address}`),
+    LAGGY_SERVERS.includes(server.address) ? bold('POTENTIALLY LAGGY SERVER!!!') : null
+  ]
+    .filter(Boolean)
+    .join('\n')
+
+const formatWipeListServer = (server: FullServer): string => {
+  const { name, url, nextWipe } = server
+  return [
     bold(
       nextWipe!.accuracy === 'DATE'
         ? formatShortDate(nextWipe!.date)
@@ -102,14 +97,9 @@ const formatWipeListServer = ({
     ),
     '|',
     link(truncate(25, name), url),
-    bold(
-      '[' +
-        [playersMax, mapSize, formatMaxGroup(maxGroup)]
-          .filter(Boolean)
-          .join(', ') +
-        ']'
-    )
+    formatServerInfoSection(server, true)
   ].join(' ')
+}
 
 export const formatUpcomingWipeList = (
   serverCount: number,
