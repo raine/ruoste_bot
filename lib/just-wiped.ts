@@ -32,7 +32,7 @@ export type FullServer = ListServer & {
 
 const JUST_WIPED_BASE_URL = 'https://just-wiped.net'
 export const SERVER_SEARCH_PARAMS = {
-  country: 'Any',
+  country: 'any',
   map: 'Procedural Map',
   max_active_player: '500',
   max_hours_since_wipe: '73',
