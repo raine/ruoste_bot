@@ -1,4 +1,4 @@
-FROM mhart/alpine-node:12
+FROM mhart/alpine-node:14
 WORKDIR /app
 COPY package.json yarn.lock ./
 RUN yarn install
@@ -9,7 +9,7 @@ COPY index.ts ./index.ts
 RUN yarn build
 RUN npm prune --production
 
-FROM mhart/alpine-node:slim-12
+FROM mhart/alpine-node:slim-14
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=0 /app .
