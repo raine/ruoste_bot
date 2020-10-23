@@ -5,10 +5,7 @@ import { DateTime } from 'luxon'
 import { roundDateTimeHour, objDateTimeToISO } from '../lib/date'
 import * as R from 'ramda'
 
-const nextWipe = R.pipe(
-  _nextWipe,
-  objDateTimeToISO
-)
+const nextWipe = R.pipe(_nextWipe, objDateTimeToISO)
 
 const toDateTimes = (str: string) =>
   str
@@ -24,6 +21,7 @@ describe('nextWipe', () => {
       07.06.2019 - 05:51 UTC
       05.06.2019 - 13:25 UTC
       29.05.2019 - 12:00 UTC`)
+
     expect(nextWipe(wipes)).toEqual({
       date: '2019-06-26T12:00:00.000Z',
       accuracy: 'TIME'

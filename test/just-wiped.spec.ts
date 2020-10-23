@@ -11,10 +11,8 @@ import { DateTime } from 'luxon'
 const dateTimeToISO = (x: any) => (x instanceof DateTime ? x.toISO() : x)
 const objDateTimeToISO = (obj: any) =>
   R.map(
-    R.pipe(
-      dateTimeToISO,
-      (x) =>
-        ['Array', 'Object'].includes(R.type(x)) ? R.map(dateTimeToISO, x) : x
+    R.pipe(dateTimeToISO, (x) =>
+      ['Array', 'Object'].includes(R.type(x)) ? R.map(dateTimeToISO, x) : x
     ),
     obj
   )

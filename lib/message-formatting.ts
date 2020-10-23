@@ -53,10 +53,7 @@ const formatServer = (server: ListServer, idx: number): string =>
   ].join(' ')
 
 const formatServerList = (servers: ListServer[]) =>
-  servers
-    .slice(0, 10)
-    .map(formatServer)
-    .join('\n')
+  servers.slice(0, 10).map(formatServer).join('\n')
 
 export const formatServerListReply = (
   servers: ListServer[],
@@ -82,7 +79,9 @@ export const formatServerConnectReply = (server: FullServer) =>
   [
     link(server.name, server.url) + ' ' + formatServerInfoSection(server),
     code(`client.connect ${server.address}`),
-    LAGGY_SERVERS.includes(server.address) ? bold('POTENTIALLY LAGGY SERVER!!!') : null
+    LAGGY_SERVERS.includes(server.address)
+      ? bold('POTENTIALLY LAGGY SERVER!!!')
+      : null
   ]
     .filter(Boolean)
     .join('\n')

@@ -18,9 +18,8 @@ export const toISOWithWeekday = (date: DateTime) =>
 const dateTimeToISO = (x: any) => (x instanceof DateTime ? x.toISO() : x)
 export const objDateTimeToISO = (obj: any) =>
   R.map(
-    R.pipe(
-      dateTimeToISO,
-      (x) => (R.type(x) === 'Array' ? R.map(dateTimeToISO, x) : x)
+    R.pipe(dateTimeToISO, (x) =>
+      R.type(x) === 'Array' ? R.map(dateTimeToISO, x) : x
     ),
     obj
   )

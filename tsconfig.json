@@ -17,5 +17,9 @@
     "target": "esnext",
     "resolveJsonModule": true
   },
-  "include": ["index.ts", "lib/**/*", "types/**/*"]
+  "include": [
+    "index.ts",
+    "lib/**/*",
+    "types/**/*"
+  ]
 }

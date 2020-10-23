@@ -1,4 +1,4 @@
-import * as got from 'got'
+import got from 'got'
 import * as R from 'ramda'
 import * as qs from 'querystring'
 import * as cheerio from 'cheerio'
@@ -63,7 +63,7 @@ export const formatServerListUrl = (params: SearchParams) =>
   JUST_WIPED_BASE_URL + '/rust_servers?' + qs.stringify(params)
 
 const parseYesNo = (str: string): boolean => str === 'Yes'
-const getText = (c: Cheerio) => c.text().trim()
+const getText = (c: cheerio.Cheerio) => c.text().trim()
 
 const parseServerBoxElement = (elem: any) => {
   const $ = cheerio
@@ -75,13 +75,13 @@ const parseServerBoxElement = (elem: any) => {
   let mapSize = null
   if ($('.map a', elem).length) {
     const mapImgAlt = $('.map a img', elem).attr('alt')
-    const mapSizeMatches = mapImgAlt.match(/Size: (\d+)/)
+    const mapSizeMatches = mapImgAlt!.match(/Size: (\d+)/)
     mapSize = mapSizeMatches ? parseInt(mapSizeMatches[1]) : null
   }
   const url = JUST_WIPED_BASE_URL + $('.name', elem).attr('href')
   const id = parseInt(R.last(url.split('/'))!)
   const lastWipe = DateTime.fromISO(
-    $('.i-last-wipe time', elem).attr('datetime')
+    $('.i-last-wipe time', elem).attr('datetime')!
   )
   const rating = parseInt(getText($('.i-rating .value', elem)))
   const modded = parseYesNo(getText($('.i-modded .value', elem)))
@@ -126,21 +126,15 @@ export const getWipedServers = (
 }
 
 export const parseRawWipeDate = (str: string): DateTime =>
-  fromFormatUTC(str, 'dd.MM.yyyy - HH:mm UTC')
+  fromFormatUTC(str, `dd.MM.yyyy - HH:mm 'UTC'`)
 
 export const parseServerPage = (html: string): FullServer => {
   const $ = cheerio.load(html)
   const wipes = $('.wipe-history .wipe-date')
-    .map((_, elem) =>
-      parseRawWipeDate(
-        $(elem)
-          .text()
-          .trim()
-      )
-    )
+    .map((_, elem) => parseRawWipeDate($(elem).text().trim()))
     .get()
 
-  const steamConnectUrl = $('.steam-connect-button').attr('href')
+  const steamConnectUrl = $('.steam-connect-button').attr('href')!
   const address = R.last(steamConnectUrl.split('/'))!
 
   return {

@@ -1,7 +1,7 @@
 const Sentry = require('@sentry/node')
 Sentry.init({ dsn: process.env.SENTRY_DSN })
 
-import Telegraf, { ContextMessageUpdate } from 'telegraf'
+import Telegraf from 'telegraf'
 import {
   formatServerListUrl,
   SERVER_SEARCH_PARAMS,
@@ -20,6 +20,7 @@ import { DateTime, Interval } from 'luxon'
 import log from './lib/logger'
 import * as R from 'ramda'
 import { getNextWipes } from './lib/get-next-wipes'
+import { TelegrafContext } from 'telegraf/typings/context'
 
 type ServerListReply = {
   message: Message
@@ -46,7 +47,7 @@ bot.catch((err: any) => {
   log.error(err, 'something went wrong')
 })
 
-const replyWithServers = (ctx: ContextMessageUpdate) =>
+const replyWithServers = (ctx: TelegrafContext) =>
   getWipedServersCached1m(SERVER_SEARCH_PARAMS)
     .then((servers) =>
       ctx
@@ -92,7 +93,7 @@ const updateRepliedServerList = async (msg: Message): Promise<ListServer[]> => {
   return servers
 }
 
-const replyWithNextWipes = async (ctx: ContextMessageUpdate) => {
+const replyWithNextWipes = async (ctx: TelegrafContext) => {
   const msg = await ctx.reply('Loading...')
   const updateMessage = (html: string) =>
     bot.telegram.editMessageText(msg.chat.id, msg.message_id, undefined, html, {
@@ -112,7 +113,7 @@ bot.command('wipes', replyWithServers)
 
 bot.command(
   R.range(1, 11).map((n) => '/' + n),
-  async (ctx: ContextMessageUpdate) => {
+  async (ctx) => {
     const text = ctx.update.message!.text!
     const num = parseInt(text.match(/^\/(\d+)/)![1])
     const chatId = ctx.update.message!.chat.id

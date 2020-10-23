@@ -1,6 +1,6 @@
 import * as memoizee from 'memoizee'
 
-const pMemoize = <F extends Function>(
+const pMemoize = <F extends (...args: any[]) => any>(
   fn: F,
   maxAge: number
 ): F & memoizee.Memoized<F> =>
