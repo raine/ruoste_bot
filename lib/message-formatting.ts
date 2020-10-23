@@ -75,13 +75,11 @@ export const formatServerListReplyWithUpdatedAt = (
       .toFormat('HH:mm:ss')}`
   )
 
-export const formatServerConnectReply = (server: FullServer) =>
+export const formatServerConnectReply = (server: FullServer, address: string) =>
   [
     link(server.name, server.url) + ' ' + formatServerInfoSection(server),
-    code(`client.connect ${server.address}`),
-    LAGGY_SERVERS.includes(server.address)
-      ? bold('POTENTIALLY LAGGY SERVER!!!')
-      : null
+    code(`client.connect ${address}`),
+    LAGGY_SERVERS.includes(address) ? bold('POTENTIALLY LAGGY SERVER!!!') : null
   ]
     .filter(Boolean)
     .join('\n')

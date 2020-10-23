@@ -13,7 +13,7 @@ export type ListServer = {
   id: number
   name: string
   url: string
-  mapSize: number
+  mapSize: number | null
   lastWipe: DateTime
   rating: number
   modded: boolean
@@ -26,7 +26,6 @@ export type ListServer = {
 
 export type FullServer = ListServer & {
   wipes: DateTime[]
-  address: string
   nextWipe: NextWipe
 }
 
@@ -65,9 +64,9 @@ export const formatServerListUrl = (params: SearchParams) =>
 const parseYesNo = (str: string): boolean => str === 'Yes'
 const getText = (c: cheerio.Cheerio) => c.text().trim()
 
-const parseServerBoxElement = (elem: any) => {
+const parseServerBoxElement = (elem: any): ListServer => {
   const $ = cheerio
-  const country = $('.flag', elem).attr('title')
+  const country = $('.flag', elem).attr('title')!
   const name = $('a.name h1', elem).length
     ? getText($('a.name h1', elem))
     : getText($('a.name', elem)).split('\n')[0]
@@ -105,7 +104,7 @@ const parseServerBoxElement = (elem: any) => {
     playersMax,
     map,
     maxGroup
-  } as ListServer
+  }
 }
 
 // TODO: check parsed item with io-ts?
@@ -134,13 +133,9 @@ export const parseServerPage = (html: string): FullServer => {
     .map((_, elem) => parseRawWipeDate($(elem).text().trim()))
     .get()
 
-  const steamConnectUrl = $('.steam-connect-button').attr('href')!
-  const address = R.last(steamConnectUrl.split('/'))!
-
   return {
     ...parseServerBoxElement($('.server.server-head')),
     wipes,
-    address,
     nextWipe: nextWipe(wipes)
   }
 }
@@ -153,8 +148,25 @@ export const getServer = async (id: number): Promise<FullServer> => {
     .then(parseServerPage)
 }
 
+export const getServerAddress = async (id: number): Promise<string> => {
+  const url = formatServerPageUrl(id) + '/connect'
+  log.info({ url }, 'getting server address')
+  const res = await got(url, {
+    headers: {
+      authority: 'just-wiped.net',
+      accept:
+        'text/javascript, application/javascript, application/ecmascript, application/x-ecmascript, */*; q=0.01',
+      'x-requested-with': 'XMLHttpRequest'
+    }
+  })
+
+  return res.body.match(/steam:\/\/connect\/([\d\.\:]+)/)?.[1]!
+}
+
 const MINUTE = 1000 * 60
+const HOUR = MINUTE * 60
 
 export const getWipedServersCached1m = pMemoize(getWipedServers, MINUTE)
 export const getServerCached1m = pMemoize(getServer, MINUTE)
+export const getServerAddressCached1h = pMemoize(getServerAddress, MINUTE)
 export const getWipedServersCached1h = pMemoize(getWipedServers, MINUTE * 60)

@@ -4,7 +4,8 @@ import {
   parseServerList,
   ListServer,
   parseServerPage,
-  FullServer
+  FullServer,
+  getServerAddress
 } from '../lib/just-wiped'
 import { DateTime } from 'luxon'
 
@@ -77,31 +78,36 @@ describe('parseServerPage', () => {
 
   test('parses server data', () => {
     expect(objDateTimeToISO(server)).toEqual({
-      country: 'DE',
+      country: 'FR',
       inactive: false,
-      lastWipe: '2019-07-07T12:00:00.000+03:00',
+      lastWipe: '2020-10-22T18:36:15.300+03:00',
       map: 'Procedural Map',
-      mapSize: 3500,
+      mapSize: null,
       maxGroup: 3,
-      modded: false,
-      name: 'playuwe.net SOLO/DUO/TRIO 07.07. 11:00 CEST07.7.FULLWIPE NOW',
-      playersCurrent: 93,
-      playersMax: 250,
-      rating: 88,
-      url: 'https://just-wiped.net/rust_servers/424678',
-      address: '148.251.47.222:28015',
-      id: 424678,
+      modded: true,
+      name: 'Intoxicated EU Solo/Duo/Trio 2x - 22 Oct - Just wiped',
+      playersCurrent: 325,
+      playersMax: 350,
+      rating: 100,
+      url: 'https://just-wiped.net/rust_servers/501174',
+      id: 501174,
       nextWipe: {
         accuracy: 'TIME',
-        date: '2019-07-14T09:00:00.000Z'
+        date: '2020-10-29T15:00:00.000Z'
       },
       wipes: [
-        '2019-07-07T09:00:00.000Z',
-        '2019-06-30T09:00:00.000Z',
-        '2019-06-23T09:00:00.000Z',
-        '2019-06-16T09:00:00.000Z',
-        '2019-06-09T09:00:00.000Z'
+        '2020-10-22T15:36:00.000Z',
+        '2020-10-15T15:34:00.000Z',
+        '2020-10-08T15:33:00.000Z',
+        '2020-10-01T18:26:00.000Z',
+        '2020-10-01T12:22:00.000Z'
       ]
     })
+  })
+})
+
+describe('getServerAddress', () => {
+  test('works', async () => {
+    expect(await getServerAddress(501174)).toBe('213.32.46.191:27222')
   })
 })

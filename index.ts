@@ -7,7 +7,8 @@ import {
   SERVER_SEARCH_PARAMS,
   ListServer,
   getWipedServersCached1m,
-  getServerCached1m
+  getServerCached1m,
+  getServerAddressCached1h
 } from './lib/just-wiped'
 import { Message } from 'telegram-typings'
 import {
@@ -124,8 +125,9 @@ bot.command(
       const server = reply.servers[num - 1]
       if (server) {
         const fullServer = await getServerCached1m(server.id)
+        const address = await getServerAddressCached1h(server.id)
         return ctx.replyWithHTML(
-          formatServerConnectReply(fullServer),
+          formatServerConnectReply(fullServer, address),
           EXTRA_OPTS
         )
       }
