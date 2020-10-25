@@ -1,8 +1,8 @@
 import * as d from 'dedent'
-import { parseRawWipeDate } from '../lib/just-wiped'
-import _nextWipe from '../lib/next-wipe'
+import { parseRawWipeDate } from '../src/just-wiped'
+import _nextWipe from '../src/next-wipe'
 import { DateTime } from 'luxon'
-import { roundDateTimeHour, objDateTimeToISO } from '../lib/date'
+import { roundDateTimeHour, objDateTimeToISO } from '../src/date'
 import * as R from 'ramda'
 
 const nextWipe = R.pipe(_nextWipe, objDateTimeToISO)

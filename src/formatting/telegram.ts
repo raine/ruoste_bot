@@ -1,15 +1,9 @@
-import { ListServer, FullServer } from './just-wiped'
-import { DateTime } from 'luxon'
-import { formatShortDate, formatShortDateTime } from './date'
-import TimeAgo from 'javascript-time-ago'
+import { ListServer, FullServer } from '../just-wiped'
+import { formatShortDate, formatShortDateTime } from '../date'
 import * as R from 'ramda'
+import { formatMaxGroup, formatRelativeDate, lastUpdatedAt } from './general'
 
 const LAGGY_SERVERS = (process.env.LAGGY_SERVERS || '').split(',')
-
-TimeAgo.addLocale(require('javascript-time-ago/locale/en'))
-const timeAgo = new TimeAgo('en-US')
-const formatRelativeDate = (date: DateTime, style: string): string =>
-  timeAgo.format(date.toMillis(), style) || '1m'
 
 const bold = (str: string) => `<b>${str}</b>`
 const code = (str: string) => `<code>${str}</code>`
@@ -17,14 +11,8 @@ const link = (text: string, href: string) => `<a href="${href}">${text}</a>`
 
 const truncate = (n: number, str: string) =>
   str.length > n ? str.slice(0, n) + `…` : str
-const unlines = (xs: any[]) => xs.filter(Boolean).join('\n')
 
-// prettier-ignore
-const formatMaxGroup = (count: number | null) => 
-  count === 1 ? '🚶' :
-  count === 2 ? '👬' :
-  count === 3 ? '👪' :
-  count && count > 3 ? count : null
+const unlines = (xs: any[]) => xs.filter(Boolean).join('\n')
 
 const formatServerInfoSection = (
   { playersCurrent, playersMax, mapSize, rating, maxGroup }: ListServer,
@@ -67,13 +55,7 @@ export const formatServerListReplyWithUpdatedAt = (
   servers: ListServer[],
   serverListUrl: string
 ): string =>
-  formatServerListReply(servers, serverListUrl) +
-  '\n' +
-  code(
-    `Last updated at ${DateTime.local()
-      .setZone('Europe/Helsinki')
-      .toFormat('HH:mm:ss')}`
-  )
+  formatServerListReply(servers, serverListUrl) + '\n' + code(lastUpdatedAt())
 
 export const formatServerConnectReply = (server: FullServer, address: string) =>
   [

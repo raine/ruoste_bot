@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "typeRoots": ["./types", "node_modules/@types"],
+    "typeRoots": ["./src/types", "node_modules/@types"],
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "lib": ["dom", "es2017"],
@@ -13,13 +13,10 @@
     "removeComments": false,
     "skipLibCheck": true,
     "sourceMap": false,
+    "outDir": "dist/",
     "strict": true,
     "target": "esnext",
     "resolveJsonModule": true
   },
-  "include": [
-    "index.ts",
-    "lib/**/*",
-    "types/**/*"
-  ]
+  "include": ["src/**/*", "types/**/*"]
 }

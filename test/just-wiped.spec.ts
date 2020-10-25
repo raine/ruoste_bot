@@ -6,7 +6,7 @@ import {
   parseServerPage,
   FullServer,
   getServerAddress
-} from '../lib/just-wiped'
+} from '../src/just-wiped'
 import { DateTime } from 'luxon'
 
 const dateTimeToISO = (x: any) => (x instanceof DateTime ? x.toISO() : x)
