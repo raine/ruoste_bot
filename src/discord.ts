@@ -10,9 +10,11 @@ import {
 import log from './logger'
 import {
   formatServerListReply,
-  formatServerListReplyWithUpdatedAt
+  formatServerListReplyWithUpdatedAt,
+  formatUpcomingWipeList
 } from './formatting/discord'
 import { initUpdateLoop, ServerListReply } from './update-loop'
+import { getNextWipes } from './get-next-wipes'
 
 type DiscordServerListReply = ServerListReply<Discord.Message>
 let updatedServerListReplies: DiscordServerListReply[] = []
@@ -42,6 +44,20 @@ const commands = {
         Sentry.captureException(err)
         log.error(err, 'failed to reply with servers')
         msg.reply('something went wrong 😳')
+      })
+  },
+  '/nextwipes': async (msg: Discord.Message) => {
+    const sent = await msg.channel.send({
+      embed: { description: 'Loading...' }
+    })
+
+    getNextWipes()
+      .skip(1)
+      .throttle(1000)
+      .onValue(({ serverCount, fetchedCount, servers }) => {
+        sent.edit({
+          embed: formatUpcomingWipeList(serverCount, fetchedCount, servers)
+        })
       })
   }
 }
