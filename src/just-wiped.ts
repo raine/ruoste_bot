@@ -160,7 +160,7 @@ export const getServerAddress = async (id: number): Promise<string> => {
     }
   })
 
-  return res.body.match(/steam:\/\/connect\/([\d\.\:]+)/)?.[1]!
+  return res.body.match(/steam:\/\/connect\/([\d.:]+)/)![1]
 }
 
 const MINUTE = 1000 * 60
@@ -168,5 +168,5 @@ const HOUR = MINUTE * 60
 
 export const getWipedServersCached1m = pMemoize(getWipedServers, MINUTE)
 export const getServerCached1m = pMemoize(getServer, MINUTE)
-export const getServerAddressCached1h = pMemoize(getServerAddress, MINUTE)
-export const getWipedServersCached1h = pMemoize(getWipedServers, MINUTE * 60)
+export const getServerAddressCached1h = pMemoize(getServerAddress, HOUR)
+export const getWipedServersCached1h = pMemoize(getWipedServers, HOUR)
