@@ -22,8 +22,8 @@ import { getNextWipes } from './get-next-wipes'
 import { TelegrafContext } from 'telegraf/typings/context'
 import { initUpdateLoop, ServerListReply } from './update-loop'
 
-type DiscordServerListReply = ServerListReply<Telegram.Message>
-let updatedServerListReplies: DiscordServerListReply[] = []
+type TelegramServerListReply = ServerListReply<Telegram.Message>
+let updatedServerListReplies: TelegramServerListReply[] = []
 
 const EXTRA_OPTS = {
   disable_web_page_preview: true,
@@ -65,9 +65,7 @@ const replyWithServers = (
           ),
           EXTRA_OPTS
         )
-        .then((sent) => {
-          updateRepliesList(servers, sent)
-        })
+        .then((sent) => updateRepliesList(servers, sent))
     )
     .catch((err) => {
       Sentry.captureException(err)
@@ -112,7 +110,7 @@ export default function start() {
       })
   }
 
-  bot.command('wipes', replyWithServers)
+  bot.command('wipes', (ctx) => replyWithServers(ctx, updateRepliesList))
 
   bot.command(
     R.range(1, 11).map((n) => '/' + n),
