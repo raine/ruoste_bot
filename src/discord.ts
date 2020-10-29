@@ -2,6 +2,7 @@ const Sentry = require('@sentry/node')
 
 import * as Discord from 'discord.js'
 import {
+  formatSearchParams,
   formatServerListUrl,
   getWipedServersCached1m,
   ListServer,
@@ -15,6 +16,7 @@ import {
 } from './formatting/discord'
 import { initUpdateLoop, ServerListReply } from './update-loop'
 import { getNextWipes } from './get-next-wipes'
+import { parseMaxGroupOption } from './input'
 
 type DiscordServerListReply = ServerListReply<Discord.Message>
 let updatedServerListReplies: DiscordServerListReply[] = []
@@ -24,20 +26,24 @@ const commands = {
     msg: Discord.Message,
     updateRepliesList: (
       servers: ListServer[],
-      sentMessage: Discord.Message
+      sentMessage: Discord.Message,
+      userMessage: Discord.Message
     ) => void
   ) => {
-    getWipedServersCached1m(SERVER_SEARCH_PARAMS)
+    const searchParams = formatSearchParams({
+      maxGroup: parseMaxGroupOption(msg.content)
+    })
+    getWipedServersCached1m(searchParams)
       .then((servers) =>
         msg.channel
           .send({
             embed: formatServerListReply(
               servers as any,
-              formatServerListUrl(SERVER_SEARCH_PARAMS)
+              formatServerListUrl(searchParams)
             )
           })
           .then((sent) => {
-            updateRepliesList(servers, sent)
+            updateRepliesList(servers, sent, msg)
           })
       )
       .catch((err) => {
@@ -63,10 +69,14 @@ const commands = {
 }
 
 const updateServerListMessage = async (
-  msg: Discord.Message
+  botMsg: Discord.Message,
+  userMessage: Discord.Message
 ): Promise<ListServer[]> => {
-  const servers = await getWipedServersCached1m(SERVER_SEARCH_PARAMS)
-  await msg.edit({
+  const searchParams = formatSearchParams({
+    maxGroup: parseMaxGroupOption(userMessage.content)
+  })
+  const servers = await getWipedServersCached1m(searchParams)
+  await botMsg.edit({
     embed: formatServerListReplyWithUpdatedAt(
       servers,
       formatServerListUrl(SERVER_SEARCH_PARAMS)
@@ -79,7 +89,7 @@ export default function start() {
   const client = new Discord.Client()
   const token = process.env.DISCORD_BOT_TOKEN!
   if (!token) {
-    log.error('Discord bot token not set, aborting...')
+    log.error('discord bot token not set, aborting...')
     return
   }
 
@@ -88,8 +98,11 @@ export default function start() {
   })
 
   client.on('message', (msg) => {
-    const command = commands[msg.content as keyof typeof commands]
-    if (command) command(msg, updateRepliesList)
+    const command = msg.content.match(/(\/[^\s]+)/)?.[1] as
+      | keyof typeof commands
+      | undefined
+    const commandHandler = command && commands[command]
+    if (commandHandler) commandHandler(msg, updateRepliesList)
   })
 
   client.login(token)

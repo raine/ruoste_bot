@@ -8,6 +8,7 @@ export const REPLY_UPDATE_EXPIRES_AFTER_SECS = 3600
 export type ServerListReply<T> = {
   message: T
   sent: DateTime
+  userMessage: T
   expires: DateTime
   updated: DateTime | null
   servers: ListServer[]
@@ -16,7 +17,7 @@ export type ServerListReply<T> = {
 async function updateLoop<T>(
   get: () => ServerListReply<T>[],
   set: (val: ServerListReply<T>[]) => void,
-  updateServerListMessage: (msg: T) => Promise<ListServer[]>
+  updateServerListMessage: (msg: T, userMessage: T) => Promise<ListServer[]>
 ) {
   const now = DateTime.local()
   const repliesToBeUpdated = get().filter(
@@ -29,9 +30,11 @@ async function updateLoop<T>(
   if (repliesToBeUpdated.length)
     await Promise.all(
       repliesToBeUpdated.map((reply) =>
-        updateServerListMessage(reply.message).then((servers) => {
-          reply.servers = servers
-        })
+        updateServerListMessage(reply.message, reply.userMessage).then(
+          (servers) => {
+            reply.servers = servers
+          }
+        )
       )
     )
       .then(() => {
@@ -57,12 +60,16 @@ async function updateLoop<T>(
 export function initUpdateLoop<T>(
   get: () => ServerListReply<T>[],
   set: (val: ServerListReply<T>[]) => void,
-  updateServerListMessage: (msg: T) => Promise<ListServer[]>,
+  updateServerListMessage: (msg: T, userMessage: T) => Promise<ListServer[]>,
   getChannelId: (msg: T) => unknown
 ) {
   updateLoop(get, set, updateServerListMessage)
 
-  function updateRepliesList(servers: ListServer[], sentMessage: T) {
+  function updateRepliesList(
+    servers: ListServer[],
+    sentMessage: T,
+    userMessage: T
+  ) {
     set(
       get()
         .filter(
@@ -70,6 +77,7 @@ export function initUpdateLoop<T>(
         )
         .concat({
           message: sentMessage,
+          userMessage,
           sent: DateTime.local(),
           expires: DateTime.local().plus({
             seconds: REPLY_UPDATE_EXPIRES_AFTER_SECS

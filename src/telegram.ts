@@ -7,7 +7,8 @@ import {
   ListServer,
   getWipedServersCached1m,
   getServerCached1m,
-  getServerAddressCached1h
+  getServerAddressCached1h,
+  formatSearchParams
 } from './just-wiped'
 import * as Telegram from 'telegram-typings'
 import {
@@ -21,6 +22,7 @@ import * as R from 'ramda'
 import { getNextWipes } from './get-next-wipes'
 import { TelegrafContext } from 'telegraf/typings/context'
 import { initUpdateLoop, ServerListReply } from './update-loop'
+import { parseMaxGroupOption } from './input'
 
 type TelegramServerListReply = ServerListReply<Telegram.Message>
 let updatedServerListReplies: TelegramServerListReply[] = []
@@ -34,7 +36,11 @@ const updateServerListMessage = async (
   bot: Telegraf<TelegrafContext>,
   msg: Telegram.Message
 ): Promise<ListServer[]> => {
-  const servers = await getWipedServersCached1m(SERVER_SEARCH_PARAMS)
+  const message = msg.text!
+  const searchParams = formatSearchParams({
+    maxGroup: parseMaxGroupOption(message)
+  })
+  const servers = await getWipedServersCached1m(searchParams)
   await bot.telegram.editMessageText(
     msg.chat.id,
     msg.message_id,
@@ -52,10 +58,15 @@ const replyWithServers = (
   ctx: TelegrafContext,
   updateRepliesList: (
     servers: ListServer[],
-    sentMessage: Telegram.Message
+    sentMessage: Telegram.Message,
+    userMessage: Telegram.Message
   ) => void
-) =>
-  getWipedServersCached1m(SERVER_SEARCH_PARAMS)
+) => {
+  const message = ctx.update.message!
+  const searchParams = formatSearchParams({
+    maxGroup: parseMaxGroupOption(message.text!)
+  })
+  getWipedServersCached1m(searchParams)
     .then((servers) =>
       ctx
         .replyWithHTML(
@@ -65,13 +76,14 @@ const replyWithServers = (
           ),
           EXTRA_OPTS
         )
-        .then((sent) => updateRepliesList(servers, sent))
+        .then((sent) => updateRepliesList(servers, sent, ctx.update.message!))
     )
     .catch((err) => {
       Sentry.captureException(err)
       log.error(err, 'failed to reply with servers')
       ctx.reply('something went wrong 😳')
     })
+}
 
 export default function start() {
   const token = process.env.TELEGRAM_BOT_TOKEN!

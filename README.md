@@ -7,7 +7,7 @@ A telegram/discord bot that retrieves recently wiped Rust servers from
 
 # commands
 
-- `/wipes` - List of recently wiped servers.
+- `/wipes [maxgroup=x-y|x]` - List of recently wiped servers.
 - `/nextwipes` - List servers that will be wiped in future.
 
 # deployment

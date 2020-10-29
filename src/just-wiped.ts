@@ -7,6 +7,7 @@ import { fromFormatUTC } from './date'
 import log from './logger'
 import nextWipe, { NextWipe } from './next-wipe'
 import pMemoize from './p-memoize'
+import { MaxGroupParameter } from './input'
 
 export type ListServer = {
   country: string
@@ -47,19 +48,27 @@ export const SERVER_SEARCH_PARAMS = {
   min_wipe_cycle: '0',
   min_world_size: '1000',
   region: 'europe',
-  s_type: 'vanilla_only',
+  // s_type: 'vanilla_only',
+  s_type: '',
   uptime_badge: '1',
   wipe_regularity_badge: '0',
   q: ''
 }
 
-type SearchParams = Partial<typeof SERVER_SEARCH_PARAMS>
+type JustWipedSearchParams = Partial<typeof SERVER_SEARCH_PARAMS>
 
 export const formatServerPageUrl = (id: number) =>
   JUST_WIPED_BASE_URL + `/rust_servers/${id}`
 
-export const formatServerListUrl = (params: SearchParams) =>
+export const formatServerListUrl = (params: JustWipedSearchParams) =>
   JUST_WIPED_BASE_URL + '/rust_servers?' + qs.stringify(params)
+
+export const formatSearchParams = (opts?: {
+  maxGroup?: MaxGroupParameter
+}): JustWipedSearchParams => ({
+  ...SERVER_SEARCH_PARAMS,
+  ...(opts?.maxGroup ? maxGroupParamToSearchParam(opts.maxGroup) : {})
+})
 
 const parseYesNo = (str: string): boolean => str === 'Yes'
 const getText = (c: cheerio.Cheerio) => c.text().trim()
@@ -115,9 +124,9 @@ export const parseServerList = (html: string): ListServer[] => {
 }
 
 export const getWipedServers = (
-  params?: SearchParams
+  params: JustWipedSearchParams
 ): Promise<ListServer[]> => {
-  const url = formatServerListUrl({ ...SERVER_SEARCH_PARAMS, ...params })
+  const url = formatServerListUrl(params)
   log.info({ url }, 'getting server list')
   return got(url)
     .then((res) => res.body)
@@ -167,6 +176,14 @@ export const getServerAddress = async (id: number): Promise<string> => {
 
   return res.body.match(/steam:\/\/connect\/([\d.:]+)/)![1]
 }
+
+export const maxGroupParamToSearchParam = ({
+  minMaxGroup,
+  maxMaxGroup
+}: MaxGroupParameter) => ({
+  min_max_group: minMaxGroup.toString(),
+  max_max_group: maxMaxGroup !== Infinity ? maxMaxGroup.toString() : '11'
+})
 
 const MINUTE = 1000 * 60
 const HOUR = MINUTE * 60
