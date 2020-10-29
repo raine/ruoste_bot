@@ -121,7 +121,12 @@ export const getWipedServers = (
   log.info({ url }, 'getting server list')
   return got(url)
     .then((res) => res.body)
-    .then((html) => parseServerList(html).filter((server) => !server.inactive))
+    .then((html) =>
+      parseServerList(html).filter(
+        (server) =>
+          !server.inactive && !server.name.includes('Train your Start')
+      )
+    )
 }
 
 export const parseRawWipeDate = (str: string): DateTime =>
