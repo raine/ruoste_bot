@@ -7,51 +7,49 @@ import { formatMaxGroup, formatRelativeDate, lastUpdatedAt } from './general'
 import { formatShortDate, formatShortDateTime } from '../date'
 
 const RUST_COLOR = 0xce422a
+const DESCRIPTION_MAX_LENGTH = 2048
 
 TimeAgo.addLocale(require('javascript-time-ago/locale/en'))
 
 const link = (text: string, href: string): string => `[${text}](${href})`
+const bold = (str: string) => `**${str}**`
+const truncate = (n: number, str: string) =>
+  str.length > n ? str.slice(0, n) + `…` : str
 
 const formatServerInfoSection = (
   { playersCurrent, playersMax, mapSize, rating, maxGroup, url }: ListServer,
-  noCurrentPlayers = false,
-  noLink = false
+  noCurrentPlayers = false
 ): string =>
   [
     noCurrentPlayers ? playersMax : `${playersCurrent}/${playersMax}`,
     mapSize,
     `${rating}%`,
     formatMaxGroup(maxGroup),
-    noLink ? undefined : link('link', url)
+    link('🔗', url)
   ]
     .filter(Boolean)
     .join(', ')
 
-const formatServerToEmbedField = (
-  server: ListServer,
-  idx: number
-): Discord.EmbedFieldData => ({
-  name: `${formatRelativeDate(
-    //@ts-ignore
-    DateTime.fromISO(server.lastWipe),
-    'twitter'
-  )} | ${server.name}`,
-  value: formatServerInfoSection(server)
-})
-
-const formatServersToEmbedFields = (
-  servers: ListServer[]
-): Discord.EmbedFieldData[] =>
-  servers.slice(0, 10).map(formatServerToEmbedField)
+const formatServerToLine = (server: ListServer, idx: number): string =>
+  bold(formatRelativeDate(server.lastWipe, 'twitter')) +
+  ' | ' +
+  truncate(25, server.name) +
+  ` **[${formatServerInfoSection(server)}]**`
 
 export const formatServerListReply = (
   servers: ListServer[],
   serverListUrl: string
-): Discord.MessageEmbedOptions => ({
-  color: RUST_COLOR,
-  description: `[Full server list](${serverListUrl})`,
-  fields: formatServersToEmbedFields(servers)
-})
+): Discord.MessageEmbedOptions => {
+  const prefix = link('Full server list', serverListUrl) + '\n'
+  return {
+    color: RUST_COLOR,
+    description: servers.reduce<string>((acc, server, idx) => {
+      const line = formatServerToLine(server, idx)
+      const str = acc + '\n' + line
+      return str.length <= DESCRIPTION_MAX_LENGTH ? str : acc
+    }, prefix)
+  }
+}
 
 export const formatServerListReplyWithUpdatedAt = (
   servers: ListServer[],
@@ -72,7 +70,7 @@ const formatWipeListServer = (server: FullServer): Discord.EmbedFieldData => {
       nextWipe!.accuracy === 'DATE'
         ? formatShortDate(nextWipe!.date)
         : formatShortDateTime(nextWipe!.date),
-    value: `${link(name, url)} (${formatServerInfoSection(server, true, true)})`
+    value: `${link(name, url)} (${formatServerInfoSection(server, true)})`
   }
 }
 
