@@ -5,7 +5,8 @@ import {
   ListServer,
   parseServerPage,
   FullServer,
-  getServerAddress
+  getServerAddress,
+  getIdFromServerLink
 } from '../src/just-wiped'
 import { DateTime } from 'luxon'
 
@@ -66,17 +67,12 @@ describe('parseServerList', () => {
 })
 
 describe('parseServerPage', () => {
-  const rawServerPage = fs.readFileSync(
-    `${__dirname}/../test/data/server-page.html`,
-    'utf8'
-  )
-
-  let server: FullServer
-  beforeEach(() => {
-    server = parseServerPage(rawServerPage)
-  })
-
   test('parses server data', () => {
+    const rawServerPage = fs.readFileSync(
+      `${__dirname}/../test/data/server-page.html`,
+      'utf8'
+    )
+    const server = parseServerPage(rawServerPage)
     expect(objDateTimeToISO(server)).toEqual({
       country: 'FR',
       inactive: false,
@@ -104,10 +100,29 @@ describe('parseServerPage', () => {
       ]
     })
   })
+
+  test('parses map image url', () => {
+    const rawServerPage = fs.readFileSync(
+      `${__dirname}/../test/data/server-page-with-map-image.html`,
+      'utf8'
+    )
+    const server = parseServerPage(rawServerPage)
+    expect(server.mapImageUrl).toBe(
+      'https://just-wiped.net/maps/219212/9c37e072a8d10d91a1b06a0b8f252bc4e4ae3605.jpg'
+    )
+  })
 })
 
 describe('getServerAddress', () => {
   test('works', async () => {
     expect(await getServerAddress(501174)).toBe('213.32.46.191:27222')
+  })
+})
+
+describe('getIdFromServerLink', () => {
+  test('works', () => {
+    expect(
+      getIdFromServerLink('https://just-wiped.net/rust_servers/1101218')
+    ).toBe(1101218)
   })
 })

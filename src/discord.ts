@@ -4,12 +4,16 @@ import * as Discord from 'discord.js'
 import {
   formatSearchParams,
   formatServerListUrl,
+  getIdFromServerLink,
+  getServerAddressCached1h,
+  getServerCached1m,
   getWipedServersCached1m,
   ListServer,
   SERVER_SEARCH_PARAMS
 } from './just-wiped'
 import log from './logger'
 import {
+  formatServerEmbed,
   formatServerListReply,
   formatServerListReplyWithUpdatedAt,
   formatUpcomingWipeList
@@ -85,6 +89,19 @@ const updateServerListMessage = async (
   return servers
 }
 
+const handleServerEmbedReply = async (msg: Discord.Message): Promise<void> => {
+  const id = getIdFromServerLink(msg.content)
+  if (!id) return
+  const [server, address] = await Promise.all([
+    getServerCached1m(id),
+    getServerAddressCached1h(id)
+  ])
+  await msg.suppressEmbeds(true)
+  await msg.channel.send({
+    embed: formatServerEmbed(server, address)
+  })
+}
+
 export default function start() {
   const client = new Discord.Client()
   const token = process.env.DISCORD_BOT_TOKEN!
@@ -98,11 +115,17 @@ export default function start() {
   })
 
   client.on('message', (msg) => {
-    const command = msg.content.match(/(\/[^\s]+)/)?.[1] as
-      | keyof typeof commands
-      | undefined
-    const commandHandler = command && commands[command]
-    if (commandHandler) commandHandler(msg, updateRepliesList)
+    ;(async () => {
+      const text = msg.content
+      const command = text.match(/(\/[^\s]+)/)?.[1] as
+        | keyof typeof commands
+        | undefined
+      const commandHandler = command && commands[command]
+      if (commandHandler) return commandHandler(msg, updateRepliesList)
+      await handleServerEmbedReply(msg)
+    })().catch((err) => {
+      log.error(err)
+    })
   })
 
   client.login(token)

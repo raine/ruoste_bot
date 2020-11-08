@@ -1,9 +1,13 @@
 import * as Discord from 'discord.js'
 import * as R from 'ramda'
-import { DateTime } from 'luxon'
 import { FullServer, ListServer } from '../just-wiped'
 import TimeAgo from 'javascript-time-ago'
-import { formatMaxGroup, formatRelativeDate, lastUpdatedAt } from './general'
+import {
+  formatMaxGroup,
+  formatPlayerCount,
+  formatRelativeDate,
+  lastUpdatedAt
+} from './general'
 import { formatShortDate, formatShortDateTime } from '../date'
 
 const RUST_COLOR = 0xce422a
@@ -21,7 +25,9 @@ const formatServerInfoSection = (
   noCurrentPlayers = false
 ): string =>
   [
-    noCurrentPlayers ? playersMax : `${playersCurrent}/${playersMax}`,
+    noCurrentPlayers
+      ? playersMax
+      : formatPlayerCount({ playersCurrent, playersMax }),
     mapSize,
     `${rating}%`,
     formatMaxGroup(maxGroup),
@@ -92,3 +98,40 @@ export const formatUpcomingWipeList = (
     fields: sortedByNextWipe.map(formatWipeListServer)
   }
 }
+
+export const formatInlineEmbedField = (name: string, value: string) => ({
+  name,
+  value,
+  inline: true
+})
+
+export const formatServerEmbed = (
+  server: FullServer,
+  address: string
+): Discord.MessageEmbedOptions => ({
+  title: server.name,
+  url: server.url,
+  color: RUST_COLOR,
+  thumbnail: {
+    url: server.mapImageUrl
+  },
+  author: {
+    name: 'just-wiped.net',
+    url: 'https://just-wiped.net',
+    icon_url:
+      'https://cdn.just-wiped.net/assets/rust_logo-c13bf05a12751df540da72db14a165f28f14f05f44f91d2a4e22a5b54512975b.png'
+  },
+  fields: [
+    formatInlineEmbedField(
+      'Wiped',
+      formatRelativeDate(server.lastWipe, 'twitter') + ' ago'
+    ),
+    formatInlineEmbedField('Players', formatPlayerCount(server)),
+    formatInlineEmbedField('Rating', server.rating.toString() + '%'),
+    formatInlineEmbedField(
+      'Map size',
+      server.mapSize ? server.mapSize.toString() : 'N/A'
+    ),
+    formatInlineEmbedField('Connect', `steam://${address}`)
+  ]
+})

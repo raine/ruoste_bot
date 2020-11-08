@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head itemscope='' itemtype='http://schema.org/WebSite'>
+<meta charset="utf-8" />
+<script>window.NREUM||(NREUM={});NREUM.info={"beacon":"bam.eu01.nr-data.net","errorBeacon":"bam.eu01.nr-data.net","licenseKey":"NRJS-fc1bcff7f8c2b79a9f8","applicationID":"33135324","transactionName":"JhpeRQoXD1tRFBlCERYBb0IdChVSRhUZQwwKAg==","queueTime":0,"applicationTime":140,"agent":""}</script>
+<script>(window.NREUM||(NREUM={})).loader_config={licenseKey:"NRJS-fc1bcff7f8c2b79a9f8",applicationID:"33135324"};window.NREUM||(NREUM={}),__nr_require=function(e,t,n){function r(n){if(!t[n]){var i=t[n]={exports:{}};e[n][0].call(i.exports,function(t){var i=e[n][1][t];return r(i||t)},i,i.exports)}return t[n].exports}if("function"==typeof __nr_require)return __nr_require;for(var i=0;i<n.length;i++)r(n[i]);return r}({1:[function(e,t,n){function r(){}function i(e,t,n){return function(){return o(e,[u.now()].concat(c(arguments)),t?null:this,n),t?void 0:this}}var o=e("handle"),a=e(6),c=e(7),f=e("ee").get("tracer"),u=e("loader"),s=NREUM;"undefined"==typeof window.newrelic&&(newrelic=s);var d=["setPageViewName","setCustomAttribute","setErrorHandler","finished","addToTrace","inlineHit","addRelease"],p="api-",l=p+"ixn-";a(d,function(e,t){s[t]=i(p+t,!0,"api")}),s.addPageAction=i(p+"addPageAction",!0),s.setCurrentRouteName=i(p+"routeName",!0),t.exports=newrelic,s.interaction=function(){return(new r).get()};var m=r.prototype={createTracer:function(e,t){var n={},r=this,i="function"==typeof t;return o(l+"tracer",[u.now(),e,n],r),function(){if(f.emit((i?"":"no-")+"fn-start",[u.now(),r,i],n),i)try{return t.apply(this,arguments)}catch(e){throw f.emit("fn-err",[arguments,this,e],n),e}finally{f.emit("fn-end",[u.now()],n)}}}};a("actionText,setName,setAttribute,save,ignore,onEnd,getContext,end,get".split(","),function(e,t){m[t]=i(l+t)}),newrelic.noticeError=function(e,t){"string"==typeof e&&(e=new Error(e)),o("err",[e,u.now(),!1,t])}},{}],2:[function(e,t,n){function r(){return c.exists&&performance.now?Math.round(performance.now()):(o=Math.max((new Date).getTime(),o))-a}function i(){return o}var o=(new Date).getTime(),a=o,c=e(8);t.exports=r,t.exports.offset=a,t.exports.getLastTimestamp=i},{}],3:[function(e,t,n){function r(e,t){var n=e.getEntries();n.forEach(function(e){"first-paint"===e.name?d("timing",["fp",Math.floor(e.startTime)]):"first-contentful-paint"===e.name&&d("timing",["fcp",Math.floor(e.startTime)])})}function i(e,t){var n=e.getEntries();n.length>0&&d("lcp",[n[n.length-1]])}function o(e){e.getEntries().forEach(function(e){e.hadRecentInput||d("cls",[e])})}function a(e){if(e instanceof m&&!g){var t=Math.round(e.timeStamp),n={type:e.type};t<=p.now()?n.fid=p.now()-t:t>p.offset&&t<=Date.now()?(t-=p.offset,n.fid=p.now()-t):t=p.now(),g=!0,d("timing",["fi",t,n])}}function c(e){d("pageHide",[p.now(),e])}if(!("init"in NREUM&&"page_view_timing"in NREUM.init&&"enabled"in NREUM.init.page_view_timing&&NREUM.init.page_view_timing.enabled===!1)){var f,u,s,d=e("handle"),p=e("loader"),l=e(5),m=NREUM.o.EV;if("PerformanceObserver"in window&&"function"==typeof window.PerformanceObserver){f=new PerformanceObserver(r);try{f.observe({entryTypes:["paint"]})}catch(v){}u=new PerformanceObserver(i);try{u.observe({entryTypes:["largest-contentful-paint"]})}catch(v){}s=new PerformanceObserver(o);try{s.observe({type:"layout-shift",buffered:!0})}catch(v){}}if("addEventListener"in document){var g=!1,y=["click","keydown","mousedown","pointerdown","touchstart"];y.forEach(function(e){document.addEventListener(e,a,!1)})}l(c)}},{}],4:[function(e,t,n){function r(e,t){if(!i)return!1;if(e!==i)return!1;if(!t)return!0;if(!o)return!1;for(var n=o.split("."),r=t.split("."),a=0;a<r.length;a++)if(r[a]!==n[a])return!1;return!0}var i=null,o=null,a=/Version\/(\S+)\s+Safari/;if(navigator.userAgent){var c=navigator.userAgent,f=c.match(a);f&&c.indexOf("Chrome")===-1&&c.indexOf("Chromium")===-1&&(i="Safari",o=f[1])}t.exports={agent:i,version:o,match:r}},{}],5:[function(e,t,n){function r(e){function t(){e(a&&document[a]?document[a]:document[i]?"hidden":"visible")}"addEventListener"in document&&o&&document.addEventListener(o,t,!1)}t.exports=r;var i,o,a;"undefined"!=typeof document.hidden?(i="hidden",o="visibilitychange",a="visibilityState"):"undefined"!=typeof document.msHidden?(i="msHidden",o="msvisibilitychange"):"undefined"!=typeof document.webkitHidden&&(i="webkitHidden",o="webkitvisibilitychange",a="webkitVisibilityState")},{}],6:[function(e,t,n){function r(e,t){var n=[],r="",o=0;for(r in e)i.call(e,r)&&(n[o]=t(r,e[r]),o+=1);return n}var i=Object.prototype.hasOwnProperty;t.exports=r},{}],7:[function(e,t,n){function r(e,t,n){t||(t=0),"undefined"==typeof n&&(n=e?e.length:0);for(var r=-1,i=n-t||0,o=Array(i<0?0:i);++r<i;)o[r]=e[t+r];return o}t.exports=r},{}],8:[function(e,t,n){t.exports={exists:"undefined"!=typeof window.performance&&window.performance.timing&&"undefined"!=typeof window.performance.timing.navigationStart}},{}],ee:[function(e,t,n){function r(){}function i(e){function t(e){return e&&e instanceof r?e:e?f(e,c,o):o()}function n(n,r,i,o){if(!p.aborted||o){e&&e(n,r,i);for(var a=t(i),c=v(n),f=c.length,u=0;u<f;u++)c[u].apply(a,r);var d=s[w[n]];return d&&d.push([b,n,r,a]),a}}function l(e,t){h[e]=v(e).concat(t)}function m(e,t){var n=h[e];if(n)for(var r=0;r<n.length;r++)n[r]===t&&n.splice(r,1)}function v(e){return h[e]||[]}function g(e){return d[e]=d[e]||i(n)}function y(e,t){u(e,function(e,n){t=t||"feature",w[n]=t,t in s||(s[t]=[])})}var h={},w={},b={on:l,addEventListener:l,removeEventListener:m,emit:n,get:g,listeners:v,context:t,buffer:y,abort:a,aborted:!1};return b}function o(){return new r}function a(){(s.api||s.feature)&&(p.aborted=!0,s=p.backlog={})}var c="nr@context",f=e("gos"),u=e(6),s={},d={},p=t.exports=i();p.backlog=s},{}],gos:[function(e,t,n){function r(e,t,n){if(i.call(e,t))return e[t];var r=n();if(Object.defineProperty&&Object.keys)try{return Object.defineProperty(e,t,{value:r,writable:!0,enumerable:!1}),r}catch(o){}return e[t]=r,r}var i=Object.prototype.hasOwnProperty;t.exports=r},{}],handle:[function(e,t,n){function r(e,t,n,r){i.buffer([e],r),i.emit(e,t,n)}var i=e("ee").get("handle");t.exports=r,r.ee=i},{}],id:[function(e,t,n){function r(e){var t=typeof e;return!e||"object"!==t&&"function"!==t?-1:e===window?0:a(e,o,function(){return i++})}var i=1,o="nr@id",a=e("gos");t.exports=r},{}],loader:[function(e,t,n){function r(){if(!E++){var e=b.info=NREUM.info,t=p.getElementsByTagName("script")[0];if(setTimeout(u.abort,3e4),!(e&&e.licenseKey&&e.applicationID&&t))return u.abort();f(h,function(t,n){e[t]||(e[t]=n)});var n=a();c("mark",["onload",n+b.offset],null,"api"),c("timing",["load",n]);var r=p.createElement("script");r.src="https://"+e.agent,t.parentNode.insertBefore(r,t)}}function i(){"complete"===p.readyState&&o()}function o(){c("mark",["domContent",a()+b.offset],null,"api")}var a=e(2),c=e("handle"),f=e(6),u=e("ee"),s=e(4),d=window,p=d.document,l="addEventListener",m="attachEvent",v=d.XMLHttpRequest,g=v&&v.prototype;NREUM.o={ST:setTimeout,SI:d.setImmediate,CT:clearTimeout,XHR:v,REQ:d.Request,EV:d.Event,PR:d.Promise,MO:d.MutationObserver};var y=""+location,h={beacon:"bam.nr-data.net",errorBeacon:"bam.nr-data.net",agent:"js-agent.newrelic.com/nr-1184.min.js"},w=v&&g&&g[l]&&!/CriOS/.test(navigator.userAgent),b=t.exports={offset:a.getLastTimestamp(),now:a,origin:y,features:{},xhrWrappable:w,userAgent:s};e(1),e(3),p[l]?(p[l]("DOMContentLoaded",o,!1),d[l]("load",r,!1)):(p[m]("onreadystatechange",i),d[m]("onload",r)),c("mark",["firstbyte",a.getLastTimestamp()],null,"api");var E=0},{}],"wrap-function":[function(e,t,n){function r(e){return!(e&&e instanceof Function&&e.apply&&!e[a])}var i=e("ee"),o=e(7),a="nr@original",c=Object.prototype.hasOwnProperty,f=!1;t.exports=function(e,t){function n(e,t,n,i){function nrWrapper(){var r,a,c,f;try{a=this,r=o(arguments),c="function"==typeof n?n(r,a):n||{}}catch(u){p([u,"",[r,a,i],c])}s(t+"start",[r,a,i],c);try{return f=e.apply(a,r)}catch(d){throw s(t+"err",[r,a,d],c),d}finally{s(t+"end",[r,a,f],c)}}return r(e)?e:(t||(t=""),nrWrapper[a]=e,d(e,nrWrapper),nrWrapper)}function u(e,t,i,o){i||(i="");var a,c,f,u="-"===i.charAt(0);for(f=0;f<t.length;f++)c=t[f],a=e[c],r(a)||(e[c]=n(a,u?c+i:i,o,c))}function s(n,r,i){if(!f||t){var o=f;f=!0;try{e.emit(n,r,i,t)}catch(a){p([a,n,r,i])}f=o}}function d(e,t){if(Object.defineProperty&&Object.keys)try{var n=Object.keys(e);return n.forEach(function(n){Object.defineProperty(t,n,{get:function(){return e[n]},set:function(t){return e[n]=t,t}})}),t}catch(r){p([r])}for(var i in e)c.call(e,i)&&(t[i]=e[i]);return t}function p(t){try{e.emit("internal-error",t)}catch(n){}}return e||(e=i),n.inPlace=u,n.flag=a,n}},{}]},{},["loader"]);</script>
+<link rel='dns-prefetch' href='//cdn.just-wiped.net' />
+<link rel='dns-prefetch' href='//img.youtube.com' />
+<link rel='dns-prefetch' href='//stats.g.doubleclick.net' />
+<link rel='dns-prefetch' href='//www.google-analytics.com' />
+<link rel='dns-prefetch' href='//securepubads.g.doubleclick.net' />
+<link rel='dns-prefetch' href='//fonts.googleapis.com' />
+<link rel='dns-prefetch' href='//pagead2.googlesyndication.com' />
+<title itemprop="name">LegionRust.uk :: Rust Server :: Just-Wiped</title>
+<meta name="google-site-verification" content="R0OUscjgkhJueD1Wf7SFobgRE3J7BM_RvHMtfNbbJcM" />
+<meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token" content="W4TUSfXeasbIpU20AAcqf5FDSUOYrxsL0XKMGu23Rw0Y97a6X4WZP8GD0vnnFVUKN3FdCsTBLn7guU45xwCg8Q==" />
+<meta name="description" content="Rust Server | Wipe: 2020-10-30 12:05 UTC | Player: 77/200 | FR | Cycle: ~ 3.1 Days | Size: 3500 | LegionRust.uk" />
+
+
+<meta property="og:type" content="website" />
+<meta property="og:title" content="LegionRust.uk :: Rust Server :: Just-Wiped" />
+<meta property="og:description" content="Rust Server | Wipe: 2020-10-30 12:05 UTC | Player: 77/200 | FR | Cycle: ~ 3.1 Days | Size: 3500 | LegionRust.uk" />
+<meta property="og:url" content="https://just-wiped.net/rust_servers/1091253" />
+<meta property="og:image" content="https://cdn.just-wiped.net/assets/rust_logo_bigger-27b2d50813ff1c14d7f6b913ea2e00c8ff3a68be4f0551bb58895e2aa0cc7a80.jpg" />
+<meta property="fb:app_id" content="738017063025863" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="LegionRust.uk :: Rust Server :: Just-Wiped" />
+<meta name="twitter:description" content="Rust Server | Wipe: 2020-10-30 12:05 UTC | Player: 77/200 | FR | Cycle: ~ 3.1 Days | Size: 3500 | LegionRust.uk" />
+<meta name="twitter:image" content="https://cdn.just-wiped.net/assets/rust_logo_bigger-27b2d50813ff1c14d7f6b913ea2e00c8ff3a68be4f0551bb58895e2aa0cc7a80.jpg" />
+<link rel="shortcut icon" type="image/x-icon" href="https://cdn.just-wiped.net/assets/favicon-da8c00304096c4d026c9a206f606f3d567a8925d33bbb29925ea6189c5242537.ico" />
+<link rel="stylesheet" media="all" href="https://cdn.just-wiped.net/assets/application-e78d7f53e35ecabea9451ce587f226d3b6c172f1454062026ab65b849c420ba6.css" />
+<link href="https://cdn.just-wiped.net/assets/Rust-93386dc37c214c04fe824075a9d30d34fe03f3b5b29b5e33142d73454e0d0811.ttf" rel="preload" type="font/ttf" as="font" crossorigin="anonymous" />
+<link href="https://cdn.just-wiped.net/assets/roboto-condensed-v18-latin-regular-53b907326f7c21a04f6d39cc32ff471aafec57d887feabfabb53394f378c659f.woff2" rel="preload" type="font/woff2" as="font" crossorigin="anonymous" />
+<script>
+  var readyBuffer = [];
+  window.googletag = window.googletag || {cmd: []};
+  
+  googletag.cmd.push(function() {});
+</script>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+<script src="https://securepubads.g.doubleclick.net/tag/js/gpt.js" async="async"></script>
+<script>
+ googletag.cmd.push(function() {
+    googletag.defineSlot('/21842588594/desktop_before_main_col', [728, 90], 'div-gpt-ad-1598302699546-0').addService(googletag.pubads());
+    googletag.pubads().enableSingleRequest();
+    googletag.pubads().collapseEmptyDivs();
+    googletag.enableServices();
+  });
+</script><script>
+  googletag.cmd.push(function() {
+    googletag.defineSlot('/21842588594/after_main_col', [728, 90], 'div-gpt-ad-1598302622757-0').addService(googletag.pubads());
+    googletag.pubads().enableSingleRequest();
+    googletag.pubads().collapseEmptyDivs();
+    googletag.enableServices();
+  });
+</script><script>
+googletag.cmd.push(function() {
+    googletag.defineSlot('/21842588594/desktop_in_side_col', [[300, 250], [250, 250]], 'div-gpt-ad-1601736608255-0').addService(googletag.pubads());
+    googletag.pubads().enableSingleRequest();
+    googletag.pubads().collapseEmptyDivs();
+    googletag.enableServices();
+  });
+</script><script>
+ googletag.cmd.push(function() {
+    googletag.defineSlot('/21842588594/desktop_outer_right', [300, 600], 'div-gpt-ad-1598302737345-0').addService(googletag.pubads());
+    googletag.pubads().enableSingleRequest();
+    googletag.pubads().collapseEmptyDivs();
+    googletag.enableServices();
+  });
+</script>
+</head>
+<body style='background-image: url(https://cdn.just-wiped.net/assets/background/b_8-c41649a7e76cbadb2d34798f759077f7520c4d58f9c80afb2bc9ec929cf47740.jpg)'>
+<div class='main-frame'>
+<div class='pre-main'></div>
+<div class='content'>
+<header>
+<div class='headline'>
+<a href="/"><div class='img-wrapper'>
+<img loading="lazy" src="https://cdn.just-wiped.net/assets/rust_logo-c13bf05a12751df540da72db14a165f28f14f05f44f91d2a4e22a5b54512975b.png" alt="Rust logo" />
+</div>
+<div class='title-wrapper'>
+<div class='title'>
+Just
+<div class='spacer'></div>
+Wiped
+</div>
+<div class='sub-title'>
+find the latest wiped Rust Servers
+</div>
+</div>
+</a></div>
+</header>
+<nav class='main-navigation'>
+<ul>
+<li class='intro'>
+&#9776;
+</li>
+<li>
+<a class="" href="/">Home</a>
+</li>
+<li>
+<a class="active" href="/rust_servers">Wipes</a>
+</li>
+<li>
+<a class="" href="/rust-maps">Maps</a>
+</li>
+<li>
+<a class="" href="/search-rust-servers">Search</a>
+</li>
+<li class='fill'></li>
+</ul>
+</nav>
+
+
+<div class='content-block'>
+
+
+<div class='breadcrumbs'>
+<ol itemscope='' itemtype='https://schema.org/BreadcrumbList'>
+<li itemprop='itemListElement' itemscope='' itemtype='https://schema.org/ListItem'>
+<a class="" title="Go To Rust Servers" itemtype="https://schema.org/Thing" itemprop="item" href="/rust_servers"><span itemprop='name'>
+Rust Servers
+</span>
+</a><meta content='0' itemprop='position'>
+</li>
+<li itemprop='itemListElement' itemscope='' itemtype='https://schema.org/ListItem'>
+<a class="" title="Go To LegionRust.uk" itemtype="https://schema.org/Thing" itemprop="item" href="/rust_servers/by_name?name=LegionRust.uk"><span itemprop='name'>
+LegionRust.uk
+</span>
+</a><meta content='1' itemprop='position'>
+</li>
+<li itemprop='itemListElement' itemscope='' itemtype='https://schema.org/ListItem'>
+<a class="active" title="Go To [EU] LegionRust.uk - Solo/Duo/Trio | FullWiped: 30.10 30/10" itemtype="https://schema.org/Thing" itemprop="item" href="/rust_servers/1091253"><span itemprop='name'>
+[EU] LegionRust.uk - Solo/Duo/Trio | FullWiped: 30.10 30/10
+</span>
+</a><meta content='2' itemprop='position'>
+</li>
+<li class='fill'></li>
+</ol>
+</div>
+
+<div class='server-show'>
+<div class='server server-head active ' id='server-1091253'>
+<div class='flag flags-FR' title='FR'></div>
+<a class="name" title="Open the server details page" href="/rust_servers/1091253"><h1>
+[EU] LegionRust.uk - Solo/Duo/Trio | FullWiped: 30.10 30/10
+</h1>
+<div class='notice bp' title='The blueprints on this server probably wiped!'>
+BP Wipe
+</div>
+</a><div class='map'>
+<a title="Show the Rust map for this server" href="/rust_servers/1091253/map"><img loading="lazy" alt="Thumbnail Rust Map: Procedural Map, Size: 3500, Seed: 2020102887, 16 Monuments" data-beforeviewport-src="/maps/219212/911e69ce2cd387e64010706a706eb7e50bc9cef9.jpg" src="https://cdn.just-wiped.net/assets/placeholder-6ede4a32efe9fb930ea1e285d7c0ce7ba4f5d8178fcdd2fb5cbacc3719a367c3.png" />
+</a></div>
+<div class='infos'>
+<div class='info i-last-wipe'>
+<div class='label'>
+Wipe
+</div>
+<div class='value'>
+<time class='timeago' datetime='2020-10-30T13:05:07.36+01:00'>
+12 minutes ago
+</time>
+</div>
+</div>
+<div class='info i-rating'>
+<div class='label'>
+Rating
+</div>
+<div class='value'>
+91%
+</div>
+</div>
+<div class='info i-max-group'>
+<div class='label'>
+Max Group
+</div>
+<div class='value'>
+3
+</div>
+</div>
+<div class='info i-modded'>
+<div class='label'>
+Modded
+</div>
+<div class='value'>
+No
+</div>
+</div>
+<div class='info i-player'>
+<div class='label'>
+player
+</div>
+<div class='value'>
+77/200
+</div>
+</div>
+<div class='info i-map'>
+<div class='label'>
+map
+</div>
+<div class='value'>
+Procedural Map
+</div>
+</div>
+<div class='info i-wipe-cycle'>
+<div class='label'>
+Cycle
+</div>
+<div class='value'>
+~ 3.1 Days
+</div>
+</div>
+</div>
+</div>
+
+<div class='left-col'>
+<div class="pol-wrap pol-desktop-before-main-col" data-pol="117" data-mon="pol/117"><div id='div-gpt-ad-1598302699546-0' style='width: 728px; height: 90px;'>
+  <script>
+    googletag.cmd.push(function() { googletag.display('div-gpt-ad-1598302699546-0'); });
+  </script>
+</div></div>
+
+<div class='badges'>
+<div class='active badge'>
+95%+ Uptime
+</div>
+<div class='active badge'>
+No Fake Wipes
+</div>
+<div class='active badge'>
+Active Players
+</div>
+<div class='active badge'>
+Wipes Regularly
+</div>
+</div>
+
+<div class='description'>
+Visit our website for information about our servers &amp; wipes: www.legionrust.uk<br /><br />Wipe Information:<br />Last Fullwiped: 30.10 at 12:00PM Noon GMT+1 London Time Halloween Update.<br />Optional wipe if population is below 10&lt; in peak times! We are a NON PAY 2 WIN community we only accept donations solely for our dedicated machines.<br />[Group Limit] : 3 Solo/Duo/Trio ONLY!<br />Discord: https://discord.gg/yE22sf3<br />Established 2020
+</div>
+<h3>
+Wipe History
+<span class='small'>
+max last 5 wipes
+</span>
+</h3>
+<div class='wipe-history'>
+<div class='wipe-history-entry'>
+<div class='wipe-date'>
+30.10.2020 - 12:05 UTC
+</div>
+<div class='wipe-name'>
+[EU] LegionRust.uk - Solo/Duo/Trio | FullWiped: 30.10 30/10
+</div>
+</div>
+<div class='wipe-history-entry'>
+<div class='wipe-date'>
+26.10.2020 - 19:08 UTC
+</div>
+<div class='wipe-name'>
+LegionRust.uk - Solo/Duo/Trio | FullWiped: 26.10 26/10
+</div>
+</div>
+<div class='wipe-history-entry'>
+<div class='wipe-date'>
+23.10.2020 - 15:22 UTC
+</div>
+<div class='wipe-name'>
+[EU] LegionRust.uk - Solo/Duo/Trio | Fullwiped: 23.10 23/10
+</div>
+</div>
+<div class='wipe-history-entry'>
+<div class='wipe-date'>
+19.10.2020 - 12:54 UTC
+</div>
+<div class='wipe-name'>
+LegionRust.uk - Solo/Duo/Trio | FullWiped: 19.10 19/10
+</div>
+</div>
+<div class='wipe-history-entry'>
+<div class='wipe-date'>
+16.10.2020 - 11:05 UTC
+</div>
+<div class='wipe-name'>
+LegionRust.uk - Solo/Duo/Trio | FullWiped: 16.10 16/10
+</div>
+</div>
+</div>
+
+
+<h3>
+Player History
+<span class='right link-list horizontal'>
+<a class="duration-link duration-90" data-remote="true" href="/rust_servers/1091253/player_chart?duration=90">3 Months</a>
+<a class="duration-link duration-30" data-remote="true" href="/rust_servers/1091253/player_chart?duration=30">1 Month</a>
+<a class="duration-link duration-7" data-remote="true" href="/rust_servers/1091253/player_chart?duration=7">1 Week</a>
+<a class="duration-link duration-3 active" data-remote="true" href="/rust_servers/1091253/player_chart?duration=3">3 Days</a>
+</span>
+</h3>
+<div class='player-chart-wrapper'>
+<canvas class='player-chart' height='150' id='player-chart-1091253'></canvas>
+<script>
+  readyBuffer.push(function() {
+    addChart("#player-chart-1091253", [{"x":"2020-10-27T13:17:05.050+01:00","y":0},{"x":"2020-10-27T12:17:42.106Z","y":0},{"x":"2020-10-27T12:17:47.106Z","y":181},{"x":"2020-10-27T12:21:01.026Z","y":180},{"x":"2020-10-27T12:26:49.239Z","y":176},{"x":"2020-10-27T12:35:39.160Z","y":185},{"x":"2020-10-27T12:39:00.486Z","y":177},{"x":"2020-10-27T12:42:17.123Z","y":178},{"x":"2020-10-27T12:51:34.162Z","y":190},{"x":"2020-10-27T12:55:01.633Z","y":183},{"x":"2020-10-27T13:03:31.908Z","y":174},{"x":"2020-10-27T13:17:48.175Z","y":175},{"x":"2020-10-27T13:25:11.639Z","y":175},{"x":"2020-10-27T13:28:11.684Z","y":173},{"x":"2020-10-27T13:36:54.887Z","y":183},{"x":"2020-10-27T13:40:17.140Z","y":181},{"x":"2020-10-27T13:48:46.710Z","y":183},{"x":"2020-10-27T13:52:13.591Z","y":187},{"x":"2020-10-27T13:55:28.529Z","y":191},{"x":"2020-10-27T14:04:11.073Z","y":189},{"x":"2020-10-27T14:07:38.313Z","y":188},{"x":"2020-10-27T14:12:59.781Z","y":195},{"x":"2020-10-27T14:19:42.074Z","y":184},{"x":"2020-10-27T14:23:01.423Z","y":183},{"x":"2020-10-27T14:28:00.706Z","y":192},{"x":"2020-10-27T14:35:03.847Z","y":189},{"x":"2020-10-27T14:40:35.300Z","y":188},{"x":"2020-10-27T14:51:51.860Z","y":189},{"x":"2020-10-27T14:57:31.245Z","y":185},{"x":"2020-10-27T15:01:12.767Z","y":189},{"x":"2020-10-27T15:10:01.099Z","y":195},{"x":"2020-10-27T15:13:31.222Z","y":191},{"x":"2020-10-27T15:16:45.238Z","y":197},{"x":"2020-10-27T15:29:25.020Z","y":206},{"x":"2020-10-27T15:32:41.976Z","y":198},{"x":"2020-10-27T15:36:13.785Z","y":202},{"x":"2020-10-27T15:43:05.323Z","y":205},{"x":"2020-10-27T15:51:42.189Z","y":204},{"x":"2020-10-27T16:02:32.192Z","y":195},{"x":"2020-10-27T16:11:37.036Z","y":200},{"x":"2020-10-27T16:14:53.666Z","y":203},{"x":"2020-10-27T16:21:41.292Z","y":202},{"x":"2020-10-27T16:27:26.273Z","y":207},{"x":"2020-10-27T16:30:39.007Z","y":205},{"x":"2020-10-27T16:39:06.593Z","y":193},{"x":"2020-10-27T16:48:22.346Z","y":188},{"x":"2020-10-27T16:51:25.448Z","y":182},{"x":"2020-10-27T17:00:34.942Z","y":190},{"x":"2020-10-27T17:09:47.456Z","y":184},{"x":"2020-10-27T17:18:57.444Z","y":186},{"x":"2020-10-27T17:22:27.942Z","y":187},{"x":"2020-10-27T17:28:12.394Z","y":188},{"x":"2020-10-27T17:36:10.321Z","y":194},{"x":"2020-10-27T17:41:02.896Z","y":192},{"x":"2020-10-27T17:46:04.002Z","y":190},{"x":"2020-10-27T17:57:14.522Z","y":186},{"x":"2020-10-27T18:00:37.997Z","y":189},{"x":"2020-10-27T18:09:20.586Z","y":197},{"x":"2020-10-27T18:23:33.135Z","y":207},{"x":"2020-10-27T18:26:59.937Z","y":208},{"x":"2020-10-27T18:32:36.297Z","y":217},{"x":"2020-10-27T18:39:29.046Z","y":222},{"x":"2020-10-27T18:44:52.530Z","y":225},{"x":"2020-10-27T18:56:50.338Z","y":217},{"x":"2020-10-27T19:02:52.514Z","y":209},{"x":"2020-10-27T19:06:22.047Z","y":208},{"x":"2020-10-27T19:14:43.747Z","y":194},{"x":"2020-10-27T19:18:09.699Z","y":192},{"x":"2020-10-27T19:23:35.789Z","y":184},{"x":"2020-10-27T19:30:35.139Z","y":179},{"x":"2020-10-27T19:35:20.035Z","y":171},{"x":"2020-10-27T19:38:40.419Z","y":173},{"x":"2020-10-27T19:49:37.536Z","y":166},{"x":"2020-10-27T19:53:09.366Z","y":161},{"x":"2020-10-27T20:00:12.488Z","y":169},{"x":"2020-10-27T20:03:26.028Z","y":165},{"x":"2020-10-27T20:06:58.758Z","y":163},{"x":"2020-10-27T20:15:55.890Z","y":170},{"x":"2020-10-27T20:20:56.074Z","y":171},{"x":"2020-10-27T20:28:42.112Z","y":171},{"x":"2020-10-27T20:36:47.097Z","y":165},{"x":"2020-10-27T20:40:06.442Z","y":168},{"x":"2020-10-27T20:43:39.962Z","y":161},{"x":"2020-10-27T20:52:39.278Z","y":154},{"x":"2020-10-27T20:55:53.363Z","y":150},{"x":"2020-10-27T21:02:45.054Z","y":148},{"x":"2020-10-27T21:10:58.241Z","y":148},{"x":"2020-10-27T21:13:58.252Z","y":146},{"x":"2020-10-27T21:27:01.170Z","y":145},{"x":"2020-10-27T21:30:01.281Z","y":137},{"x":"2020-10-27T21:33:21.199Z","y":135},{"x":"2020-10-27T21:42:00.389Z","y":129},{"x":"2020-10-27T21:45:28.084Z","y":125},{"x":"2020-10-27T21:49:03.529Z","y":119},{"x":"2020-10-27T21:55:40.378Z","y":113},{"x":"2020-10-27T22:01:15.699Z","y":111},{"x":"2020-10-27T22:12:00.276Z","y":109},{"x":"2020-10-27T22:15:30.854Z","y":107},{"x":"2020-10-27T22:20:38.595Z","y":103},{"x":"2020-10-27T22:29:42.566Z","y":107},{"x":"2020-10-27T22:35:12.068Z","y":101},{"x":"2020-10-27T22:38:39.563Z","y":99},{"x":"2020-10-27T22:47:40.682Z","y":95},{"x":"2020-10-27T22:53:07.150Z","y":92},{"x":"2020-10-27T22:56:26.446Z","y":90},{"x":"2020-10-27T23:06:27.437Z","y":94},{"x":"2020-10-27T23:09:58.303Z","y":92},{"x":"2020-10-27T23:18:46.422Z","y":88},{"x":"2020-10-27T23:23:47.379Z","y":89},{"x":"2020-10-27T23:28:43.206Z","y":90},{"x":"2020-10-27T23:39:54.327Z","y":95},{"x":"2020-10-27T23:43:17.804Z","y":92},{"x":"2020-10-27T23:46:42.254Z","y":90},{"x":"2020-10-27T23:55:31.193Z","y":83},{"x":"2020-10-27T23:58:47.797Z","y":81},{"x":"2020-10-28T00:04:05.955Z","y":80},{"x":"2020-10-28T00:12:47.087Z","y":82},{"x":"2020-10-28T00:17:35.869Z","y":81},{"x":"2020-10-28T00:22:39.678Z","y":78},{"x":"2020-10-28T00:31:22.055Z","y":77},{"x":"2020-10-28T00:36:32.796Z","y":76},{"x":"2020-10-28T00:49:03.964Z","y":75},{"x":"2020-10-28T00:52:04.027Z","y":74},{"x":"2020-10-28T00:57:12.006Z","y":76},{"x":"2020-10-28T01:07:49.745Z","y":70},{"x":"2020-10-28T01:11:12.698Z","y":74},{"x":"2020-10-28T01:14:43.254Z","y":72},{"x":"2020-10-28T01:23:32.337Z","y":64},{"x":"2020-10-28T01:29:10.930Z","y":66},{"x":"2020-10-28T01:34:27.224Z","y":67},{"x":"2020-10-28T01:45:43.870Z","y":62},{"x":"2020-10-28T01:48:58.982Z","y":63},{"x":"2020-10-28T02:01:43.680Z","y":61},{"x":"2020-10-28T02:04:43.721Z","y":59},{"x":"2020-10-28T02:09:55.251Z","y":57},{"x":"2020-10-28T02:23:37.397Z","y":58},{"x":"2020-10-28T02:26:37.459Z","y":56},{"x":"2020-10-28T02:31:55.558Z","y":52},{"x":"2020-10-28T02:40:01.194Z","y":50},{"x":"2020-10-28T02:45:08.047Z","y":44},{"x":"2020-10-28T02:48:19.974Z","y":42},{"x":"2020-10-28T03:01:36.650Z","y":38},{"x":"2020-10-28T03:09:31.210Z","y":38},{"x":"2020-10-28T03:17:31.047Z","y":35},{"x":"2020-10-28T03:25:08.651Z","y":35},{"x":"2020-10-28T03:28:08.669Z","y":34},{"x":"2020-10-28T03:38:51.372Z","y":32},{"x":"2020-10-28T03:46:01.717Z","y":32},{"x":"2020-10-28T03:49:01.734Z","y":30},{"x":"2020-10-28T03:59:58.629Z","y":31},{"x":"2020-10-28T04:07:26.841Z","y":31},{"x":"2020-10-28T04:10:26.900Z","y":30},{"x":"2020-10-28T04:27:52.833Z","y":31},{"x":"2020-10-28T04:30:52.845Z","y":32},{"x":"2020-10-28T04:43:49.856Z","y":34},{"x":"2020-10-28T04:46:49.867Z","y":36},{"x":"2020-10-28T04:55:18.098Z","y":36},{"x":"2020-10-28T05:03:52.839Z","y":36},{"x":"2020-10-28T05:09:34.176Z","y":37},{"x":"2020-10-28T05:14:44.315Z","y":38},{"x":"2020-10-28T05:25:57.598Z","y":34},{"x":"2020-10-28T05:36:43.714Z","y":34},{"x":"2020-10-28T05:39:43.732Z","y":29},{"x":"2020-10-28T05:50:45.569Z","y":28},{"x":"2020-10-28T05:53:45.593Z","y":27},{"x":"2020-10-28T06:12:24.294Z","y":26},{"x":"2020-10-28T06:15:24.307Z","y":27},{"x":"2020-10-28T06:21:08.389Z","y":25},{"x":"2020-10-28T06:35:32.420Z","y":28},{"x":"2020-10-28T06:42:58.126Z","y":28},{"x":"2020-10-28T06:45:58.213Z","y":31},{"x":"2020-10-28T06:54:44.925Z","y":32},{"x":"2020-10-28T07:02:06.303Z","y":32},{"x":"2020-10-28T07:05:06.317Z","y":35},{"x":"2020-10-28T07:21:12.385Z","y":36},{"x":"2020-10-28T07:24:12.404Z","y":34},{"x":"2020-10-28T07:29:12.057Z","y":35},{"x":"2020-10-28T07:39:44.784Z","y":35},{"x":"2020-10-28T07:47:14.548Z","y":35},{"x":"2020-10-28T07:53:32.801Z","y":40},{"x":"2020-10-28T07:59:00.043Z","y":49},{"x":"2020-10-28T08:07:18.381Z","y":47},{"x":"2020-10-28T08:17:33.232Z","y":49},{"x":"2020-10-28T08:20:47.458Z","y":48},{"x":"2020-10-28T08:26:37.018Z","y":52},{"x":"2020-10-28T08:35:26.523Z","y":53},{"x":"2020-10-28T08:40:58.023Z","y":54},{"x":"2020-10-28T09:10:19.003Z","y":54},{"x":"2020-10-28T09:16:50.565Z","y":60},{"x":"2020-10-28T09:22:02.583Z","y":58},{"x":"2020-10-28T09:32:52.692Z","y":60},{"x":"2020-10-28T09:37:50.584Z","y":57},{"x":"2020-10-28T09:41:19.780Z","y":58},{"x":"2020-10-28T09:52:25.484Z","y":59},{"x":"2020-10-28T09:55:55.984Z","y":58},{"x":"2020-10-28T10:03:01.409Z","y":58},{"x":"2020-10-28T10:09:21.917Z","y":63},{"x":"2020-10-28T10:22:53.699Z","y":63},{"x":"2020-10-28T10:25:53.723Z","y":30},{"x":"2020-10-28T10:32:49.757Z","y":64},{"x":"2020-10-28T10:36:22.965Z","y":67},{"x":"2020-10-28T10:50:33.288Z","y":70},{"x":"2020-10-28T10:55:48.350Z","y":69},{"x":"2020-10-28T11:00:55.655Z","y":76},{"x":"2020-10-28T11:09:52.951Z","y":79},{"x":"2020-10-28T11:13:24.858Z","y":83},{"x":"2020-10-28T11:16:46.386Z","y":85},{"x":"2020-10-28T11:33:33.304Z","y":87},{"x":"2020-10-28T11:39:04.438Z","y":88},{"x":"2020-10-28T11:44:06.220Z","y":90},{"x":"2020-10-28T11:53:04.418Z","y":90},{"x":"2020-10-28T11:56:32.562Z","y":95},{"x":"2020-10-28T12:08:47.825Z","y":94},{"x":"2020-10-28T12:12:07.822Z","y":91},{"x":"2020-10-28T12:15:39.561Z","y":93},{"x":"2020-10-28T12:26:19.877Z","y":98},{"x":"2020-10-28T12:29:38.634Z","y":101},{"x":"2020-10-28T12:40:29.511Z","y":101},{"x":"2020-10-28T12:46:47.640Z","y":102},{"x":"2020-10-28T12:55:48.080Z","y":101},{"x":"2020-10-28T13:01:26.297Z","y":98},{"x":"2020-10-28T13:12:13.696Z","y":100},{"x":"2020-10-28T13:15:13.834Z","y":101},{"x":"2020-10-28T13:25:50.744Z","y":101},{"x":"2020-10-28T13:31:35.646Z","y":95},{"x":"2020-10-28T13:42:39.643Z","y":95},{"x":"2020-10-28T13:51:14.029Z","y":93},{"x":"2020-10-28T13:54:25.327Z","y":95},{"x":"2020-10-28T13:59:26.990Z","y":96},{"x":"2020-10-28T14:08:47.236Z","y":103},{"x":"2020-10-28T14:12:14.358Z","y":104},{"x":"2020-10-28T14:17:49.275Z","y":105},{"x":"2020-10-28T14:28:46.729Z","y":108},{"x":"2020-10-28T14:32:14.518Z","y":109},{"x":"2020-10-28T14:37:23.187Z","y":101},{"x":"2020-10-28T14:45:59.134Z","y":93},{"x":"2020-10-28T14:49:24.647Z","y":96},{"x":"2020-10-28T14:57:48.869Z","y":97},{"x":"2020-10-28T15:01:17.091Z","y":100},{"x":"2020-10-28T15:04:42.670Z","y":99},{"x":"2020-10-28T15:15:51.656Z","y":98},{"x":"2020-10-28T15:19:17.420Z","y":100},{"x":"2020-10-28T15:25:07.636Z","y":103},{"x":"2020-10-28T15:33:27.928Z","y":103},{"x":"2020-10-28T15:38:39.158Z","y":101},{"x":"2020-10-28T15:48:35.341Z","y":105},{"x":"2020-10-28T15:55:06.934Z","y":105},{"x":"2020-10-28T15:58:42.343Z","y":102},{"x":"2020-10-28T16:07:55.629Z","y":103},{"x":"2020-10-28T16:13:22.889Z","y":99},{"x":"2020-10-28T16:16:37.664Z","y":100},{"x":"2020-10-28T16:27:33.433Z","y":100},{"x":"2020-10-28T16:32:56.551Z","y":96},{"x":"2020-10-28T16:42:32.479Z","y":93},{"x":"2020-10-28T16:49:36.283Z","y":92},{"x":"2020-10-28T16:52:48.153Z","y":86},{"x":"2020-10-28T16:56:35.436Z","y":84},{"x":"2020-10-28T17:07:08.600Z","y":85},{"x":"2020-10-28T17:12:08.133Z","y":89},{"x":"2020-10-28T17:19:06.890Z","y":85},{"x":"2020-10-28T17:24:44.285Z","y":89},{"x":"2020-10-28T17:28:06.637Z","y":87},{"x":"2020-10-28T17:38:45.656Z","y":89},{"x":"2020-10-28T17:43:41.671Z","y":92},{"x":"2020-10-28T17:52:54.955Z","y":89},{"x":"2020-10-28T18:01:49.436Z","y":89},{"x":"2020-10-28T18:07:14.654Z","y":92},{"x":"2020-10-28T18:10:50.306Z","y":90},{"x":"2020-10-28T18:19:24.833Z","y":97},{"x":"2020-10-28T18:22:54.347Z","y":95},{"x":"2020-10-28T18:31:25.991Z","y":99},{"x":"2020-10-28T18:34:44.646Z","y":100},{"x":"2020-10-28T18:40:07.572Z","y":101},{"x":"2020-10-28T18:51:42.029Z","y":102},{"x":"2020-10-28T18:57:02.947Z","y":105},{"x":"2020-10-28T19:00:33.422Z","y":101},{"x":"2020-10-28T19:12:58.606Z","y":111},{"x":"2020-10-28T19:17:57.513Z","y":112},{"x":"2020-10-28T19:23:20.804Z","y":111},{"x":"2020-10-28T19:32:19.171Z","y":119},{"x":"2020-10-28T19:36:04.950Z","y":120},{"x":"2020-10-28T19:41:12.247Z","y":115},{"x":"2020-10-28T19:54:30.469Z","y":111},{"x":"2020-10-28T19:58:00.587Z","y":110},{"x":"2020-10-28T20:08:49.360Z","y":109},{"x":"2020-10-28T20:13:40.133Z","y":105},{"x":"2020-10-28T20:22:55.781Z","y":103},{"x":"2020-10-28T20:33:03.855Z","y":103},{"x":"2020-10-28T20:40:39.185Z","y":103},{"x":"2020-10-28T20:43:39.209Z","y":100},{"x":"2020-10-28T20:50:43.315Z","y":93},{"x":"2020-10-28T20:55:33.203Z","y":94},{"x":"2020-10-28T21:03:23.244Z","y":94},{"x":"2020-10-28T21:12:19.761Z","y":87},{"x":"2020-10-28T21:15:41.689Z","y":86},{"x":"2020-10-28T21:32:28.341Z","y":88},{"x":"2020-10-28T21:37:55.278Z","y":90},{"x":"2020-10-28T21:45:32.146Z","y":90},{"x":"2020-10-28T21:53:59.174Z","y":85},{"x":"2020-10-28T22:03:02.735Z","y":82},{"x":"2020-10-28T22:06:19.312Z","y":81},{"x":"2020-10-28T22:19:29.053Z","y":80},{"x":"2020-10-28T22:22:29.107Z","y":78},{"x":"2020-10-28T22:27:29.784Z","y":79},{"x":"2020-10-28T22:39:08.572Z","y":75},{"x":"2020-10-28T22:42:16.866Z","y":76},{"x":"2020-10-28T22:50:28.862Z","y":71},{"x":"2020-10-28T22:55:52.007Z","y":64},{"x":"2020-10-28T23:05:04.447Z","y":65},{"x":"2020-10-28T23:17:47.952Z","y":66},{"x":"2020-10-28T23:20:47.967Z","y":67},{"x":"2020-10-28T23:26:08.496Z","y":68},{"x":"2020-10-28T23:34:45.517Z","y":60},{"x":"2020-10-28T23:43:51.284Z","y":56},{"x":"2020-10-28T23:47:04.074Z","y":54},{"x":"2020-10-28T23:55:16.668Z","y":50},{"x":"2020-10-29T00:01:17.157Z","y":48},{"x":"2020-10-29T00:09:23.073Z","y":44},{"x":"2020-10-29T00:27:53.260Z","y":44},{"x":"2020-10-29T00:30:53.273Z","y":43},{"x":"2020-10-29T00:49:10.691Z","y":45},{"x":"2020-10-29T00:52:10.699Z","y":43},{"x":"2020-10-29T00:57:07.245Z","y":40},{"x":"2020-10-29T01:05:40.467Z","y":37},{"x":"2020-10-29T01:14:10.229Z","y":34},{"x":"2020-10-29T01:22:44.281Z","y":35},{"x":"2020-10-29T01:44:16.444Z","y":32},{"x":"2020-10-29T01:47:16.478Z","y":31},{"x":"2020-10-29T01:57:38.946Z","y":32},{"x":"2020-10-29T02:03:40.087Z","y":31},{"x":"2020-10-29T02:09:10.220Z","y":32},{"x":"2020-10-29T02:19:45.486Z","y":29},{"x":"2020-10-29T02:28:43.657Z","y":28},{"x":"2020-10-29T02:41:56.771Z","y":28},{"x":"2020-10-29T02:52:53.160Z","y":26},{"x":"2020-10-29T02:55:53.171Z","y":23},{"x":"2020-10-29T03:05:15.476Z","y":20},{"x":"2020-10-29T03:19:06.725Z","y":16},{"x":"2020-10-29T03:22:14.621Z","y":15},{"x":"2020-10-29T03:27:18.537Z","y":16},{"x":"2020-10-29T03:37:49.032Z","y":15},{"x":"2020-10-29T03:42:50.332Z","y":14},{"x":"2020-10-29T04:05:12.986Z","y":12},{"x":"2020-10-29T04:08:13.020Z","y":10},{"x":"2020-10-29T04:15:24.426Z","y":10},{"x":"2020-10-29T04:26:29.346Z","y":9},{"x":"2020-10-29T04:29:29.402Z","y":8},{"x":"2020-10-29T05:08:39.996Z","y":8},{"x":"2020-10-29T05:16:29.307Z","y":9},{"x":"2020-10-29T05:23:57.202Z","y":9},{"x":"2020-10-29T05:26:57.224Z","y":8},{"x":"2020-10-29T05:39:36.918Z","y":9},{"x":"2020-10-29T05:42:36.932Z","y":10},{"x":"2020-10-29T06:03:15.021Z","y":11},{"x":"2020-10-29T06:26:31.931Z","y":11},{"x":"2020-10-29T06:29:31.946Z","y":12},{"x":"2020-10-29T06:44:43.674Z","y":15},{"x":"2020-10-29T07:28:58.020Z","y":15},{"x":"2020-10-29T07:31:58.105Z","y":17},{"x":"2020-10-29T07:42:26.244Z","y":19},{"x":"2020-10-29T07:49:55.820Z","y":19},{"x":"2020-10-29T07:52:55.835Z","y":20},{"x":"2020-10-29T08:08:36.877Z","y":22},{"x":"2020-10-29T08:11:55.814Z","y":23},{"x":"2020-10-29T08:21:53.262Z","y":25},{"x":"2020-10-29T08:27:16.967Z","y":26},{"x":"2020-10-29T08:35:11.877Z","y":26},{"x":"2020-10-29T08:45:43.734Z","y":28},{"x":"2020-10-29T08:48:43.802Z","y":26},{"x":"2020-10-29T08:53:39.816Z","y":29},{"x":"2020-10-29T09:10:29.899Z","y":27},{"x":"2020-10-29T09:13:29.960Z","y":26},{"x":"2020-10-29T09:20:48.810Z","y":26},{"x":"2020-10-29T09:28:58.887Z","y":25},{"x":"2020-10-29T09:34:49.217Z","y":29},{"x":"2020-10-29T09:43:44.913Z","y":31},{"x":"2020-10-29T09:49:40.398Z","y":32},{"x":"2020-10-29T09:55:15.254Z","y":33},{"x":"2020-10-29T10:05:58.201Z","y":33},{"x":"2020-10-29T10:11:28.815Z","y":34},{"x":"2020-10-29T10:16:41.146Z","y":35},{"x":"2020-10-29T10:27:20.174Z","y":39},{"x":"2020-10-29T10:35:39.799Z","y":40},{"x":"2020-10-29T10:41:05.059Z","y":42},{"x":"2020-10-29T10:52:16.702Z","y":39},{"x":"2020-10-29T11:05:40.593Z","y":39},{"x":"2020-10-29T11:15:49.842Z","y":40},{"x":"2020-10-29T11:18:49.877Z","y":43},{"x":"2020-10-29T11:22:34.702Z","y":44},{"x":"2020-10-29T11:31:32.358Z","y":45},{"x":"2020-10-29T11:37:15.840Z","y":47},{"x":"2020-10-29T11:42:16.665Z","y":49},{"x":"2020-10-29T11:51:07.400Z","y":46},{"x":"2020-10-29T11:57:16.767Z","y":47},{"x":"2020-10-29T12:02:53.625Z","y":46},{"x":"2020-10-29T12:17:16.701Z","y":51},{"x":"2020-10-29T12:22:45.112Z","y":54},{"x":"2020-10-29T12:26:09.794Z","y":56},{"x":"2020-10-29T12:36:55.647Z","y":57},{"x":"2020-10-29T12:42:50.265Z","y":56},{"x":"2020-10-29T12:52:45.793Z","y":51},{"x":"2020-10-29T13:01:43.728Z","y":52},{"x":"2020-10-29T13:09:47.420Z","y":52},{"x":"2020-10-29T13:17:46.042Z","y":53},{"x":"2020-10-29T13:27:42.880Z","y":52},{"x":"2020-10-29T13:33:08.542Z","y":51},{"x":"2020-10-29T13:43:04.380Z","y":49},{"x":"2020-10-29T13:48:06.425Z","y":50},{"x":"2020-10-29T13:53:24.684Z","y":45},{"x":"2020-10-29T14:07:54.572Z","y":47},{"x":"2020-10-29T14:13:42.413Z","y":48},{"x":"2020-10-29T14:24:36.889Z","y":47},{"x":"2020-10-29T14:29:39.824Z","y":48},{"x":"2020-10-29T14:35:31.463Z","y":50},{"x":"2020-10-29T14:46:16.711Z","y":52},{"x":"2020-10-29T14:52:11.084Z","y":54},{"x":"2020-10-29T15:05:24.244Z","y":54},{"x":"2020-10-29T15:13:53.974Z","y":54},{"x":"2020-10-29T15:18:50.483Z","y":55},{"x":"2020-10-29T15:24:19.749Z","y":60},{"x":"2020-10-29T15:33:31.020Z","y":63},{"x":"2020-10-29T15:38:33.096Z","y":61},{"x":"2020-10-29T15:49:57.532Z","y":59},{"x":"2020-10-29T15:53:09.212Z","y":63},{"x":"2020-10-29T15:56:43.516Z","y":61},{"x":"2020-10-29T16:07:14.534Z","y":59},{"x":"2020-10-29T16:19:41.305Z","y":59},{"x":"2020-10-29T16:22:41.393Z","y":53},{"x":"2020-10-29T16:31:40.280Z","y":51},{"x":"2020-10-29T16:36:44.589Z","y":53},{"x":"2020-10-29T16:43:21.312Z","y":56},{"x":"2020-10-29T16:56:25.400Z","y":53},{"x":"2020-10-29T17:01:56.425Z","y":55},{"x":"2020-10-29T17:12:40.504Z","y":56},{"x":"2020-10-29T17:18:07.167Z","y":52},{"x":"2020-10-29T17:21:31.607Z","y":51},{"x":"2020-10-29T17:32:11.064Z","y":50},{"x":"2020-10-29T17:37:24.344Z","y":49},{"x":"2020-10-29T17:43:24.118Z","y":51},{"x":"2020-10-29T17:51:53.782Z","y":54},{"x":"2020-10-29T17:57:55.514Z","y":53},{"x":"2020-10-29T18:02:53.233Z","y":49},{"x":"2020-10-29T18:14:32.288Z","y":50},{"x":"2020-10-29T18:17:32.329Z","y":49},{"x":"2020-10-29T18:29:57.701Z","y":51},{"x":"2020-10-29T18:32:57.733Z","y":50},{"x":"2020-10-29T19:03:23.014Z","y":50},{"x":"2020-10-29T19:09:58.054Z","y":55},{"x":"2020-10-29T19:15:24.319Z","y":54},{"x":"2020-10-29T19:20:50.204Z","y":51},{"x":"2020-10-29T19:32:23.766Z","y":50},{"x":"2020-10-29T19:35:23.827Z","y":52},{"x":"2020-10-29T19:40:39.535Z","y":51},{"x":"2020-10-29T19:51:42.770Z","y":50},{"x":"2020-10-29T19:56:49.702Z","y":55},{"x":"2020-10-29T20:00:24.445Z","y":54},{"x":"2020-10-29T20:13:21.467Z","y":52},{"x":"2020-10-29T20:16:21.477Z","y":50},{"x":"2020-10-29T20:24:34.218Z","y":43},{"x":"2020-10-29T20:27:48.959Z","y":45},{"x":"2020-10-29T20:32:51.671Z","y":44},{"x":"2020-10-29T20:43:51.199Z","y":45},{"x":"2020-10-29T20:49:21.195Z","y":43},{"x":"2020-10-29T20:54:18.666Z","y":42},{"x":"2020-10-29T21:07:28.440Z","y":44},{"x":"2020-10-29T21:10:28.482Z","y":46},{"x":"2020-10-29T21:16:07.087Z","y":47},{"x":"2020-10-29T21:27:24.891Z","y":45},{"x":"2020-10-29T21:32:35.692Z","y":46},{"x":"2020-10-29T21:45:20.519Z","y":44},{"x":"2020-10-29T21:48:20.552Z","y":42},{"x":"2020-10-29T21:53:54.076Z","y":37},{"x":"2020-10-29T22:02:53.938Z","y":39},{"x":"2020-10-29T22:06:21.846Z","y":38},{"x":"2020-10-29T22:11:52.179Z","y":39},{"x":"2020-10-29T22:23:35.375Z","y":38},{"x":"2020-10-29T22:29:21.033Z","y":36},{"x":"2020-10-29T22:34:39.253Z","y":35},{"x":"2020-10-29T23:06:40.986Z","y":0},{"x":"2020-10-30T09:06:13.098Z","y":0},{"x":"2020-10-30T09:12:30.785Z","y":8},{"x":"2020-10-30T09:20:25.497Z","y":8},{"x":"2020-10-30T09:23:25.672Z","y":9},{"x":"2020-10-30T09:39:46.565Z","y":10},{"x":"2020-10-30T09:45:13.855Z","y":9},{"x":"2020-10-30T09:51:06.786Z","y":10},{"x":"2020-10-30T10:07:36.418Z","y":12},{"x":"2020-10-30T10:12:50.074Z","y":11},{"x":"2020-10-30T10:18:11.292Z","y":10},{"x":"2020-10-30T10:39:45.563Z","y":11},{"x":"2020-10-30T10:53:19.878Z","y":11},{"x":"2020-10-30T10:59:48.642Z","y":7},{"x":"2020-10-30T11:04:58.599Z","y":9},{"x":"2020-10-30T11:12:37.243Z","y":9},{"x":"2020-10-30T11:20:37.954Z","y":11},{"x":"2020-10-30T11:28:32.579Z","y":11},{"x":"2020-10-30T11:31:32.661Z","y":12},{"x":"2020-10-30T11:48:54.236Z","y":13},{"x":"2020-10-30T11:54:07.818Z","y":12},{"x":"2020-10-30T12:02:07.336Z","y":12},{"x":"2020-10-30T12:08:37.529Z","y":18},{"x":"2020-10-30T12:12:07.653Z","y":44},{"x":"2020-10-30T12:15:45.258Z","y":77},{"x":"2020-10-30T13:17:05.135+01:00","y":77}], [{"x":"2020-10-30T12:41:37.360+01:00","y":0},{"x":"2020-10-30T12:42:37.360+01:00","y":200},{"x":"2020-10-30T13:27:37.360+01:00","y":200},{"x":"2020-10-30T13:28:37.360+01:00","y":0}], [], 200);
+  });
+</script>
+</div>
+<div class="pol-wrap pol-desktop-after-main-col" data-pol="116" data-mon="pol/116"><div id='div-gpt-ad-1598302622757-0' style='width: 728px; height: 90px;'>
+  <script>
+    googletag.cmd.push(function() { googletag.display('div-gpt-ad-1598302622757-0'); });
+  </script>
+</div></div>
+
+</div>
+<div class='info-table'>
+<form class="button_to" method="get" action="/rust_servers/1091253/connect" data-remote="true"><input class="button connect" type="submit" value="Connect to Server" /></form>
+
+
+<table>
+<tbody>
+<tr>
+<th colspan='2'>
+<h3 class='no-top-margin'>
+Server Information
+</h3>
+</th>
+</tr>
+<tr>
+<th>
+First Seen
+</th>
+<td>
+2 months
+ago
+</td>
+</tr>
+<tr>
+<th>
+Last Seen
+</th>
+<td>
+1 minute
+ago
+</td>
+</tr>
+<tr>
+<th>
+Map
+</th>
+<td>
+Procedural Map
+(3,500)
+</td>
+</tr>
+<tr>
+<th>
+Services
+</th>
+<td>
+<div class='service-links'>
+<div class='service-link'>
+<a target="_blank" rel="nofollow noopener" title="This link leads to an external resource." class="external-link" href="http://discord.gg/yE22sf3">Discord<img loading="lazy" alt="External Link" src="https://cdn.just-wiped.net/assets/ext_link-7a3e230aa5d847a7518ee8cd73cf985b704abf442984cad569a6dc6b3cd27e3f.gif" /></a>
+</div>
+</div>
+</td>
+</tr>
+<tr class='spacer'>
+<th colspan='2'></th>
+</tr>
+<tr>
+<th>
+Global Rank
+</th>
+<td>
+105 of 14,613
+</td>
+</tr>
+<tr>
+<th>
+Region Rank
+</th>
+<td>
+41 of 5,365
+</td>
+</tr>
+<tr>
+<th>
+Country Rank
+</th>
+<td>
+4 of 131
+</td>
+</tr>
+<tr class='spacer'>
+<th colspan='2'></th>
+</tr>
+<tr>
+<th>
+Web Badges
+</th>
+<td>
+<a rel="nofollow" href="/rust_servers/1091253/web_badges">Get A Web Badge</a>
+</td>
+</tr>
+<tr class='spacer'>
+<th colspan='2'></th>
+</tr>
+<tr>
+<th colspan='2'>
+<h3 class='no-top-margin'>
+Map
+</h3>
+</th>
+</tr>
+<tr>
+<td colspan='2'>
+<div class='map'>
+<a title="Show the Rust map for this server" href="/rust_servers/1091253/map"><img loading="lazy" alt="Thumbnail Rust Map: Procedural Map, Size: 3500, Seed: 2020102887, 16 Monuments" data-beforeviewport-src="/maps/219212/9c37e072a8d10d91a1b06a0b8f252bc4e4ae3605.jpg" src="https://cdn.just-wiped.net/assets/placeholder-6ede4a32efe9fb930ea1e285d7c0ce7ba4f5d8178fcdd2fb5cbacc3719a367c3.png" />
+</a></div>
+</td>
+</tr>
+<tr class='spacer'>
+<th colspan='2'>
+<div class="pol-wrap pol-desktop-in-side-col" data-pol="122" data-mon="pol/122"><div id='div-gpt-ad-1601736608255-0'>
+  <script>
+    googletag.cmd.push(function() { googletag.display('div-gpt-ad-1601736608255-0'); });
+  </script>
+</div></div>
+
+</th>
+</tr>
+<tr>
+<th colspan='2'>
+<h3 class='no-top-margin'>
+Rating
+</h3>
+</th>
+</tr>
+<tr>
+<td colspan='2'>
+<div class='rating-section with-tooltip' title='<h3>Server Runtime</h3><div>A lot of servers are disappearing very fast. To provide a solid and stable experience, the server should reach a certain runtime.</div>'>
+Server Runtime
+<div class='rating-value' data-rating='100'>
+0%
+</div>
+<div class='rating-wrapper'>
+<div class='rating'></div>
+</div>
+</div>
+<div class='rating-section with-tooltip' title='<h3>No Fake Wiping</h3><div>Servers trying to get more people playing using fake wipes will get downrated.</div>'>
+No Fake Wiping
+<div class='rating-value' data-rating='100'>
+0%
+</div>
+<div class='rating-wrapper'>
+<div class='rating'></div>
+</div>
+</div>
+<div class='rating-section with-tooltip' title='<h3>Regular Wipes</h3><div>For a lot of players regular wipe cycles are important. So the more regular the wipes are, the better.</div>'>
+Regular Wipes
+<div class='rating-value' data-rating='93'>
+0%
+</div>
+<div class='rating-wrapper'>
+<div class='rating'></div>
+</div>
+</div>
+<div class='rating-section with-tooltip' title='<h3>Fill on Wipes</h3><div>The server gets regularly filled with players on a new wipe.</div>'>
+Fill on Wipes
+<div class='rating-value' data-rating='82'>
+0%
+</div>
+<div class='rating-wrapper'>
+<div class='rating'></div>
+</div>
+</div>
+<div class='rating-section with-tooltip' title='<h3>Stays Populated</h3><div>The server stays populated for a certain time of the wipe.</div>'>
+Stays Populated
+<div class='rating-value' data-rating='18'>
+0%
+</div>
+<div class='rating-wrapper'>
+<div class='rating'></div>
+</div>
+</div>
+<div class='rating-section with-tooltip' title='<h3>Availability</h3><div>Evaluating the availability of the server.</div>'>
+Availability
+<div class='rating-value' data-rating='100'>
+0%
+</div>
+<div class='rating-wrapper'>
+<div class='rating'></div>
+</div>
+</div>
+<div class='rating-section with-tooltip' title='<h3>Server Information</h3><div>It is checked how much and what information are given for the server. Those contain a given wipe date, websites or community links, group size and so on.</div>'>
+Server Information
+<div class='rating-value' data-rating='100'>
+0%
+</div>
+<div class='rating-wrapper'>
+<div class='rating'></div>
+</div>
+</div>
+<br>
+<div class='rating-section with-tooltip' title='<h3>Total Rating</h3><div>The final rating of the server based on the highest rated servers.</div>'>
+Total Rating
+<div class='rating-value' data-rating='91'>
+0%
+</div>
+<div class='rating-wrapper'>
+<div class='rating'></div>
+</div>
+</div>
+</td>
+</tr>
+<tr class='spacer'>
+<th colspan='2'></th>
+</tr>
+<tr>
+<td colspan='2'>
+<div class='share-buttons'>
+<a target="_blank" title="Share on Facebook" onclick="window.open(&#39;http://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fjust-wiped.net%2Frust_servers%2F1091253&#39;,&#39;sharer&#39;,&#39;toolbar=0,status=0,width=580,height=325&#39;);" href="javascript:void(0)"><div class='button facebook'></div>
+</a><a target="_blank" title="Share on Twitter" onclick="window.open(&#39;http://twitter.com/share?url=https%3A%2F%2Fjust-wiped.net%2Frust_servers%2F1091253&amp;text=Rust+Server+%7C+Wipe%3A+2020-10-30+12%3A05+UTC+%7C+Player%3A+77%2F200+%7C+FR+%7C+Cycle%3A+%7E+3.1+Days+%7C+Size%3A+3500+%7C+LegionRust.uk&#39;,&#39;sharer&#39;,&#39;toolbar=0,status=0,width=580,height=325&#39;);" href="javascript:void(0)"><div class='button twitter'></div>
+</a><a target="_blank" title="Share on Google+" onclick="window.open(&#39;https://plus.google.com/share?url=https%3A%2F%2Fjust-wiped.net%2Frust_servers%2F1091253&#39;,&#39;sharer&#39;,&#39;toolbar=0,status=0,width=580,height=325&#39;);" href="javascript:void(0)"><div class='button google-plus'></div>
+</a><a target="_blank" title="Share on Reddit" href="http://reddit.com/submit?url=https%3A%2F%2Fjust-wiped.net%2Frust_servers%2F1091253&amp;title=%5BEU%5D+LegionRust.uk+-+Solo%2FDuo%2FTrio+%7C+FullWiped%3A+30.10+30%2F10"><div class='button reddit'></div>
+</a></div>
+
+</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+
+
+
+</div>
+<footer>
+<div class='navigation footer-navigation'>
+<ul>
+<li class='intro'>
+&#9776;
+</li>
+<li><a class="" href="/blog">Blog</a></li>
+<li><a target="_blank" class="facebook" rel="nofollow noopener" href="https://www.facebook.com/JustWipedNet/">Facebook</a></li>
+<li><a target="_blank" class="twitter" rel="nofollow noopener" href="https://twitter.com/JustWipedNet">Twitter</a></li>
+<li><a class="" href="/add_rust_stream">Add Stream</a></li>
+<li><a class="" href="/faqs">Help</a></li>
+<li><a class="" href="/support-us">Support us</a></li>
+<li><a class="" href="/youtubers">YouTubers</a></li>
+<li><a class="" href="/server-listings">Server Listings</a></li>
+<li><a class="" href="/about">About</a></li>
+<li><a class="" href="/legals">Legals</a></li>
+<li class='fill'></li>
+</ul>
+</div>
+<div class='appendix'>
+This site is not affiliated with, nor endorsed by
+<a target="_blank" rel="nofollow noopener" title="This link leads to an external resource." class="external-link" href="http://www.facepunchstudios.com/">Facepunch Studios LTD<img loading="lazy" alt="External Link" src="https://cdn.just-wiped.net/assets/ext_link-7a3e230aa5d847a7518ee8cd73cf985b704abf442984cad569a6dc6b3cd27e3f.gif" /></a>
+.
+All trademarks belong to their respective owners and are used for information only.
+This product includes GeoLite data created by MaxMind, available from
+<a target="_blank" rel="nofollow noopener" title="This link leads to an external resource." class="external-link" href="http://www.maxmind.com">www.maxmind.com<img loading="lazy" alt="External Link" src="https://cdn.just-wiped.net/assets/ext_link-7a3e230aa5d847a7518ee8cd73cf985b704abf442984cad569a6dc6b3cd27e3f.gif" /></a>
+.
+That awesome Rust font was created by
+<a target="_blank" rel="nofollow noopener" title="This link leads to an external resource." class="external-link" href="http://steamcommunity.com/id/kohanthebarbarian">Ben Kohan<img loading="lazy" alt="External Link" src="https://cdn.just-wiped.net/assets/ext_link-7a3e230aa5d847a7518ee8cd73cf985b704abf442984cad569a6dc6b3cd27e3f.gif" /></a>
+.
+This page contains affiliate links!
+</div>
+</footer>
+
+
+</div>
+<div class='side-content-wrapper'>
+<div class='side-content'>
+<div class="pol-wrap pol-desktop-outer-right" data-pol="114" data-mon="pol/114"><div id='div-gpt-ad-1598302737345-0' style='width: 300px; height: 600px;'>
+  <script>
+    googletag.cmd.push(function() { googletag.display('div-gpt-ad-1598302737345-0'); });
+  </script>
+</div></div>
+</div>
+</div>
+<div class='post-main'></div>
+</div>
+<div class='cookie-information'>
+<div class='notification'>
+Cookies help us deliver our services. By using our services, you agree to our use of cookies.
+</div>
+<button>
+OK
+</button>
+</div>
+<div class='modal-dialog disabled'>
+<div class='dialog-housing'>
+<div class='close-dialog'>
+<a title="Close The Dialog" onclick="closeDialog()" href="javascript:void(0)">Close</a>
+</div>
+<div class='dialog-content'></div>
+<div class='close-dialog-inline'>
+<a title="Close The Dialog" class="button" onclick="closeDialog()" href="javascript:void(0)">Close</a>
+</div>
+</div>
+</div>
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  
+    ga('create', 'UA-65084038-3', 'auto');
+    ga('set', 'anonymizeIp', true);
+    ga('send', 'pageview');
+</script>
+<script src="https://cdn.just-wiped.net/assets/application-bdc7bafad713f04d50c5eb9b4b3d16cad0a4ecb5cde11e140ad27f66dcc44f92.js"></script>
+
+</body>
+</html>

@@ -21,6 +21,7 @@
     "@typescript-eslint/indent": "off",
     "@typescript-eslint/prefer-interface": "off",
     "@typescript-eslint/ban-ts-comment": "off",
+    "@typescript-eslint/no-extra-semi": "off",
     "react/react-in-jsx-scope": "off",
     "react/prop-types": "off",
     "no-empty": ["error", { "allowEmptyCatch": true }],

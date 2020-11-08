@@ -28,6 +28,7 @@ export type ListServer = {
 export type FullServer = ListServer & {
   wipes: DateTime[]
   nextWipe: NextWipe
+  mapImageUrl?: string
 }
 
 const JUST_WIPED_BASE_URL = 'https://just-wiped.net'
@@ -155,11 +156,13 @@ export const parseServerPage = (html: string): FullServer => {
   const wipes = $('.wipe-history .wipe-date')
     .map((_, elem) => parseRawWipeDate($(elem).text().trim()))
     .get()
+  const mapImagePath = $('.info-table .map img').attr('data-beforeviewport-src')
 
   return {
     ...parseServerBoxElement($('.server.server-head')),
     wipes,
-    nextWipe: nextWipe(wipes)
+    nextWipe: nextWipe(wipes),
+    ...(mapImagePath ? { mapImageUrl: JUST_WIPED_BASE_URL + mapImagePath } : {})
   }
 }
 
@@ -193,6 +196,11 @@ export const maxGroupParamToSearchParam = ({
   min_max_group: minMaxGroup.toString(),
   max_max_group: maxMaxGroup !== Infinity ? maxMaxGroup.toString() : '11'
 })
+
+export const getIdFromServerLink = (str: string): number | undefined => {
+  const id = str.match(/https:\/\/just-wiped\.net\/rust_servers\/(\d+)/)?.[1]
+  return id ? parseInt(id) : undefined
+}
 
 const MINUTE = 1000 * 60
 const HOUR = MINUTE * 60

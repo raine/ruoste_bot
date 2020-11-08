@@ -18,3 +18,8 @@ export const lastUpdatedAt = () =>
   `Last updated at ${DateTime.local()
     .setZone('Europe/Helsinki')
     .toFormat('HH:mm:ss')}`
+
+export const formatPlayerCount = (server: {
+  playersCurrent: number
+  playersMax: number
+}): string => server.playersCurrent + '/' + server.playersMax
