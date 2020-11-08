@@ -52,7 +52,8 @@ export const SERVER_SEARCH_PARAMS = {
   s_type: '',
   uptime_badge: '1',
   wipe_regularity_badge: '0',
-  q: ''
+  q: '',
+  page: 1
 }
 
 type JustWipedSearchParams = Partial<typeof SERVER_SEARCH_PARAMS>
@@ -123,10 +124,11 @@ export const parseServerList = (html: string): ListServer[] => {
   return $servers.map((_, elem) => parseServerBoxElement(elem)).get()
 }
 
-export const getWipedServers = (
+export const getWipedServersPage = (
+  page: number,
   params: JustWipedSearchParams
 ): Promise<ListServer[]> => {
-  const url = formatServerListUrl(params)
+  const url = formatServerListUrl({ ...params, page })
   log.info({ url }, 'getting server list')
   return got(url)
     .then((res) => res.body)
@@ -137,6 +139,13 @@ export const getWipedServers = (
       )
     )
 }
+
+export const getWipedServers = (
+  params: JustWipedSearchParams
+): Promise<ListServer[]> =>
+  Promise.all(
+    [1, 2].map((page) => getWipedServersPage(page, params))
+  ).then((xs) => xs.flat())
 
 export const parseRawWipeDate = (str: string): DateTime =>
   fromFormatUTC(str, `dd.MM.yyyy - HH:mm 'UTC'`)

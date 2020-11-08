@@ -40,14 +40,11 @@ const formatServer = (server: ListServer, idx: number): string =>
     `/${idx + 1}`
   ].join(' ')
 
-const formatServerList = (servers: ListServer[]) =>
-  servers.slice(0, 10).map(formatServer).join('\n')
-
 export const formatServerListReply = (
   servers: ListServer[],
   serverListUrl: string
 ): string =>
-  formatServerList(servers) +
+  servers.map(formatServer).join('\n') +
   '\n' +
   link('Open full server list', serverListUrl)
 
