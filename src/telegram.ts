@@ -23,6 +23,7 @@ import { getNextWipes } from './get-next-wipes'
 import { TelegrafContext } from 'telegraf/typings/context'
 import { initUpdateLoop, ServerListReply } from './update-loop'
 import { parseMaxGroupOption } from './input'
+import { filterServerNoise } from './formatting/general'
 
 type TelegramServerListReply = ServerListReply<Telegram.Message>
 let updatedServerListReplies: TelegramServerListReply[] = []
@@ -40,7 +41,9 @@ const updateServerListMessage = async (
   const searchParams = formatSearchParams({
     maxGroup: parseMaxGroupOption(message)
   })
-  const servers = await getWipedServersCached1m(searchParams)
+  const servers = await getWipedServersCached1m(searchParams).then(
+    filterServerNoise
+  )
   await bot.telegram.editMessageText(
     msg.chat.id,
     msg.message_id,
@@ -67,6 +70,7 @@ const replyWithServers = (
     maxGroup: parseMaxGroupOption(message.text!)
   })
   getWipedServersCached1m(searchParams)
+    .then(filterServerNoise)
     .then((servers) =>
       ctx
         .replyWithHTML(

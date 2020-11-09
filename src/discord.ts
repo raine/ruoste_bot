@@ -21,6 +21,7 @@ import {
 import { initUpdateLoop, ServerListReply } from './update-loop'
 import { getNextWipes } from './get-next-wipes'
 import { parseMaxGroupOption } from './input'
+import { filterServerNoise } from './formatting/general'
 
 type DiscordServerListReply = ServerListReply<Discord.Message>
 let updatedServerListReplies: DiscordServerListReply[] = []
@@ -38,6 +39,7 @@ const commands = {
       maxGroup: parseMaxGroupOption(msg.content)
     })
     getWipedServersCached1m(searchParams)
+      .then(filterServerNoise)
       .then((servers) =>
         msg.channel
           .send({
@@ -79,7 +81,9 @@ const updateServerListMessage = async (
   const searchParams = formatSearchParams({
     maxGroup: parseMaxGroupOption(userMessage.content)
   })
-  const servers = await getWipedServersCached1m(searchParams)
+  const servers = await getWipedServersCached1m(searchParams).then(
+    filterServerNoise
+  )
   await botMsg.edit({
     embed: formatServerListReplyWithUpdatedAt(
       servers,
