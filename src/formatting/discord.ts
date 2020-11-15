@@ -21,13 +21,22 @@ const truncate = (n: number, str: string) =>
   str.length > n ? str.slice(0, n) + `…` : str
 
 const formatServerInfoSection = (
-  { playersCurrent, playersMax, mapSize, rating, maxGroup, url }: ListServer,
+  {
+    playersCurrent,
+    playersMax,
+    mapSize,
+    rating,
+    maxGroup,
+    url,
+    moddedMultiplier
+  }: ListServer,
   noCurrentPlayers = false
 ): string =>
   [
     noCurrentPlayers
       ? playersMax
       : formatPlayerCount({ playersCurrent, playersMax }),
+    moddedMultiplier ? moddedMultiplier + 'x' : null,
     mapSize,
     `${rating}%`,
     formatMaxGroup(maxGroup),
