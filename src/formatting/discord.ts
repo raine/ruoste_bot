@@ -99,7 +99,10 @@ export const formatUpcomingWipeList = (
   }
 }
 
-export const formatInlineEmbedField = (name: string, value: string) => ({
+export const formatInlineEmbedField = (
+  name: string,
+  value: string
+): Discord.EmbedFieldData => ({
   name,
   value,
   inline: true
@@ -131,6 +134,10 @@ export const formatServerEmbed = (
     formatInlineEmbedField(
       'Map size',
       server.mapSize ? server.mapSize.toString() : 'N/A'
+    ),
+    formatInlineEmbedField(
+      'Max group',
+      server.maxGroup ? server.maxGroup.toString() : 'N/A'
     ),
     formatInlineEmbedField('Connect', `steam://${address}`)
   ]
