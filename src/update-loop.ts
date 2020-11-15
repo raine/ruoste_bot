@@ -3,7 +3,7 @@ import { ListServer } from './just-wiped'
 import log from './logger'
 
 export const REPLY_UPDATE_INTERVAL_SECS = 180
-export const REPLY_UPDATE_EXPIRES_AFTER_SECS = 3600
+export const REPLY_UPDATE_EXPIRES_AFTER_SECS = 3600 * 3
 
 export type ServerListReply<T> = {
   message: T
