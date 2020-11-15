@@ -1,83 +1,75 @@
 <!DOCTYPE html>
 <html lang='en'>
 <head itemscope='' itemtype='http://schema.org/WebSite'>
-<title itemprop="name">Full Rust Server List :: Just-Wiped</title>
 <meta charset="utf-8" />
+<script>window.NREUM||(NREUM={});NREUM.info={"beacon":"bam.eu01.nr-data.net","errorBeacon":"bam.eu01.nr-data.net","licenseKey":"NRJS-fc1bcff7f8c2b79a9f8","applicationID":"33135324","transactionName":"JhpeRQoXD1tRFBlCERYBb0IdChVSRhUZWQoBEEg=","queueTime":0,"applicationTime":113,"agent":""}</script>
+<script>(window.NREUM||(NREUM={})).loader_config={licenseKey:"NRJS-fc1bcff7f8c2b79a9f8",applicationID:"33135324"};window.NREUM||(NREUM={}),__nr_require=function(e,t,n){function r(n){if(!t[n]){var i=t[n]={exports:{}};e[n][0].call(i.exports,function(t){var i=e[n][1][t];return r(i||t)},i,i.exports)}return t[n].exports}if("function"==typeof __nr_require)return __nr_require;for(var i=0;i<n.length;i++)r(n[i]);return r}({1:[function(e,t,n){function r(){}function i(e,t,n){return function(){return o(e,[u.now()].concat(c(arguments)),t?null:this,n),t?void 0:this}}var o=e("handle"),a=e(6),c=e(7),f=e("ee").get("tracer"),u=e("loader"),s=NREUM;"undefined"==typeof window.newrelic&&(newrelic=s);var d=["setPageViewName","setCustomAttribute","setErrorHandler","finished","addToTrace","inlineHit","addRelease"],p="api-",l=p+"ixn-";a(d,function(e,t){s[t]=i(p+t,!0,"api")}),s.addPageAction=i(p+"addPageAction",!0),s.setCurrentRouteName=i(p+"routeName",!0),t.exports=newrelic,s.interaction=function(){return(new r).get()};var m=r.prototype={createTracer:function(e,t){var n={},r=this,i="function"==typeof t;return o(l+"tracer",[u.now(),e,n],r),function(){if(f.emit((i?"":"no-")+"fn-start",[u.now(),r,i],n),i)try{return t.apply(this,arguments)}catch(e){throw f.emit("fn-err",[arguments,this,e],n),e}finally{f.emit("fn-end",[u.now()],n)}}}};a("actionText,setName,setAttribute,save,ignore,onEnd,getContext,end,get".split(","),function(e,t){m[t]=i(l+t)}),newrelic.noticeError=function(e,t){"string"==typeof e&&(e=new Error(e)),o("err",[e,u.now(),!1,t])}},{}],2:[function(e,t,n){function r(){return c.exists&&performance.now?Math.round(performance.now()):(o=Math.max((new Date).getTime(),o))-a}function i(){return o}var o=(new Date).getTime(),a=o,c=e(8);t.exports=r,t.exports.offset=a,t.exports.getLastTimestamp=i},{}],3:[function(e,t,n){function r(e,t){var n=e.getEntries();n.forEach(function(e){"first-paint"===e.name?d("timing",["fp",Math.floor(e.startTime)]):"first-contentful-paint"===e.name&&d("timing",["fcp",Math.floor(e.startTime)])})}function i(e,t){var n=e.getEntries();n.length>0&&d("lcp",[n[n.length-1]])}function o(e){e.getEntries().forEach(function(e){e.hadRecentInput||d("cls",[e])})}function a(e){if(e instanceof m&&!g){var t=Math.round(e.timeStamp),n={type:e.type};t<=p.now()?n.fid=p.now()-t:t>p.offset&&t<=Date.now()?(t-=p.offset,n.fid=p.now()-t):t=p.now(),g=!0,d("timing",["fi",t,n])}}function c(e){d("pageHide",[p.now(),e])}if(!("init"in NREUM&&"page_view_timing"in NREUM.init&&"enabled"in NREUM.init.page_view_timing&&NREUM.init.page_view_timing.enabled===!1)){var f,u,s,d=e("handle"),p=e("loader"),l=e(5),m=NREUM.o.EV;if("PerformanceObserver"in window&&"function"==typeof window.PerformanceObserver){f=new PerformanceObserver(r);try{f.observe({entryTypes:["paint"]})}catch(v){}u=new PerformanceObserver(i);try{u.observe({entryTypes:["largest-contentful-paint"]})}catch(v){}s=new PerformanceObserver(o);try{s.observe({type:"layout-shift",buffered:!0})}catch(v){}}if("addEventListener"in document){var g=!1,y=["click","keydown","mousedown","pointerdown","touchstart"];y.forEach(function(e){document.addEventListener(e,a,!1)})}l(c)}},{}],4:[function(e,t,n){function r(e,t){if(!i)return!1;if(e!==i)return!1;if(!t)return!0;if(!o)return!1;for(var n=o.split("."),r=t.split("."),a=0;a<r.length;a++)if(r[a]!==n[a])return!1;return!0}var i=null,o=null,a=/Version\/(\S+)\s+Safari/;if(navigator.userAgent){var c=navigator.userAgent,f=c.match(a);f&&c.indexOf("Chrome")===-1&&c.indexOf("Chromium")===-1&&(i="Safari",o=f[1])}t.exports={agent:i,version:o,match:r}},{}],5:[function(e,t,n){function r(e){function t(){e(a&&document[a]?document[a]:document[i]?"hidden":"visible")}"addEventListener"in document&&o&&document.addEventListener(o,t,!1)}t.exports=r;var i,o,a;"undefined"!=typeof document.hidden?(i="hidden",o="visibilitychange",a="visibilityState"):"undefined"!=typeof document.msHidden?(i="msHidden",o="msvisibilitychange"):"undefined"!=typeof document.webkitHidden&&(i="webkitHidden",o="webkitvisibilitychange",a="webkitVisibilityState")},{}],6:[function(e,t,n){function r(e,t){var n=[],r="",o=0;for(r in e)i.call(e,r)&&(n[o]=t(r,e[r]),o+=1);return n}var i=Object.prototype.hasOwnProperty;t.exports=r},{}],7:[function(e,t,n){function r(e,t,n){t||(t=0),"undefined"==typeof n&&(n=e?e.length:0);for(var r=-1,i=n-t||0,o=Array(i<0?0:i);++r<i;)o[r]=e[t+r];return o}t.exports=r},{}],8:[function(e,t,n){t.exports={exists:"undefined"!=typeof window.performance&&window.performance.timing&&"undefined"!=typeof window.performance.timing.navigationStart}},{}],ee:[function(e,t,n){function r(){}function i(e){function t(e){return e&&e instanceof r?e:e?f(e,c,o):o()}function n(n,r,i,o){if(!p.aborted||o){e&&e(n,r,i);for(var a=t(i),c=v(n),f=c.length,u=0;u<f;u++)c[u].apply(a,r);var d=s[w[n]];return d&&d.push([b,n,r,a]),a}}function l(e,t){h[e]=v(e).concat(t)}function m(e,t){var n=h[e];if(n)for(var r=0;r<n.length;r++)n[r]===t&&n.splice(r,1)}function v(e){return h[e]||[]}function g(e){return d[e]=d[e]||i(n)}function y(e,t){u(e,function(e,n){t=t||"feature",w[n]=t,t in s||(s[t]=[])})}var h={},w={},b={on:l,addEventListener:l,removeEventListener:m,emit:n,get:g,listeners:v,context:t,buffer:y,abort:a,aborted:!1};return b}function o(){return new r}function a(){(s.api||s.feature)&&(p.aborted=!0,s=p.backlog={})}var c="nr@context",f=e("gos"),u=e(6),s={},d={},p=t.exports=i();p.backlog=s},{}],gos:[function(e,t,n){function r(e,t,n){if(i.call(e,t))return e[t];var r=n();if(Object.defineProperty&&Object.keys)try{return Object.defineProperty(e,t,{value:r,writable:!0,enumerable:!1}),r}catch(o){}return e[t]=r,r}var i=Object.prototype.hasOwnProperty;t.exports=r},{}],handle:[function(e,t,n){function r(e,t,n,r){i.buffer([e],r),i.emit(e,t,n)}var i=e("ee").get("handle");t.exports=r,r.ee=i},{}],id:[function(e,t,n){function r(e){var t=typeof e;return!e||"object"!==t&&"function"!==t?-1:e===window?0:a(e,o,function(){return i++})}var i=1,o="nr@id",a=e("gos");t.exports=r},{}],loader:[function(e,t,n){function r(){if(!E++){var e=b.info=NREUM.info,t=p.getElementsByTagName("script")[0];if(setTimeout(u.abort,3e4),!(e&&e.licenseKey&&e.applicationID&&t))return u.abort();f(h,function(t,n){e[t]||(e[t]=n)});var n=a();c("mark",["onload",n+b.offset],null,"api"),c("timing",["load",n]);var r=p.createElement("script");r.src="https://"+e.agent,t.parentNode.insertBefore(r,t)}}function i(){"complete"===p.readyState&&o()}function o(){c("mark",["domContent",a()+b.offset],null,"api")}var a=e(2),c=e("handle"),f=e(6),u=e("ee"),s=e(4),d=window,p=d.document,l="addEventListener",m="attachEvent",v=d.XMLHttpRequest,g=v&&v.prototype;NREUM.o={ST:setTimeout,SI:d.setImmediate,CT:clearTimeout,XHR:v,REQ:d.Request,EV:d.Event,PR:d.Promise,MO:d.MutationObserver};var y=""+location,h={beacon:"bam.nr-data.net",errorBeacon:"bam.nr-data.net",agent:"js-agent.newrelic.com/nr-1184.min.js"},w=v&&g&&g[l]&&!/CriOS/.test(navigator.userAgent),b=t.exports={offset:a.getLastTimestamp(),now:a,origin:y,features:{},xhrWrappable:w,userAgent:s};e(1),e(3),p[l]?(p[l]("DOMContentLoaded",o,!1),d[l]("load",r,!1)):(p[m]("onreadystatechange",i),d[m]("onload",r)),c("mark",["firstbyte",a.getLastTimestamp()],null,"api");var E=0},{}],"wrap-function":[function(e,t,n){function r(e){return!(e&&e instanceof Function&&e.apply&&!e[a])}var i=e("ee"),o=e(7),a="nr@original",c=Object.prototype.hasOwnProperty,f=!1;t.exports=function(e,t){function n(e,t,n,i){function nrWrapper(){var r,a,c,f;try{a=this,r=o(arguments),c="function"==typeof n?n(r,a):n||{}}catch(u){p([u,"",[r,a,i],c])}s(t+"start",[r,a,i],c);try{return f=e.apply(a,r)}catch(d){throw s(t+"err",[r,a,d],c),d}finally{s(t+"end",[r,a,f],c)}}return r(e)?e:(t||(t=""),nrWrapper[a]=e,d(e,nrWrapper),nrWrapper)}function u(e,t,i,o){i||(i="");var a,c,f,u="-"===i.charAt(0);for(f=0;f<t.length;f++)c=t[f],a=e[c],r(a)||(e[c]=n(a,u?c+i:i,o,c))}function s(n,r,i){if(!f||t){var o=f;f=!0;try{e.emit(n,r,i,t)}catch(a){p([a,n,r,i])}f=o}}function d(e,t){if(Object.defineProperty&&Object.keys)try{var n=Object.keys(e);return n.forEach(function(n){Object.defineProperty(t,n,{get:function(){return e[n]},set:function(t){return e[n]=t,t}})}),t}catch(r){p([r])}for(var i in e)c.call(e,i)&&(t[i]=e[i]);return t}function p(t){try{e.emit("internal-error",t)}catch(n){}}return e||(e=i),n.inPlace=u,n.flag=a,n}},{}]},{},["loader"]);</script>
+<link rel='dns-prefetch' href='//cdn.just-wiped.net' />
+<link rel='dns-prefetch' href='//img.youtube.com' />
+<link rel='dns-prefetch' href='//stats.g.doubleclick.net' />
+<link rel='dns-prefetch' href='//www.google-analytics.com' />
+<link rel='dns-prefetch' href='//securepubads.g.doubleclick.net' />
+<link rel='dns-prefetch' href='//fonts.googleapis.com' />
+<link rel='dns-prefetch' href='//pagead2.googlesyndication.com' />
+<title itemprop="name">Full Rust Server List :: Just-Wiped</title>
 <meta name="google-site-verification" content="R0OUscjgkhJueD1Wf7SFobgRE3J7BM_RvHMtfNbbJcM" />
 <meta name="csrf-param" content="authenticity_token" />
-<meta name="csrf-token" content="t8/UUnHc/CxAF3rNovyLJh8s38L0F5k2DnRRwGx1WiqFy17b42ztzDERgDNIYnxrl8hvKGEl8It3Rrq3GDh2tg==" />
-<meta name="description" content="10 Servers | Last wipe: 2019-07-07 10:00 UTC | Rustafied.com | Rustworld | playuwe.net | Rusty Rascals Only | SURVIVORS | Rust Addict | Lands | RustyWorld | Newbie | RAWR RUST" />
+<meta name="csrf-token" content="+yJR3qVhsfH1uaUCyZR9tvT8U3w1Ju3e5aTnFUi0rsDszdaMFY0fp5DddzJ+2IqKgXGbSyUYqxpVBW8RxMD/Wg==" />
+<meta name="description" content="Rust servers worldwide listed with the latest wipe information. Directly browse all Rust servers and find the one best for you!" />
 
 
 <meta property="og:type" content="website" />
 <meta property="og:title" content="Full Rust Server List :: Just-Wiped" />
-<meta property="og:description" content="10 Servers | Last wipe: 2019-07-07 10:00 UTC | Rustafied.com | Rustworld | playuwe.net | Rusty Rascals Only | SURVIVORS | Rust Addict | Lands | RustyWorld | Newbie | RAWR RUST" />
-<meta property="og:url" content="https://just-wiped.net/rust_servers?country=Any&amp;map=Procedural%20Map&amp;max_active_player=500&amp;max_hours_since_wipe=73&amp;max_max_group=11&amp;max_players_max=500&amp;max_wipe_cycle=31&amp;max_world_size=6000&amp;min_active_player=0&amp;min_hours_since_wipe=0&amp;min_max_group=1&amp;min_players_max=24&amp;min_rating=60&amp;min_wipe_cycle=0&amp;min_world_size=1000&amp;region=europe&amp;s_type=vanilla_only&amp;uptime_badge=1&amp;wipe_regularity_badge=0&amp;q=" />
-<meta property="og:image" content="https://just-wiped.net/assets/rust_logo_bigger-27b2d50813ff1c14d7f6b913ea2e00c8ff3a68be4f0551bb58895e2aa0cc7a80.jpg" />
+<meta property="og:description" content="Rust servers worldwide listed with the latest wipe information. Directly browse all Rust servers and find the one best for you!" />
+<meta property="og:url" content="https://just-wiped.net/rust_servers" />
+<meta property="og:image" content="https://cdn.just-wiped.net/assets/rust_logo_bigger-27b2d50813ff1c14d7f6b913ea2e00c8ff3a68be4f0551bb58895e2aa0cc7a80.jpg" />
 <meta property="fb:app_id" content="738017063025863" />
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:title" content="Full Rust Server List :: Just-Wiped" />
-<meta name="twitter:description" content="10 Servers | Last wipe: 2019-07-07 10:00 UTC | Rustafied.com | Rustworld | playuwe.net | Rusty Rascals Only | SURVIVORS | Rust Addict | Lands | RustyWorld | Newbie | RAWR RUST" />
-<meta name="twitter:image" content="https://just-wiped.net/assets/rust_logo_bigger-27b2d50813ff1c14d7f6b913ea2e00c8ff3a68be4f0551bb58895e2aa0cc7a80.jpg" />
-<link rel="shortcut icon" type="image/x-icon" href="/assets/favicon-da8c00304096c4d026c9a206f606f3d567a8925d33bbb29925ea6189c5242537.ico" />
-<link rel="stylesheet" media="all" href="/assets/application-d38dee058dfe79b60cf92ed4a99930f074ea7435b355bec47f65223fca9d478c.css" />
-<link href="/assets/Rust-93386dc37c214c04fe824075a9d30d34fe03f3b5b29b5e33142d73454e0d0811.ttf" rel="preload" type="font/ttf" as="font" crossorigin="anonymous" />
-<script src="/assets/doubleclick-ads-manager-77cd173faadbe7efc2c7a91ab7ae726a544502097bcb0825115815775aba333b.js"></script>
+<meta name="twitter:description" content="Rust servers worldwide listed with the latest wipe information. Directly browse all Rust servers and find the one best for you!" />
+<meta name="twitter:image" content="https://cdn.just-wiped.net/assets/rust_logo_bigger-27b2d50813ff1c14d7f6b913ea2e00c8ff3a68be4f0551bb58895e2aa0cc7a80.jpg" />
+<link rel="shortcut icon" type="image/x-icon" href="https://cdn.just-wiped.net/assets/favicon-da8c00304096c4d026c9a206f606f3d567a8925d33bbb29925ea6189c5242537.ico" />
+<link rel="stylesheet" media="all" href="https://cdn.just-wiped.net/assets/application-64b1212ddca5088132e3e507c5a0008447ab475149b96b5b203be2ec36f269b6.css" />
+<link href="https://cdn.just-wiped.net/assets/Rust-93386dc37c214c04fe824075a9d30d34fe03f3b5b29b5e33142d73454e0d0811.ttf" rel="preload" type="font/ttf" as="font" crossorigin="anonymous" />
+<link href="https://cdn.just-wiped.net/assets/roboto-condensed-v18-latin-regular-53b907326f7c21a04f6d39cc32ff471aafec57d887feabfabb53394f378c659f.woff2" rel="preload" type="font/woff2" as="font" crossorigin="anonymous" />
 <script>
   var readyBuffer = [];
+  window.googletag = window.googletag || {cmd: []};
+  
+  googletag.cmd.push(function() {});
 </script>
-<style>
-  .servers-top-housing-pol-c5173e9bd2721f7879751bef0e5926dd {
-    text-align: center;
-    line-height: 0;
-    margin-bottom: 15px; }
-
-  .server-top-wide-housing-pol-c5173e9bd2721f7879751bef0e5926dd {
-    text-align: center;
-    margin-bottom: 5px; }
-
-  .pol-wrap-c5173e9bd2721f7879751bef0e5926dd {
-    display: inline-block;
-    position: relative; }
-  .pol-wrap-c5173e9bd2721f7879751bef0e5926dd .pol-item-c5173e9bd2721f7879751bef0e5926dd {
-    margin: 0;
-    padding: 0;
-    overflow: hidden;  }
-  .pol-wrap-c5173e9bd2721f7879751bef0e5926dd.w1x5xh15x-c5173e9bd2721f7879751bef0e5926dd .pol-notice {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    background: #00000087;
-    padding: 3px 5px;
-    margin: 0;
-  }
-  .pol-wrap-c5173e9bd2721f7879751bef0e5926dd .pol-notice span:nth-child(1),
-  .pol-wrap-c5173e9bd2721f7879751bef0e5926dd .pol-notice span:nth-child(2),
-  .pol-wrap-c5173e9bd2721f7879751bef0e5926dd .pol-notice span:nth-child(4),
-  .pol-wrap-c5173e9bd2721f7879751bef0e5926dd .pol-notice span:nth-child(7),
-  .pol-wrap-c5173e9bd2721f7879751bef0e5926dd .pol-notice span:nth-child(9),
-  .pol-wrap-c5173e9bd2721f7879751bef0e5926dd .pol-notice span:nth-child(10),
-  .pol-wrap-c5173e9bd2721f7879751bef0e5926dd .pol-notice span:nth-child(12),
-  .pol-wrap-c5173e9bd2721f7879751bef0e5926dd .pol-notice span:nth-child(14),
-  .pol-wrap-c5173e9bd2721f7879751bef0e5926dd .pol-notice span:nth-child(16),
-  .pol-wrap-c5173e9bd2721f7879751bef0e5926dd .pol-notice span:nth-child(17),
-  .pol-wrap-c5173e9bd2721f7879751bef0e5926dd .pol-notice span:nth-child(19) {
-    font-size: 1px;
-    width: 2px;
-    opacity: 0.01;
-    overflow: hidden;
-    display: inline-block;
-    margin-left: -2px; }
-</style>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+<script src="https://securepubads.g.doubleclick.net/tag/js/gpt.js" async="async"></script>
+<script>
+  googletag.cmd.push(function() {
+    googletag.defineSlot('/21842588594/desktop_before_content', [[970, 90], [728, 90]], 'div-gpt-ad-1598302664162-0').addService(googletag.pubads());
+    googletag.pubads().enableSingleRequest();
+    googletag.pubads().collapseEmptyDivs();
+    googletag.enableServices();
+  });
+</script><script>
+  googletag.cmd.push(function() {
+    googletag.defineSlot('/21842588594/desktop_after_content', [[970, 90], [728, 90]], 'div-gpt-ad-1598950403303-0').addService(googletag.pubads());
+    googletag.pubads().enableSingleRequest();
+    googletag.enableServices();
+  });
+</script><script>
+ googletag.cmd.push(function() {
+    googletag.defineSlot('/21842588594/desktop_outer_right', [300, 600], 'div-gpt-ad-1598302737345-0').addService(googletag.pubads());
+    googletag.pubads().enableSingleRequest();
+    googletag.pubads().collapseEmptyDivs();
+    googletag.enableServices();
+  });
+</script>
 </head>
-<body style='background-image: url(/assets/background/b_2-d5c85146d2c431f1b2bb178c781a2f10e6f6c7057a5aad9386063003a01e7516.jpg)'>
-<div class='content-frame'></div>
+<body class='' style='background-image: url(https://cdn.just-wiped.net/assets/background/b_2-d5c85146d2c431f1b2bb178c781a2f10e6f6c7057a5aad9386063003a01e7516.jpg)'>
+<div class='main-frame'>
+<div class='pre-main'></div>
 <div class='content'>
 <header>
 <div class='headline'>
 <a href="/"><div class='img-wrapper'>
-<img src="/assets/rust_logo-5da16b7d6a2113e895a0744b354dd88f8265be10a07487097e12ff08c7b1446f.png" alt="Rust logo" />
+<img src="https://cdn.just-wiped.net/assets/rust_logo-c13bf05a12751df540da72db14a165f28f14f05f44f91d2a4e22a5b54512975b.png" alt="Rust logo" />
 </div>
 <div class='title-wrapper'>
 <div class='title'>
@@ -91,87 +83,67 @@ find the latest wiped Rust Servers
 </div>
 </a></div>
 </header>
-<nav class='main-navigation'>
-<ul>
-<li class='intro'>
-&#9776;
-</li>
-<li>
+<nav class='bar-navigation big'>
+<div class='intro'>&#9776;</div>
 <a class="" href="/">Home</a>
-</li>
-<li>
 <a class="active" href="/rust_servers">Wipes</a>
-</li>
-<li>
 <a class="" href="/rust-maps">Maps</a>
-</li>
-<li>
-<a class="" href="/search-rust-servers">Search</a>
-</li>
-<li class='fill'></li>
-</ul>
+<a class="" href="/host-rust-server">Hosting</a>
+<div class='fill'></div>
+</nav>
+<nav class='bar-navigation medium secondary'>
+<div class='new fat upcase'>New</div>
+<div class='text fill'>
+Sign in and create your own profile
+</div>
+<div class='login'>
+<a href="/login"><img src="https://steamcommunity.com/public/images/signinthroughsteam/sits_small.png" alt="Sits small" /></a>
+</div>
 </nav>
 
 
 <div class='content-block'>
+<div class="pol-wrap pol-desktop-before-content" data-pol="115" data-mon="pol/115"><div id='div-gpt-ad-1598302664162-0'>
+  <script>
+    googletag.cmd.push(function() { googletag.display('div-gpt-ad-1598302664162-0'); });
+  </script>
+</div></div>
+
 <form action="/rust_servers" accept-charset="UTF-8" data-remote="true" method="get"><input name="utf8" type="hidden" value="&#x2713;" />
-<div class='navigation quick-filter'>
-<ul>
-<li class='intro'>
-Select
-</li>
-<li>
+<nav class='bar-navigation medium'>
+<div class='intro fat upcase'>Filter</div>
 <select name="max_group" id="quickfilter-max-group" class="selectric-sel invis" onchange="this.form.submit()"><option value="">No Max Group</option>
 <option value="1">Solo Only</option>
 <option value="2">Duo Only</option>
 <option value="3">Trio Only</option></select>
-</li>
-<li>
 <select name="s_type" id="quickfilter-mods" class="selectric-sel invis" onchange="this.form.submit()"><option value="">Vanilla and Modded</option>
-<option selected="selected" value="vanilla_only">Vanilla Only</option>
+<option value="vanilla_only">Vanilla Only</option>
 <option value="modded_only">Modded Only</option>
 <option value="officials">Officials Only</option></select>
-</li>
-<li>
 <select name="min_rating" id="quickfilter-min-rating" class="selectric-sel invis" onchange="this.form.submit()"><option value="0">No Min Rating</option>
 <option value="20">20% Min Rating</option>
-<option value="40">40% Min Rating</option>
-<option value="60" selected="selected">60% Min Rating</option>
+<option value="40" selected="selected">40% Min Rating</option>
+<option value="60">60% Min Rating</option>
 <option value="80">80% Min Rating</option>
 <option value="100">100% Min Rating</option></select>
-</li>
-<li>
-<select name="region" id="quickfilter-region" class="selectric-sel invis" onchange="this.form.submit()"><option value="Any">All Regions</option>
+<select name="region" id="quickfilter-region" class="selectric-sel invis" onchange="this.form.submit()"><option value="any">All Regions</option>
 <option value="africa">Africa</option>
 <option value="asia">Asia</option>
 <option value="australia_oceania">Australia/Oceania</option>
 <option value="europe" selected="selected">Europe</option>
 <option value="north_america">North America</option>
 <option value="south_america">South America</option></select>
-</li>
-<li>
-<a href="/search-rust-servers?country=Any&amp;map=Procedural+Map&amp;max_active_player=500&amp;max_hours_since_wipe=73&amp;max_max_group=11&amp;max_players_max=500&amp;max_wipe_cycle=31&amp;max_world_size=6000&amp;min_active_player=0&amp;min_hours_since_wipe=0&amp;min_max_group=1&amp;min_players_max=24&amp;min_rating=60&amp;min_wipe_cycle=0&amp;min_world_size=1000&amp;q=&amp;region=europe&amp;s_type=vanilla_only&amp;uptime_badge=1&amp;wipe_regularity_badge=0">Extended Search</a>
-</li>
-<li class='fill'></li>
-</ul>
-</div>
+<a href="/search-rust-servers">Extended Search</a>
+<div class='fill'></div>
+</nav>
 </form>
 
-<div class='spacer'></div>
-<div class='filter-information'>
-The servers have been filtered. Click
-<a href="/search-rust-servers?country=Any&amp;map=Procedural+Map&amp;max_active_player=500&amp;max_hours_since_wipe=73&amp;max_max_group=11&amp;max_players_max=500&amp;max_wipe_cycle=31&amp;max_world_size=6000&amp;min_active_player=0&amp;min_hours_since_wipe=0&amp;min_max_group=1&amp;min_players_max=24&amp;min_rating=60&amp;min_wipe_cycle=0&amp;min_world_size=1000&amp;q=&amp;region=europe&amp;s_type=vanilla_only&amp;uptime_badge=1&amp;wipe_regularity_badge=0">here</a>
-to adjust the filter parameters.
-</div>
 <div class='servers'>
-<div class='server server-head active ' id='server-490501'>
-<div class='flag flags-CZ' title='CZ'></div>
-<a class="name" title="Open the server details page" href="/rust_servers/490501">Rustafied.com - EU TRIO (Full Wipe 07.07, 12:00 CET)
-<div class='notice bp' title='The blueprints on this server probably wiped!'>
-BP Wipe
-</div>
+<div class='server server-head active ' id='server-1008878'>
+<div class='flags-DK server-flag' title='DK'></div>
+<a class="name" title="Open the server details page" href="/rust_servers/1008878">[EU] RustyKing 3x - Solo Only - Wipe Sundays
 </a><div class='map'>
-<a title="Show the Rust map for this server" href="/rust_servers/490501/map"><img alt="Thumbnail Rust Map: Procedural Map, Size: 3400, Seed: 1281891653, 14 Monuments" src="/maps/52117/28db9689eaa516681121a3610af18cf97348772a.jpg?1561844328" />
+<a title="Show the Rust map for this server" href="/rust_servers/1008878/map"><img alt="Thumbnail Rust Map: Procedural Map, Size: 3500, Seed: 48055, 13 Monuments" data-beforeviewport-src="/maps/225245/7ec31d99d1e9b894bdafcf61eb41fb5ba24f2993.jpg" src="https://cdn.just-wiped.net/assets/placeholder-6ede4a32efe9fb930ea1e285d7c0ce7ba4f5d8178fcdd2fb5cbacc3719a367c3.png" />
 </a></div>
 <div class='infos'>
 <div class='info i-last-wipe'>
@@ -179,8 +151,8 @@ BP Wipe
 Wipe
 </div>
 <div class='value'>
-<time class='hidden timeago' datetime='2019-07-07T12:00:13.61+02:00'>
-2019-07-07T12:00:13.61+02:00
+<time class='timeago' datetime='2020-11-15T10:36:18.55+01:00'>
+8 minutes ago
 </time>
 </div>
 </div>
@@ -189,7 +161,83 @@ Wipe
 Rating
 </div>
 <div class='value'>
-76%
+69%
+</div>
+</div>
+<div class='info i-max-group'>
+<div class='label'>
+Max Group
+</div>
+<div class='value'>
+1
+</div>
+</div>
+<div class='info i-modded'>
+<div class='label'>
+Modded
+</div>
+<div class='value'>
+Yes
+</div>
+</div>
+<div class='info i-player'>
+<div class='label'>
+Player
+</div>
+<div class='value'>
+3/150
+</div>
+</div>
+<div class='info i-map'>
+<div class='label'>
+Map
+</div>
+<div class='value'>
+Procedural Map
+</div>
+</div>
+<div class='info i-wipe-cycle'>
+<div class='label'>
+Cycle
+</div>
+<div class='value'>
+~ 7.4 Days
+</div>
+</div>
+</div>
+</div>
+<div class='server server-head active ' id='server-1147742'>
+<div class='flags-GB server-flag' title='GB'></div>
+<a class="name" title="Open the server details page" href="/rust_servers/1147742">! Rust-ON | Vanilla | SOLO/DUO | Full Wipe 15/11
+<div class="tag bp" title="The blueprints on this server probably wiped!"><span>BP Wipe</span></div>
+</a><div class='map'>
+<a title="Show the Rust map for this server" href="/rust_servers/1147742/map"><img alt="Thumbnail Rust Map: Procedural Map, Size: 3500, Seed: 130, 14 Monuments" data-beforeviewport-src="/maps/37772/1649df392772dc83bdc5c7ac15a6e76347cd00de.jpg" src="https://cdn.just-wiped.net/assets/placeholder-6ede4a32efe9fb930ea1e285d7c0ce7ba4f5d8178fcdd2fb5cbacc3719a367c3.png" />
+</a></div>
+<div class='infos'>
+<div class='info i-last-wipe'>
+<div class='label'>
+Wipe
+</div>
+<div class='value'>
+<time class='timeago' datetime='2020-11-15T10:31:42.52+01:00'>
+13 minutes ago
+</time>
+</div>
+</div>
+<div class='info i-rating'>
+<div class='label'>
+Rating
+</div>
+<div class='value'>
+53%
+</div>
+</div>
+<div class='info i-max-group'>
+<div class='label'>
+Max Group
+</div>
+<div class='value'>
+2
 </div>
 </div>
 <div class='info i-modded'>
@@ -202,7 +250,7 @@ No
 </div>
 <div class='info i-player'>
 <div class='label'>
-player
+Player
 </div>
 <div class='value'>
 4/100
@@ -210,7 +258,7 @@ player
 </div>
 <div class='info i-map'>
 <div class='label'>
-map
+Map
 </div>
 <div class='value'>
 Procedural Map
@@ -225,13 +273,13 @@ Cycle
 </div>
 </div>
 </div>
-
 </div>
-<div class='server server-head active ' id='server-583614'>
-<div class='flag flags-GB' title='GB'></div>
-<a class="name" title="Open the server details page" href="/rust_servers/583614">RUSTCON Europe | Just Wiped 7/7 | Vanilla | PvP
+<div class='server server-head active featured' id='server-690627'>
+<div class='flags-FR server-flag' title='FR'></div>
+<a class="name" title="Open the server details page" href="/rust_servers/690627">[EU] CoolRust Solo/Duo 2x | Fullwiped: 15.11 10:00 CET
+<div class="tag bp" title="The blueprints on this server probably wiped!"><span>BP Wipe</span></div>
 </a><div class='map'>
-<a title="Show the Rust map for this server" href="/rust_servers/583614/map"><img alt="Thumbnail Rust Map: Procedural Map, Size: 3500, Seed: 12532151, 15 Monuments" src="/maps/47709/6d98fde29407480e4ef755a08d57f525c01a4df4.jpg?1561949272" />
+<a title="Show the Rust map for this server" href="/rust_servers/690627/map"><img alt="Thumbnail Rust Map: Procedural Map, Size: 4000, Seed: 1043405039, 13 Monuments" data-beforeviewport-src="/maps/63712/50b53ede390c06a1846e2a8c24aeb5bfe0c149be.jpg" src="https://cdn.just-wiped.net/assets/placeholder-6ede4a32efe9fb930ea1e285d7c0ce7ba4f5d8178fcdd2fb5cbacc3719a367c3.png" />
 </a></div>
 <div class='infos'>
 <div class='info i-last-wipe'>
@@ -239,8 +287,8 @@ Cycle
 Wipe
 </div>
 <div class='value'>
-<time class='hidden timeago' datetime='2019-07-07T11:38:00.00+02:00'>
-2019-07-07T11:38:00.00+02:00
+<time class='timeago' datetime='2020-11-15T10:00:00.00+01:00'>
+44 minutes ago
 </time>
 </div>
 </div>
@@ -252,75 +300,12 @@ Rating
 64%
 </div>
 </div>
-<div class='info i-modded'>
-<div class='label'>
-Modded
-</div>
-<div class='value'>
-No
-</div>
-</div>
-<div class='info i-player'>
-<div class='label'>
-player
-</div>
-<div class='value'>
-1/100
-</div>
-</div>
-<div class='info i-map'>
-<div class='label'>
-map
-</div>
-<div class='value'>
-Procedural Map
-</div>
-</div>
-<div class='info i-wipe-cycle'>
-<div class='label'>
-Cycle
-</div>
-<div class='value'>
-~ 18.6 Days
-</div>
-</div>
-</div>
-
-</div>
-<div class='server server-head active ' id='server-424678'>
-<div class='flag flags-DE' title='DE'></div>
-<a class="name" title="Open the server details page" href="/rust_servers/424678">playuwe.net SOLO/DUO/TRIO 07.07. 11:00 CEST07.7.FULLWIPE NOW
-<div class='notice bp' title='The blueprints on this server probably wiped!'>
-BP Wipe
-</div>
-</a><div class='map'>
-<a title="Show the Rust map for this server" href="/rust_servers/424678/map"><img alt="Thumbnail Rust Map: Procedural Map, Size: 3500, Seed: 1215, 15 Monuments" src="/maps/39561/2cbd0ea60c87b80f2e17cb10600da30f6b6a58fd.jpg?1561399087" />
-</a></div>
-<div class='infos'>
-<div class='info i-last-wipe'>
-<div class='label'>
-Wipe
-</div>
-<div class='value'>
-<time class='hidden timeago' datetime='2019-07-07T11:00:00.00+02:00'>
-2019-07-07T11:00:00.00+02:00
-</time>
-</div>
-</div>
-<div class='info i-rating'>
-<div class='label'>
-Rating
-</div>
-<div class='value'>
-88%
-</div>
-</div>
 <div class='info i-max-group'>
 <div class='label'>
 Max Group
 </div>
 <div class='value'>
-3
+2
 </div>
 </div>
 <div class='info i-modded'>
@@ -328,20 +313,20 @@ Max Group
 Modded
 </div>
 <div class='value'>
-No
+Yes
 </div>
 </div>
 <div class='info i-player'>
 <div class='label'>
-player
+Player
 </div>
 <div class='value'>
-93/250
+150/250
 </div>
 </div>
 <div class='info i-map'>
 <div class='label'>
-map
+Map
 </div>
 <div class='value'>
 Procedural Map
@@ -352,20 +337,16 @@ Procedural Map
 Cycle
 </div>
 <div class='value'>
-~ 6.2 Days
+~ 5.1 Days
 </div>
 </div>
 </div>
-
 </div>
-<div class='server server-head active ' id='server-598577'>
-<div class='flag flags-FR' title='FR'></div>
-<a class="name" title="Open the server details page" href="/rust_servers/598577">Rusty Rascals Solo Only | FULLWIPED 10AM CEST 07.07
-<div class='notice bp' title='The blueprints on this server probably wiped!'>
-BP Wipe
-</div>
+<div class='server server-head active ' id='server-664645'>
+<div class='flags-DE server-flag' title='DE'></div>
+<a class="name" title="Open the server details page" href="/rust_servers/664645">[DE] SOLO SURVIVAL | WIPE 15.11. 10Uhr | direct ban on teamplay
 </a><div class='map'>
-<a title="Show the Rust map for this server" href="/rust_servers/598577/map"><img alt="Thumbnail Rust Map: Procedural Map, Size: 3000, Seed: 99456, 12 Monuments" src="/maps/48637/fc19b41f2c3353c9f27d4ead5793d0367d1fb7b0.jpg?1561788551" />
+<a title="Show the Rust map for this server" href="/rust_servers/664645/map"><img alt="Thumbnail Rust Map: Procedural Map, Size: 4000, Seed: 13, 14 Monuments" data-beforeviewport-src="/maps/38243/2c974595d960d70179d7ea01810751599ab809d1.jpg" src="https://cdn.just-wiped.net/assets/placeholder-6ede4a32efe9fb930ea1e285d7c0ce7ba4f5d8178fcdd2fb5cbacc3719a367c3.png" />
 </a></div>
 <div class='infos'>
 <div class='info i-last-wipe'>
@@ -373,8 +354,8 @@ BP Wipe
 Wipe
 </div>
 <div class='value'>
-<time class='hidden timeago' datetime='2019-07-07T10:00:00.00+02:00'>
-2019-07-07T10:00:00.00+02:00
+<time class='timeago' datetime='2020-11-15T09:56:06.75+01:00'>
+1 hour ago
 </time>
 </div>
 </div>
@@ -383,7 +364,7 @@ Wipe
 Rating
 </div>
 <div class='value'>
-91%
+79%
 </div>
 </div>
 <div class='info i-max-group'>
@@ -404,15 +385,15 @@ No
 </div>
 <div class='info i-player'>
 <div class='label'>
-player
+Player
 </div>
 <div class='value'>
-89/100
+11/101
 </div>
 </div>
 <div class='info i-map'>
 <div class='label'>
-map
+Map
 </div>
 <div class='value'>
 Procedural Map
@@ -423,17 +404,17 @@ Procedural Map
 Cycle
 </div>
 <div class='value'>
-~ 4.0 Days
+~ 6.7 Days
 </div>
 </div>
 </div>
-
 </div>
-<div class='server server-head active ' id='server-429401'>
-<div class='flag flags-DE' title='DE'></div>
-<a class="name" title="Open the server details page" href="/rust_servers/429401">SURVIVORS.GG #7 [ Vanilla ] WIPED 07.07 - 10:00CEST
+<div class='server server-head active featured' id='server-542226'>
+<div class='flags-FR server-flag' title='FR'></div>
+<a class="name" title="Open the server details page" href="/rust_servers/542226">Rustonia - 2x Vanilla - FULLWIPED 15.11 NOW
+<div class="tag bp" title="The blueprints on this server probably wiped!"><span>BP Wipe</span></div>
 </a><div class='map'>
-<a title="Show the Rust map for this server" href="/rust_servers/429401/map"><img alt="Thumbnail Rust Map: Procedural Map, Size: 3500, Seed: 364812564, 14 Monuments" src="/maps/43745/526c9c7a44e54b2cf8cd5adcc735f741a09edbc5.jpg?1561602766" />
+<a title="Show the Rust map for this server" href="/rust_servers/542226/map"><img alt="Thumbnail Rust Map: Procedural Map, Size: 3500, Seed: 337147, 15 Monuments" data-beforeviewport-src="/maps/220240/47ed2b1f7c49ba0e8f209a9f68ef9a00f76fbc1d.jpg" src="https://cdn.just-wiped.net/assets/placeholder-6ede4a32efe9fb930ea1e285d7c0ce7ba4f5d8178fcdd2fb5cbacc3719a367c3.png" />
 </a></div>
 <div class='infos'>
 <div class='info i-last-wipe'>
@@ -441,210 +422,8 @@ Cycle
 Wipe
 </div>
 <div class='value'>
-<time class='hidden timeago' datetime='2019-07-07T09:57:46.69+02:00'>
-2019-07-07T09:57:46.69+02:00
-</time>
-</div>
-</div>
-<div class='info i-rating'>
-<div class='label'>
-Rating
-</div>
-<div class='value'>
-87%
-</div>
-</div>
-<div class='info i-modded'>
-<div class='label'>
-Modded
-</div>
-<div class='value'>
-No
-</div>
-</div>
-<div class='info i-player'>
-<div class='label'>
-player
-</div>
-<div class='value'>
-139/200
-</div>
-</div>
-<div class='info i-map'>
-<div class='label'>
-map
-</div>
-<div class='value'>
-Procedural Map
-</div>
-</div>
-<div class='info i-wipe-cycle'>
-<div class='label'>
-Cycle
-</div>
-<div class='value'>
-~ 5.9 Days
-</div>
-</div>
-</div>
-
-</div>
-<div class='server server-head active ' id='server-607243'>
-<div class='flag flags-FI' title='FI'></div>
-<a class="name" title="Open the server details page" href="/rust_servers/607243">Rust Addict Solo FullWipe Now 23.06 23/06 10:00am CET
-<div class='notice bp' title='The blueprints on this server probably wiped!'>
-BP Wipe
-</div>
-</a><div class='map'>
-<a title="Show the Rust map for this server" href="/rust_servers/607243/map"><img alt="Thumbnail Rust Map: Procedural Map, Size: 3000, Seed: 1170422, 11 Monuments" src="/maps/64231/7651f1db2c76c8968244186bc225a5eaeda4e2fa.jpg?1562456301" />
-</a></div>
-<div class='infos'>
-<div class='info i-last-wipe'>
-<div class='label'>
-Wipe
-</div>
-<div class='value'>
-<time class='hidden timeago' datetime='2019-07-07T01:36:19.84+02:00'>
-2019-07-07T01:36:19.84+02:00
-</time>
-</div>
-</div>
-<div class='info i-rating'>
-<div class='label'>
-Rating
-</div>
-<div class='value'>
-64%
-</div>
-</div>
-<div class='info i-max-group'>
-<div class='label'>
-Max Group
-</div>
-<div class='value'>
-1
-</div>
-</div>
-<div class='info i-modded'>
-<div class='label'>
-Modded
-</div>
-<div class='value'>
-No
-</div>
-</div>
-<div class='info i-player'>
-<div class='label'>
-player
-</div>
-<div class='value'>
-0/150
-</div>
-</div>
-<div class='info i-map'>
-<div class='label'>
-map
-</div>
-<div class='value'>
-Procedural Map
-</div>
-</div>
-<div class='info i-wipe-cycle'>
-<div class='label'>
-Cycle
-</div>
-<div class='value'>
-~ 6.6 Days
-</div>
-</div>
-</div>
-
-</div>
-<div class='server server-head active ' id='server-621190'>
-<div class='flag flags-NL' title='NL'></div>
-<a class="name" title="Open the server details page" href="/rust_servers/621190">Noob Lands | Beginner Friendly | solo/duo/trio | 06.07.19
-</a><div class='map'>
-<a title="Show the Rust map for this server" href="/rust_servers/621190/map"><img alt="Thumbnail Rust Map: Procedural Map, Size: 3500, Seed: 751161, 13 Monuments" src="/maps/64217/ea62f54d2adb432a28ef7afa42b88a62ddf36a02.jpg?1562452459" />
-</a></div>
-<div class='infos'>
-<div class='info i-last-wipe'>
-<div class='label'>
-Wipe
-</div>
-<div class='value'>
-<time class='hidden timeago' datetime='2019-07-07T00:31:55.65+02:00'>
-2019-07-07T00:31:55.65+02:00
-</time>
-</div>
-</div>
-<div class='info i-rating'>
-<div class='label'>
-Rating
-</div>
-<div class='value'>
-61%
-</div>
-</div>
-<div class='info i-max-group'>
-<div class='label'>
-Max Group
-</div>
-<div class='value'>
-3
-</div>
-</div>
-<div class='info i-modded'>
-<div class='label'>
-Modded
-</div>
-<div class='value'>
-No
-</div>
-</div>
-<div class='info i-player'>
-<div class='label'>
-player
-</div>
-<div class='value'>
-3/50
-</div>
-</div>
-<div class='info i-map'>
-<div class='label'>
-map
-</div>
-<div class='value'>
-Procedural Map
-</div>
-</div>
-<div class='info i-wipe-cycle'>
-<div class='label'>
-Cycle
-</div>
-<div class='value'>
-~ 0.6 Day
-</div>
-</div>
-</div>
-
-</div>
-<div class='server server-head active ' id='server-634330'>
-<div class='flag flags-DE' title='DE'></div>
-<a class="name" title="Open the server details page" href="/rust_servers/634330">RustyWorld |EU| FULLWIPE 06.07.2019 20:30 CET
-<div class='notice bp' title='The blueprints on this server probably wiped!'>
-BP Wipe
-</div>
-</a><div class='map'>
-<a title="Show the Rust map for this server" href="/rust_servers/634330/map"><img alt="Thumbnail Rust Map: Procedural Map, Size: 3800, Seed: 18, 15 Monuments" src="/maps/60254/ef39fd6ff75479a55180ed58630ccc833e59a863.jpg?1561949908" />
-</a></div>
-<div class='infos'>
-<div class='info i-last-wipe'>
-<div class='label'>
-Wipe
-</div>
-<div class='value'>
-<time class='hidden timeago' datetime='2019-07-06T21:30:00.00+02:00'>
-2019-07-06T21:30:00.00+02:00
+<time class='timeago' datetime='2020-11-15T09:53:13.53+01:00'>
+1 hour ago
 </time>
 </div>
 </div>
@@ -656,6 +435,81 @@ Rating
 67%
 </div>
 </div>
+<div class='info i-max-group'>
+<div class='label'>
+Max Group
+</div>
+<div class='value'>
+5
+</div>
+</div>
+<div class='info i-modded'>
+<div class='label'>
+Modded
+</div>
+<div class='value'>
+Yes
+</div>
+</div>
+<div class='info i-player'>
+<div class='label'>
+Player
+</div>
+<div class='value'>
+46/150
+</div>
+</div>
+<div class='info i-map'>
+<div class='label'>
+Map
+</div>
+<div class='value'>
+Procedural Map
+</div>
+</div>
+<div class='info i-wipe-cycle'>
+<div class='label'>
+Cycle
+</div>
+<div class='value'>
+~ 5.5 Days
+</div>
+</div>
+</div>
+</div>
+<div class='server server-head active ' id='server-1145404'>
+<div class='flags-FR server-flag' title='FR'></div>
+<a class="name" title="Open the server details page" href="/rust_servers/1145404">[EU] Elite Rust #1 - Duo Teams
+</a><div class='map'>
+<a title="Show the Rust map for this server" href="/rust_servers/1145404/map"><img alt="Thumbnail Rust Map: Procedural Map, Size: 3000, Seed: 1337, 11 Monuments" data-beforeviewport-src="/maps/38976/c315a11a76ce6499015153169a9e556d40700de6.jpg" src="https://cdn.just-wiped.net/assets/placeholder-6ede4a32efe9fb930ea1e285d7c0ce7ba4f5d8178fcdd2fb5cbacc3719a367c3.png" />
+</a></div>
+<div class='infos'>
+<div class='info i-last-wipe'>
+<div class='label'>
+Wipe
+</div>
+<div class='value'>
+<time class='timeago' datetime='2020-11-15T09:40:20.55+01:00'>
+1 hour ago
+</time>
+</div>
+</div>
+<div class='info i-rating'>
+<div class='label'>
+Rating
+</div>
+<div class='value'>
+56%
+</div>
+</div>
+<div class='info i-max-group'>
+<div class='label'>
+Max Group
+</div>
+<div class='value'>
+2
+</div>
+</div>
 <div class='info i-modded'>
 <div class='label'>
 Modded
@@ -666,15 +520,15 @@ No
 </div>
 <div class='info i-player'>
 <div class='label'>
-player
+Player
 </div>
 <div class='value'>
-0/200
+1/60
 </div>
 </div>
 <div class='info i-map'>
 <div class='label'>
-map
+Map
 </div>
 <div class='value'>
 Procedural Map
@@ -689,13 +543,12 @@ Cycle
 </div>
 </div>
 </div>
-
 </div>
-<div class='server server-head active ' id='server-394695'>
-<div class='flag flags-DE' title='DE'></div>
-<a class="name" title="Open the server details page" href="/rust_servers/394695">Newbie Solo/Dou fresh wipe 29.06 21.30
+<div class='server server-head active ' id='server-818837'>
+<div class='flags-FR server-flag' title='FR'></div>
+<a class="name" title="Open the server details page" href="/rust_servers/818837">• SEXY ISLAND • 20X SOLO/DUO • SHOP • 15/11 WIPED
 </a><div class='map'>
-<a title="Show the Rust map for this server" href="/rust_servers/394695/map"><img alt="Thumbnail Rust Map: Procedural Map, Size: 4000, Seed: 423412027, 14 Monuments" src="/maps/64084/34bc899c6a97c0b30d5cfe6e220f575e3bb2e2cd.jpg?1562434243" />
+<a title="Show the Rust map for this server" href="/rust_servers/818837/map"><img alt="Thumbnail Rust Map: Procedural Map, Size: 3500, Seed: 1190670706, 14 Monuments" data-beforeviewport-src="/maps/180740/02026840a4fea2ca474b1167f988df1131d979a8.jpg" src="https://cdn.just-wiped.net/assets/placeholder-6ede4a32efe9fb930ea1e285d7c0ce7ba4f5d8178fcdd2fb5cbacc3719a367c3.png" />
 </a></div>
 <div class='infos'>
 <div class='info i-last-wipe'>
@@ -703,8 +556,8 @@ Cycle
 Wipe
 </div>
 <div class='value'>
-<time class='hidden timeago' datetime='2019-07-06T19:28:53.51+02:00'>
-2019-07-06T19:28:53.51+02:00
+<time class='timeago' datetime='2020-11-15T09:39:32.99+01:00'>
+1 hour ago
 </time>
 </div>
 </div>
@@ -713,7 +566,7 @@ Wipe
 Rating
 </div>
 <div class='value'>
-70%
+74%
 </div>
 </div>
 <div class='info i-max-group'>
@@ -721,7 +574,7 @@ Rating
 Max Group
 </div>
 <div class='value'>
-1
+2
 </div>
 </div>
 <div class='info i-modded'>
@@ -729,20 +582,20 @@ Max Group
 Modded
 </div>
 <div class='value'>
-No
+Yes
 </div>
 </div>
 <div class='info i-player'>
 <div class='label'>
-player
+Player
 </div>
 <div class='value'>
-6/100
+16/250
 </div>
 </div>
 <div class='info i-map'>
 <div class='label'>
-map
+Map
 </div>
 <div class='value'>
 Procedural Map
@@ -753,71 +606,10 @@ Procedural Map
 Cycle
 </div>
 <div class='value'>
-~ 12.9 Days
+~ 3.0 Days
 </div>
 </div>
 </div>
-
-</div>
-<div class='server server-head active ' id='server-511569'>
-<div class='flag flags-GB' title='GB'></div>
-<a class="name" title="Open the server details page" href="/rust_servers/511569">RAWR Vanilla RUST #1
-</a><div class='map'>
-<a title="Show the Rust map for this server" href="/rust_servers/511569/map"><img alt="Thumbnail Rust Map: Procedural Map, Size: 4000, Seed: 1234, 15 Monuments" src="/maps/37499/a72b30d57565e72d26887899a4b53f1b857c431c.jpg?1561555209" />
-</a></div>
-<div class='infos'>
-<div class='info i-last-wipe'>
-<div class='label'>
-Wipe
-</div>
-<div class='value'>
-<time class='hidden timeago' datetime='2019-07-06T18:29:22.63+02:00'>
-2019-07-06T18:29:22.63+02:00
-</time>
-</div>
-</div>
-<div class='info i-rating'>
-<div class='label'>
-Rating
-</div>
-<div class='value'>
-63%
-</div>
-</div>
-<div class='info i-modded'>
-<div class='label'>
-Modded
-</div>
-<div class='value'>
-No
-</div>
-</div>
-<div class='info i-player'>
-<div class='label'>
-player
-</div>
-<div class='value'>
-14/100
-</div>
-</div>
-<div class='info i-map'>
-<div class='label'>
-map
-</div>
-<div class='value'>
-Procedural Map
-</div>
-</div>
-<div class='info i-wipe-cycle'>
-<div class='label'>
-Cycle
-</div>
-<div class='value'>
-~ 26.3 Days
-</div>
-</div>
-</div>
-
 </div>
 
 </div>
@@ -829,102 +621,86 @@ Cycle
 </span>
 
         <span class="page">
-  <a rel="next" href="/rust_servers?country=Any&amp;map=Procedural+Map&amp;max_active_player=500&amp;max_hours_since_wipe=73&amp;max_max_group=11&amp;max_players_max=500&amp;max_wipe_cycle=31&amp;max_world_size=6000&amp;min_active_player=0&amp;min_hours_since_wipe=0&amp;min_max_group=1&amp;min_players_max=24&amp;min_rating=60&amp;min_wipe_cycle=0&amp;min_world_size=1000&amp;page=2&amp;q=&amp;region=europe&amp;s_type=vanilla_only&amp;uptime_badge=1&amp;wipe_regularity_badge=0">2</a>
+  <a rel="next" href="/rust_servers?page=2">2</a>
 </span>
 
         <span class="page">
-  <a href="/rust_servers?country=Any&amp;map=Procedural+Map&amp;max_active_player=500&amp;max_hours_since_wipe=73&amp;max_max_group=11&amp;max_players_max=500&amp;max_wipe_cycle=31&amp;max_world_size=6000&amp;min_active_player=0&amp;min_hours_since_wipe=0&amp;min_max_group=1&amp;min_players_max=24&amp;min_rating=60&amp;min_wipe_cycle=0&amp;min_world_size=1000&amp;page=3&amp;q=&amp;region=europe&amp;s_type=vanilla_only&amp;uptime_badge=1&amp;wipe_regularity_badge=0">3</a>
+  <a href="/rust_servers?page=3">3</a>
 </span>
 
         <span class="page">
-  <a href="/rust_servers?country=Any&amp;map=Procedural+Map&amp;max_active_player=500&amp;max_hours_since_wipe=73&amp;max_max_group=11&amp;max_players_max=500&amp;max_wipe_cycle=31&amp;max_world_size=6000&amp;min_active_player=0&amp;min_hours_since_wipe=0&amp;min_max_group=1&amp;min_players_max=24&amp;min_rating=60&amp;min_wipe_cycle=0&amp;min_world_size=1000&amp;page=4&amp;q=&amp;region=europe&amp;s_type=vanilla_only&amp;uptime_badge=1&amp;wipe_regularity_badge=0">4</a>
+  <a href="/rust_servers?page=4">4</a>
 </span>
 
         <span class="page">
-  <a href="/rust_servers?country=Any&amp;map=Procedural+Map&amp;max_active_player=500&amp;max_hours_since_wipe=73&amp;max_max_group=11&amp;max_players_max=500&amp;max_wipe_cycle=31&amp;max_world_size=6000&amp;min_active_player=0&amp;min_hours_since_wipe=0&amp;min_max_group=1&amp;min_players_max=24&amp;min_rating=60&amp;min_wipe_cycle=0&amp;min_world_size=1000&amp;page=5&amp;q=&amp;region=europe&amp;s_type=vanilla_only&amp;uptime_badge=1&amp;wipe_regularity_badge=0">5</a>
+  <a href="/rust_servers?page=5">5</a>
 </span>
 
         <span class="page gap">&hellip;</span>
 
       <span class="next">
-  <a rel="next" href="/rust_servers?country=Any&amp;map=Procedural+Map&amp;max_active_player=500&amp;max_hours_since_wipe=73&amp;max_max_group=11&amp;max_players_max=500&amp;max_wipe_cycle=31&amp;max_world_size=6000&amp;min_active_player=0&amp;min_hours_since_wipe=0&amp;min_max_group=1&amp;min_players_max=24&amp;min_rating=60&amp;min_wipe_cycle=0&amp;min_world_size=1000&amp;page=2&amp;q=&amp;region=europe&amp;s_type=vanilla_only&amp;uptime_badge=1&amp;wipe_regularity_badge=0">Next &rsaquo;</a>
+  <a rel="next" href="/rust_servers?page=2">Next &rsaquo;</a>
 </span>
 
       <span class="last">
-  <a href="/rust_servers?country=Any&amp;map=Procedural+Map&amp;max_active_player=500&amp;max_hours_since_wipe=73&amp;max_max_group=11&amp;max_players_max=500&amp;max_wipe_cycle=31&amp;max_world_size=6000&amp;min_active_player=0&amp;min_hours_since_wipe=0&amp;min_max_group=1&amp;min_players_max=24&amp;min_rating=60&amp;min_wipe_cycle=0&amp;min_world_size=1000&amp;page=33&amp;q=&amp;region=europe&amp;s_type=vanilla_only&amp;uptime_badge=1&amp;wipe_regularity_badge=0">Last &raquo;</a>
+  <a href="/rust_servers?page=265">Last &raquo;</a>
 </span>
 
   </nav>
 
 
+<div class="pol-wrap pol-desktop-after-content" data-pol="118" data-mon="pol/118"><div id='div-gpt-ad-1598950403303-0'>
+  <script>
+    googletag.cmd.push(function() { googletag.display('div-gpt-ad-1598950403303-0'); });
+  </script>
+</div></div>
+
 </div>
 <footer>
-<div class='navigation footer-navigation'>
-<ul>
-<li class='intro'>
-&#9776;
-</li>
-<li><a class="" href="/blog">Blog</a></li>
-<li><a target="_blank" class="facebook" rel="nofollow" href="https://www.facebook.com/JustWipedNet/">Facebook</a></li>
-<li><a target="_blank" class="twitter" rel="nofollow" href="https://twitter.com/JustWipedNet">Twitter</a></li>
-<li><a class="" href="/add_rust_stream">Add Stream</a></li>
-<li><a class="" href="/faqs">Help</a></li>
-<li><a class="" href="/support-us">Support us</a></li>
-<li><a class="" href="/youtubers">YouTubers</a></li>
-<li><a class="" href="/server-listings">Server Listings</a></li>
-<li><a class="" href="/about">About</a></li>
-<li><a class="" href="/legals">Legals</a></li>
-<li class='fill'></li>
-</ul>
-</div>
+<nav class='bar-navigation small secondary'>
+<div class='intro'>&#9776;</div>
+<a class="" href="/blog">Blog</a>
+<a target="_blank" class="facebook" rel="nofollow noopener" href="https://www.facebook.com/JustWipedNet/">Facebook</a>
+<a target="_blank" class="twitter" rel="nofollow noopener" href="https://twitter.com/JustWipedNet">Twitter</a>
+<a class="" href="/add_rust_stream">Add Stream</a>
+<a class="" href="/faqs">Help</a>
+<a class="" href="/youtubers">YouTubers</a>
+<a class="" href="/server-listings">Server Listings</a>
+<a class="" href="/about">About</a>
+<div class='fill'></div>
+</nav>
 <div class='appendix'>
 This site is not affiliated with, nor endorsed by
-<a target="_blank" rel="nofollow" title="This link leads to an external resource." class="external-link" href="http://www.facepunchstudios.com/">Facepunch Studios LTD<img alt="External Link" src="/assets/ext_link-7a3e230aa5d847a7518ee8cd73cf985b704abf442984cad569a6dc6b3cd27e3f.gif" /></a>
+<a target="_blank" rel="nofollow noopener" title="This link leads to an external resource." class="external-link" href="http://www.facepunchstudios.com/">Facepunch Studios LTD<i class="fa fa-external-link-alt"></i></a>
 .
 All trademarks belong to their respective owners and are used for information only.
 This product includes GeoLite data created by MaxMind, available from
-<a target="_blank" rel="nofollow" title="This link leads to an external resource." class="external-link" href="http://www.maxmind.com">www.maxmind.com<img alt="External Link" src="/assets/ext_link-7a3e230aa5d847a7518ee8cd73cf985b704abf442984cad569a6dc6b3cd27e3f.gif" /></a>
+<a target="_blank" rel="nofollow noopener" title="This link leads to an external resource." class="external-link" href="http://www.maxmind.com">www.maxmind.com<i class="fa fa-external-link-alt"></i></a>
 .
 That awesome Rust font was created by
-<a target="_blank" rel="nofollow" title="This link leads to an external resource." class="external-link" href="http://steamcommunity.com/id/kohanthebarbarian">Ben Kohan<img alt="External Link" src="/assets/ext_link-7a3e230aa5d847a7518ee8cd73cf985b704abf442984cad569a6dc6b3cd27e3f.gif" /></a>
+<a target="_blank" rel="nofollow noopener" title="This link leads to an external resource." class="external-link" href="http://steamcommunity.com/id/kohanthebarbarian">Ben Kohan<i class="fa fa-external-link-alt"></i></a>
 .
 This page contains affiliate links!
+<br>
+<a href="/legals">Imprint</a>
+&#183;
+<a href="/terms-and-conditions">Terms And Conditions</a>
 </div>
 </footer>
-</div>
-<div class='modal-dialog disabled'>
-<div class='dialog-housing'>
-<div class='close-dialog'>
-<a title="Close The Dialog" onclick="closeDialog()" href="javascript:void(0)">Close</a>
-</div>
-<div class='dialog-content'></div>
-<div class='close-dialog-inline'>
-<a title="Close The Dialog" class="button" onclick="closeDialog()" href="javascript:void(0)">Close</a>
-</div>
-</div>
-</div>
-<script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-  
-  ga('create', 'UA-65084038-3', 'auto');
-  ga('set', 'anonymizeIp', true);
-  ga('send', 'pageview');
-</script>
-<img style="width: 1px, height: 1px;" src="https://img.directtrack.com/favicon.ico" alt="Favicon" />
-<script>
-  (function() {
-    window.setTimeout(function() {
-      var state;
-      state = (window.adsEnabled !== true) || $("img[src='https://img.directtrack.com/favicon.ico']").css('display') === 'none';
-      return $.get("/user_logs/393322/update_ab?state=" + state);
-    }, 1200);
-  
-  }).call(this);
-</script>
 
+
+</div>
+<div class='side-content-wrapper'>
+<div class='side-content'>
+<div class="pol-wrap pol-desktop-outer-right" data-pol="114" data-mon="pol/114"><div id='div-gpt-ad-1598302737345-0' style='width: 300px; height: 600px;'>
+  <script>
+    googletag.cmd.push(function() { googletag.display('div-gpt-ad-1598302737345-0'); });
+  </script>
+</div></div>
+</div>
+</div>
+<div class='post-main'></div>
+</div>
 <div class='cookie-information'>
 <div class='notification'>
 Cookies help us deliver our services. By using our services, you agree to our use of cookies.
@@ -933,18 +709,29 @@ Cookies help us deliver our services. By using our services, you agree to our us
 OK
 </button>
 </div>
-<script src="/assets/application-c7a1b37e8783d393e1bfbbeffaea87eb29ef41e5965fe5f5c0bdd59d84e43aa4.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js"></script>
-<script src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js" async="async"></script>
+<div class='modal-dialog disabled'>
+<div class='dialog-housing'>
+<div class='close-dialog'>
+<button name="button" type="submit" title="Close The Dialog" onclick="closeDialog()">Close</button>
+</div>
+<div class='dialog-content'></div>
+<div class='close-dialog-inline'>
+<button name="button" type="submit" title="Close The Dialog" class="button secondary" onclick="closeDialog()">Close</button>
+</div>
+</div>
+</div>
 <script>
-  WebFont.load({ google: { families: ['Roboto Condensed'] } });
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
   
-  $(function() { return $(".pol-wrap-c5173e9bd2721f7879751bef0e5926dd").bind('contextmenu', function() { return false; }); });
-  
-  (adsbygoogle = window.adsbygoogle || []).push({
-    google_ad_client: "ca-pub-6047488027388607",
-    enable_page_level_ads: true
-  });
+    ga('create', 'UA-65084038-3', 'auto');
+    ga('set', 'anonymizeIp', true);
+    ga('send', 'pageview');
 </script>
+<script src="https://cdn.just-wiped.net/assets/application-eaf69aa0124d498d2338a5c170a9f2228e81a4f2592a8709f1e47a5ef1f83030.js"></script>
+<link rel="stylesheet" media="all" href="https://cdn.just-wiped.net/assets/footer-59b1a7b65d14627dafa0b02c16ded0db941471cb544599cf8bc5a9413f26e70a.css" />
+
 </body>
 </html>

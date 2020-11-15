@@ -4,7 +4,6 @@ import {
   parseServerList,
   ListServer,
   parseServerPage,
-  FullServer,
   getServerAddress,
   getIdFromServerLink
 } from '../src/just-wiped'
@@ -30,25 +29,25 @@ describe('parseServerList', () => {
     servers = parseServerList(rawServerList)
   })
 
-  test('parses 10 servers', () => {
-    expect(servers).toHaveLength(10)
+  test('parses 7 servers', () => {
+    expect(servers).toHaveLength(7)
   })
 
   test('parses server data', () => {
     expect(objDateTimeToISO(servers[0])).toMatchObject({
-      country: 'CZ',
-      lastWipe: '2019-07-07T13:00:13.610+03:00',
+      id: 1008878,
+      country: undefined,
+      lastWipe: '2020-11-15T11:36:18.550+02:00',
+      inactive: false,
+      name: '[EU] RustyKing 3x - Solo Only - Wipe Sundays',
+      url: 'https://just-wiped.net/rust_servers/1008878',
+      mapSize: 3500,
+      rating: 69,
+      modded: true,
+      playersCurrent: 3,
+      playersMax: 150,
       map: 'Procedural Map',
-      mapSize: 3400,
-      maxGroup: null,
-      modded: false,
-      name: 'Rustafied.com - EU TRIO (Full Wipe 07.07, 12:00 CET)',
-      playersCurrent: 4,
-      playersMax: 100,
-      rating: 76,
-      url: 'https://just-wiped.net/rust_servers/490501',
-      id: 490501,
-      inactive: false
+      maxGroup: 1
     })
   })
 
