@@ -23,6 +23,7 @@ export type ListServer = {
   map: string
   maxGroup: number | null
   inactive: boolean
+  moddedMultiplier: number | null
 }
 
 export type FullServer = ListServer & {
@@ -72,6 +73,12 @@ export const formatSearchParams = (opts?: {
   ...(opts?.maxGroup ? maxGroupParamToSearchParam(opts.maxGroup) : {})
 })
 
+export const parseModdedMultiplier = (str: string): number | null => {
+  const m = str.match(/\b(\d{1,2})x\b/i)
+  if (m) return parseInt(m[1])
+  else return null
+}
+
 const parseYesNo = (str: string): boolean => str === 'Yes'
 const getText = (c: cheerio.Cheerio) => c.text().trim()
 
@@ -101,6 +108,7 @@ const parseServerBoxElement = (elem: any): ListServer => {
   const map = getText($('.i-map .value', elem))
   const maxGroupStr = getText($('.i-max-group .value', elem))
   const maxGroup = maxGroupStr ? parseInt(maxGroupStr) : null
+  const moddedMultiplier = parseModdedMultiplier(name)
   return {
     id,
     country,
@@ -114,7 +122,8 @@ const parseServerBoxElement = (elem: any): ListServer => {
     playersCurrent,
     playersMax,
     map,
-    maxGroup
+    maxGroup,
+    moddedMultiplier
   }
 }
 

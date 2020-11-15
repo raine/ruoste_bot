@@ -5,7 +5,8 @@ import {
   ListServer,
   parseServerPage,
   getServerAddress,
-  getIdFromServerLink
+  getIdFromServerLink,
+  parseModdedMultiplier
 } from '../src/just-wiped'
 import { DateTime } from 'luxon'
 
@@ -41,6 +42,7 @@ describe('parseServerList', () => {
       inactive: false,
       name: '[EU] RustyKing 3x - Solo Only - Wipe Sundays',
       url: 'https://just-wiped.net/rust_servers/1008878',
+      moddedMultiplier: 3,
       mapSize: 3500,
       rating: 69,
       modded: true,
@@ -96,7 +98,8 @@ describe('parseServerPage', () => {
         '2020-10-08T15:33:00.000Z',
         '2020-10-01T18:26:00.000Z',
         '2020-10-01T12:22:00.000Z'
-      ]
+      ],
+      moddedMultiplier: 2
     })
   })
 
@@ -123,5 +126,23 @@ describe('getIdFromServerLink', () => {
     expect(
       getIdFromServerLink('https://just-wiped.net/rust_servers/1101218')
     ).toBe(1101218)
+  })
+})
+
+describe('parseModdedMultiplier', () => {
+  test('works', () => {
+    expect(
+      parseModdedMultiplier(
+        'Intoxicated EU Solo/Duo/Trio 2x - 22 Oct - Just wiped'
+      )
+    ).toBe(2)
+
+    expect(
+      parseModdedMultiplier('[EU] RustyKing 3x - Solo Only - Wipe Sundays')
+    ).toBe(3)
+
+    expect(
+      parseModdedMultiplier('[EU] RustyKing 3X - Solo Only - Wipe Sundays')
+    ).toBe(3)
   })
 })
