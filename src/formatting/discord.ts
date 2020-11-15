@@ -127,7 +127,7 @@ export const formatServerEmbed = (
   fields: [
     formatInlineEmbedField(
       'Wiped',
-      formatRelativeDate(server.lastWipe, 'twitter') + ' ago'
+      formatRelativeDate(server.lastWipe, 'twitter')
     ),
     formatInlineEmbedField('Players', formatPlayerCount(server)),
     formatInlineEmbedField('Rating', server.rating.toString() + '%'),
