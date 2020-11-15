@@ -42,6 +42,8 @@
   },
   "scripts": {
     "start": "node index.js",
+    "test": "yarn jest",
+    "test:watch": "yarn jest --watch",
     "build": "tsc",
     "dev": "ts-node-dev --files --no-notify --ignore-watch node_modules --respawn src/index.ts"
   },
