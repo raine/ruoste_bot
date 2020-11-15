@@ -139,6 +139,6 @@ export const formatServerEmbed = (
       'Max group',
       server.maxGroup ? server.maxGroup.toString() : 'N/A'
     ),
-    formatInlineEmbedField('Connect', `steam://${address}`)
+    formatInlineEmbedField('Connect', `client.connect ${address}`)
   ]
 })
