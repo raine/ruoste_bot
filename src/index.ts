@@ -17,3 +17,8 @@ process.on('unhandledRejection', (err) => {
   Sentry.captureException(err)
   process.exit(1)
 })
+
+process.on('SIGTERM', () => {
+  log.info('received SIGTERM')
+  process.exit(0)
+})
