@@ -149,7 +149,7 @@ export const getWipedServers = (
   params: JustWipedSearchParams
 ): Promise<ListServer[]> =>
   Promise.all(
-    [1, 2].map((page) => getWipedServersPage(page, params))
+    [1, 2, 3].map((page) => getWipedServersPage(page, params))
   ).then((xs) => xs.flat())
 
 export const parseRawWipeDate = (str: string): DateTime =>
