@@ -3,6 +3,7 @@ import * as R from 'ramda'
 import { FullServer, ListServer } from '../just-wiped'
 import TimeAgo from 'javascript-time-ago'
 import {
+  filterServerNoise,
   formatMaxGroup,
   formatPlayerCount,
   formatRelativeDate,
@@ -45,7 +46,7 @@ const formatServerInfoSection = (
     .filter(Boolean)
     .join(', ')
 
-const formatServerToLine = (server: ListServer, idx: number): string =>
+const formatServerToLine = (server: ListServer /* , idx: number */): string =>
   bold(formatRelativeDate(server.lastWipe, 'twitter')) +
   ' | ' +
   truncate(25, server.name) +
@@ -55,14 +56,23 @@ export const formatServerListReply = (
   servers: ListServer[],
   serverListUrl: string
 ): Discord.MessageEmbedOptions => {
+  const filteredServers = filterServerNoise(servers)
+  const filteredServersCount = servers.length - filteredServers.length
   const prefix = link('Full server list', serverListUrl) + '\n'
   return {
     color: RUST_COLOR,
-    description: servers.reduce<string>((acc, server, idx) => {
-      const line = formatServerToLine(server, idx)
+    description: filteredServers.reduce<string>((acc, server /* , idx */) => {
+      const line = formatServerToLine(server)
       const str = acc + '\n' + line
       return str.length <= DESCRIPTION_MAX_LENGTH ? str : acc
-    }, prefix)
+    }, prefix),
+    ...(filteredServersCount > 0
+      ? {
+          footer: {
+            text: `${filteredServersCount} servers not shown to reduce noise`
+          }
+        }
+      : {})
   }
 }
 
@@ -70,10 +80,12 @@ export const formatServerListReplyWithUpdatedAt = (
   servers: ListServer[],
   serverListUrl: string
 ): Discord.MessageEmbedOptions => {
+  const reply = formatServerListReply(servers, serverListUrl)
   return {
-    ...formatServerListReply(servers, serverListUrl),
+    ...reply,
     footer: {
-      text: lastUpdatedAt()
+      text:
+        (reply.footer?.text ? reply.footer.text + '\n' : '') + lastUpdatedAt()
     }
   }
 }

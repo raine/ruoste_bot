@@ -27,11 +27,17 @@ export const formatPlayerCount = (server: {
 
 const IGNORED_SERVERS_PATTERN = ['Train your start']
 
-export const isIgnoredServer = (server: ListServer): boolean =>
-  server.inactive ||
-  IGNORED_SERVERS_PATTERN.some((str) => server.name.includes(str)) ||
-  (DateTime.local().diff(server.lastWipe).as('minutes') >= 60 &&
-    server.playersCurrent === 0)
+export const isIgnoredServer = (server: ListServer): boolean => {
+  const minsAgoWiped = DateTime.local().diff(server.lastWipe).as('minutes')
+  const { playersCurrent } = server
+  return (
+    server.inactive ||
+    IGNORED_SERVERS_PATTERN.some((str) => server.name.includes(str)) ||
+    (minsAgoWiped >= 10 && playersCurrent < 5) ||
+    (minsAgoWiped >= 30 && playersCurrent < 10) ||
+    (minsAgoWiped >= 60 && playersCurrent < 30)
+  )
+}
 
 export const filterServerNoise = (servers: ListServer[]): ListServer[] =>
   servers.filter((server) => !isIgnoredServer(server))
