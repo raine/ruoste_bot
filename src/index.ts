@@ -14,6 +14,7 @@ try {
 
 process.on('unhandledRejection', (err) => {
   log.error('unhandled rejection', err)
+  console.log(err)
   Sentry.captureException(err)
   process.exit(1)
 })

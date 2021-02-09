@@ -13,7 +13,7 @@ export const formatMaxGroup = (count: number | null) =>
   count === 1 ? '🚶' :
   count === 2 ? '👬' :
   count === 3 ? '👪' :
-  count && count > 3 ? count : null
+  count && count > 3 ? `${count} max` : null
 
 export const lastUpdatedAt = () =>
   `Last updated at ${DateTime.local()

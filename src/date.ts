@@ -1,6 +1,8 @@
 import { DateTime } from 'luxon'
 import * as R from 'ramda'
 
+const HEL_TZ = 'Europe/Helsinki'
+
 // DateTime.fromFormat defaults to local timezone
 export const fromFormatUTC = (str: string, format: string) =>
   DateTime.fromFormat(str, format).setZone('UTC', {
@@ -25,12 +27,19 @@ export const objDateTimeToISO = (obj: any) =>
   )
 
 export const formatShortDate = (date: DateTime): string =>
-  date.setZone('Europe/Helsinki').toFormat('d.L')
+  date.setZone(HEL_TZ).toFormat('d.L.')
+
+export const formatShortDateWithWeekday = (date: DateTime): string =>
+  date.setZone(HEL_TZ).toFormat('ccc d.L.')
 
 export const formatShortDateTime = (date: DateTime): string => {
   const today = DateTime.local()
-  date = date.setZone('Europe/Helsinki')
+  date = date.setZone(HEL_TZ)
   return date.hasSame(today, 'day')
     ? date.toFormat('HH:mm')
     : date.toFormat('d.L. HH:mm')
+}
+
+export const formatTime = (date: DateTime): string => {
+  return date.setZone(HEL_TZ).toFormat('HH:mm')
 }

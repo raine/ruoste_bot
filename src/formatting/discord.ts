@@ -1,4 +1,5 @@
 import * as Discord from 'discord.js'
+import { DateTime } from 'luxon'
 import * as R from 'ramda'
 import { FullServer, ListServer } from '../just-wiped'
 import TimeAgo from 'javascript-time-ago'
@@ -9,14 +10,17 @@ import {
   formatRelativeDate,
   lastUpdatedAt
 } from './general'
-import { formatShortDate, formatShortDateTime } from '../date'
+import { formatShortDateWithWeekday, formatTime } from '../date'
 
 const RUST_COLOR = 0xce422a
 const DESCRIPTION_MAX_LENGTH = 2048
 
 TimeAgo.addLocale(require('javascript-time-ago/locale/en'))
 
-const link = (text: string, href: string): string => `[${text}](${href})`
+// There is no way to escape [ in text, so replacing [ -> ( etc.
+const link = (text: string, href: string): string =>
+  `[${text.replace(/\[/g, '(').replace(/\]/g, ')')}](${href})`
+
 const bold = (str: string) => `**${str}**`
 const truncate = (n: number, str: string) =>
   str.length > n ? str.slice(0, n) + `…` : str
@@ -31,17 +35,14 @@ const formatServerInfoSection = (
     url,
     moddedMultiplier
   }: ListServer,
-  noCurrentPlayers = false
+  { showPlayers = true, showMapSize = true, showRating = true } = {}
 ): string =>
   [
-    noCurrentPlayers
-      ? playersMax
-      : formatPlayerCount({ playersCurrent, playersMax }),
+    showPlayers ? formatPlayerCount({ playersCurrent, playersMax }) : null,
     moddedMultiplier ? moddedMultiplier + 'x' : null,
-    mapSize,
-    `${rating}%`,
-    formatMaxGroup(maxGroup),
-    link('🔗', url)
+    showMapSize ? mapSize : null,
+    showRating ? `${rating}%` : null,
+    formatMaxGroup(maxGroup)
   ]
     .filter(Boolean)
     .join(', ')
@@ -49,8 +50,8 @@ const formatServerInfoSection = (
 const formatServerToLine = (server: ListServer /* , idx: number */): string =>
   bold(formatRelativeDate(server.lastWipe, 'twitter')) +
   ' | ' +
-  truncate(25, server.name) +
-  ` **[${formatServerInfoSection(server)}]**`
+  link(truncate(25, server.name), server.url) +
+  ` (${formatServerInfoSection(server)})`
 
 export const formatServerListReply = (
   servers: ListServer[],
@@ -69,7 +70,7 @@ export const formatServerListReply = (
     ...(filteredServersCount > 0
       ? {
           footer: {
-            text: `${filteredServersCount} servers not shown to reduce noise`
+            text: `${filteredServersCount} servers hidden to reduce noise`
           }
         }
       : {})
@@ -90,25 +91,66 @@ export const formatServerListReplyWithUpdatedAt = (
   }
 }
 
-const formatWipeListServer = (server: FullServer): Discord.EmbedFieldData => {
-  const { name, url, nextWipe } = server
-  return {
-    name:
-      nextWipe!.accuracy === 'DATE'
-        ? formatShortDate(nextWipe!.date)
-        : formatShortDateTime(nextWipe!.date),
-    value: `${link(name, url)} (${formatServerInfoSection(server, true)})`
-  }
+export const formatUpcomingWipe = (server: FullServer) => {
+  const infoStr = formatServerInfoSection(server, {
+    showMapSize: false,
+    showPlayers: false,
+    showRating: false
+  })
+
+  return (
+    (server.nextWipe!.accuracy === 'TIME'
+      ? formatTime(server.nextWipe!.date) + ' '
+      : '??:?? ') +
+    link(truncate(30, server.name), server.url) +
+    (infoStr.length ? ` (${infoStr})` : '')
+  )
 }
+
+const VALUE_MAX_LEN = 1024
+
+// Discord has 1024 character limit for EmbedFieldData value so date may have
+// to split into multiple fields
+export const formatUpcomingWipeListFields = (serversGroupedByDate: {
+  [date: string]: FullServer[]
+}): Discord.EmbedFieldData[] =>
+  Object.entries(serversGroupedByDate).reduce<Discord.EmbedFieldData[]>(
+    (fieldsAcc, [date, servers]) => {
+      const values = servers.reduce<string[]>((valuesAcc, server) => {
+        const init = valuesAcc.slice(0, -1)
+        const last = R.last(valuesAcc) ?? ''
+        const wipeLine = formatUpcomingWipe(server)
+        const newLast = (last + '\n' + wipeLine).trim()
+        if (newLast.length < VALUE_MAX_LEN) return [...init, newLast]
+        else return [...init, last, wipeLine]
+      }, [])
+
+      return [
+        ...fieldsAcc,
+        ...values.map((value, idx) => ({
+          name: idx === 0 ? date : '…',
+          value
+        }))
+      ]
+    },
+    []
+  )
 
 export const formatUpcomingWipeList = (
   serverCount: number,
   fetchedCount: number,
   servers: FullServer[]
 ): Discord.MessageEmbedOptions => {
+  const thisWeeksWipes = servers.filter(
+    (server) => server.nextWipe!.date < DateTime.local().endOf('week')
+  )
   const sortedByNextWipe = R.sortWith(
     [R.ascend(({ nextWipe }) => (nextWipe ? nextWipe.date : 0))],
-    servers
+    thisWeeksWipes
+  )
+  const groupedByDate = R.groupBy(
+    (server) => formatShortDateWithWeekday(server.nextWipe!.date),
+    sortedByNextWipe
   )
   return {
     description:
@@ -116,7 +158,7 @@ export const formatUpcomingWipeList = (
         ? `Loading... ${((fetchedCount / serverCount) * 100).toFixed(0)}%`
         : undefined,
     color: RUST_COLOR,
-    fields: sortedByNextWipe.map(formatWipeListServer)
+    fields: formatUpcomingWipeListFields(groupedByDate)
   }
 }
 
