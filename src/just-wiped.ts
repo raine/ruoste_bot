@@ -79,6 +79,24 @@ export const parseModdedMultiplier = (str: string): number | null => {
   else return null
 }
 
+export const parseMaxGroup = (str: string): number | null => {
+  const patterns = [
+    /(?:max\s)?team\s?limit (?:is )?(\d+)/i,
+    /max group (\d+)/i,
+    /max (?:team|group):? (\d+)/i,
+    /(?:max\s)?(?:group|team) limit: (\d+)/i
+  ]
+  return patterns.reduce<number | null>(
+    (acc, p) =>
+      acc ??
+      (() => {
+        const m = str.match(p)
+        return m ? parseInt(m[1]) : null
+      })(),
+    null
+  )
+}
+
 const parseYesNo = (str: string): boolean => str === 'Yes'
 const getText = (c: cheerio.Cheerio) => c.text().trim()
 
@@ -161,12 +179,17 @@ export const parseServerPage = (html: string): FullServer => {
     .map((_, elem) => parseRawWipeDate($(elem).text().trim()))
     .get()
   const mapImagePath = $('.info-table .map img').attr('data-beforeviewport-src')
+  const description = $('.server-show .description').text().trim()
+  const server = parseServerBoxElement($('.server.server-head'))
 
   return {
-    ...parseServerBoxElement($('.server.server-head')),
+    ...server,
+    ...(server.maxGroup == null
+      ? { maxGroup: parseMaxGroup(description) }
+      : {}),
     wipes,
-    nextWipe: nextWipe(wipes),
-    ...(mapImagePath ? { mapImageUrl: JUST_WIPED_BASE_URL + mapImagePath } : {})
+    nextWipe: nextWipe(wipes, server.name),
+    ...(mapImagePath ? { mapImageUrl: mapImagePath } : {})
   }
 }
 

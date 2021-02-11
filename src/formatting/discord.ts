@@ -32,7 +32,6 @@ const formatServerInfoSection = (
     mapSize,
     rating,
     maxGroup,
-    url,
     moddedMultiplier
   }: ListServer,
   { showPlayers = true, showMapSize = true, showRating = true } = {}

@@ -6,9 +6,12 @@ import {
   parseServerPage,
   getServerAddress,
   getIdFromServerLink,
-  parseModdedMultiplier
+  parseModdedMultiplier,
+  getServer,
+  parseMaxGroup
 } from '../src/just-wiped'
 import { DateTime } from 'luxon'
+import { back as nockBack } from 'nock'
 
 const dateTimeToISO = (x: any) => (x instanceof DateTime ? x.toISO() : x)
 const objDateTimeToISO = (obj: any) =>
@@ -113,11 +116,20 @@ describe('parseServerPage', () => {
       'https://just-wiped.net/maps/219212/9c37e072a8d10d91a1b06a0b8f252bc4e4ae3605.jpg'
     )
   })
+
+  test('parses max group from description as fallback', async () => {
+    const { nockDone } = await nockBack('suolakaivos.json')
+    const server = await getServer(1168733)
+    nockDone()
+    expect(server.maxGroup).toBe(6)
+  })
 })
 
 describe('getServerAddress', () => {
   test('works', async () => {
+    const { nockDone } = await nockBack('get-server-address.json')
     expect(await getServerAddress(501174)).toBe('213.32.46.191:27222')
+    nockDone()
   })
 })
 
@@ -144,5 +156,17 @@ describe('parseModdedMultiplier', () => {
     expect(
       parseModdedMultiplier('[EU] RustyKing 3X - Solo Only - Wipe Sundays')
     ).toBe(3)
+  })
+})
+
+describe('parseMaxGroup', () => {
+  test('works', () => {
+    expect(parseMaxGroup('foo\nTeam limit is 6!foo\nbar')).toBe(6)
+    expect(
+      parseMaxGroup('alliances! Max team 5 players Vanilla. No scam')
+    ).toBe(5)
+    expect(parseMaxGroup('✯ Max Team: 8 Players ')).toBe(8)
+    expect(parseMaxGroup('Max teamlimit 8, ')).toBe(8)
+    expect(parseMaxGroup('Group limit: 5')).toBe(5)
   })
 })

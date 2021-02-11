@@ -8,6 +8,31 @@ type IntervalWithDays = {
   days: number
 }
 
+const DATETIME_FORMATS = ['dd.MM.', 'dd.MM', 'd.M.', 'd.M']
+
+export const parseNextWipeDateFromName = (
+  name: string
+): DateTime | undefined => {
+  const patterns = [/Next wipe (\d{1,2}\.\d{1,2})\.?/]
+  const dateStr = patterns.reduce<string | null>(
+    (acc, p) =>
+      acc ??
+      (() => {
+        const m = name.match(p)
+        return m ? m[1] : null
+      })(),
+    null
+  )
+
+  return dateStr
+    ? DATETIME_FORMATS.reduce<DateTime | undefined>((acc, format) => {
+        if (acc) return acc
+        const parsed = fromFormatUTC(dateStr, format)
+        if (parsed.isValid) return parsed
+      }, undefined)
+    : undefined
+}
+
 const uniqByStartOfDay = (dts: DateTime[]): DateTime[] =>
   R.uniqBy((dt: DateTime) => dt.startOf('day').toMillis(), dts)
 
@@ -74,7 +99,10 @@ const getWipeTimeFromDates = (dates: DateTime[]): DateTime | null =>
 
 // TODO: If next wipe date is first thursday of month, wipe time cant be
 // calculated based on data
-const nextWipe = (wipes: DateTime[]): NextWipe => {
+const nextWipe = (wipes: DateTime[], serverName?: string): NextWipe => {
+  const nextWipeDateFromServerName = serverName
+    ? parseNextWipeDateFromName(serverName)
+    : undefined
   log.info(wipes.map(toISOWithWeekday), 'previous wipes')
   const sortedUniqWipes = uniqByStartOfDay(
     R.sortBy((dt: DateTime) => dt.toMillis(), wipes)
@@ -100,7 +128,9 @@ const nextWipe = (wipes: DateTime[]): NextWipe => {
   const mostCommonInterval = R.head(intervalDayCounts)
   if (!(mostCommonInterval && mostCommonInterval.count >= 2)) {
     log.info('no regular wipe interval stands out')
-    return null
+    if (nextWipeDateFromServerName)
+      return { date: nextWipeDateFromServerName, accuracy: 'DATE' }
+    else return null
   }
 
   log.info(mostCommonInterval, 'most common wipe interval in days')
@@ -151,9 +181,23 @@ const nextWipe = (wipes: DateTime[]): NextWipe => {
       : null
   })
 
+  let resultDateTime = nextWipeDateTime ?? nextWipeDate
+
+  if (nextWipeDateFromServerName) {
+    if (nextWipeDateTime) {
+      // Use the date parsed from name but take time from guessed datetime
+      resultDateTime = nextWipeDateFromServerName.set({
+        hour: nextWipeDateTime.hour,
+        minute: nextWipeDateTime.minute
+      })
+    } else {
+      resultDateTime = nextWipeDateFromServerName
+    }
+  }
+
   return nextWipeDate
     ? {
-        date: nextWipeDateTime || nextWipeDate,
+        date: resultDateTime,
         accuracy: nextWipeDateTime ? 'TIME' : 'DATE'
       }
     : null

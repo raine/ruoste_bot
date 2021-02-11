@@ -1,11 +1,11 @@
 import * as d from 'dedent'
 import { parseRawWipeDate } from '../src/just-wiped'
-import _nextWipe from '../src/next-wipe'
+import _nextWipe, { parseNextWipeDateFromName } from '../src/next-wipe'
 import { DateTime } from 'luxon'
 import { roundDateTimeHour, objDateTimeToISO } from '../src/date'
-import * as R from 'ramda'
 
-const nextWipe = R.pipe(_nextWipe, objDateTimeToISO)
+//@ts-ignore
+const nextWipe = (...args) => objDateTimeToISO(_nextWipe(...args))
 
 const toDateTimes = (str: string) =>
   str
@@ -92,10 +92,41 @@ describe('nextWipe', () => {
       accuracy: 'TIME'
     })
   })
+
+  test('parses next wipe from server title and overrides the guessed date and preserves time', () => {
+    const year = DateTime.local().year
+    const serverName =
+      '[EU/FIN]Kuningas servu/Vanilla/Max 5/Wiped 4.2/Next wipe 9.7'
+    const wipes = toDateTimes(d`
+      04.07.${year} - 20:27 UTC
+      04.07.${year} - 20:22 UTC
+      01.07.${year} - 12:11 UTC
+      24.06.${year} - 12:00 UTC
+      17.06.${year} - 12:00 UTC`)
+    expect(nextWipe(wipes, serverName)).toEqual({
+      date: `${year}-07-09T12:00:00.000Z`,
+      accuracy: 'TIME'
+    })
+  })
+
+  test.only('parses next wipe from server title and overrides the guessed date and preserves time', () => {
+    const serverName =
+      '[EU/FIN]Kuningas servu/Vanilla/Max 5/Wiped 4.2/Next wipe 18.2'
+    const wipes = toDateTimes(d`
+      04.02.2021 - 19:11 UTC
+      21.01.2021 - 13:14 UTC
+      07.01.2021 - 19:09 UTC
+      31.12.2020 - 10:59 UTC
+      24.12.2020 - 22:20 UTC`)
+    expect(nextWipe(wipes, serverName)).toEqual({
+      date: `2021-02-18T00:00:00.000Z`,
+      accuracy: 'DATE'
+    })
+  })
 })
 
 describe('roundDateTimeHour', () => {
-  const roundDateTimeHourISO = (isoDate) =>
+  const roundDateTimeHourISO = (isoDate: string) =>
     roundDateTimeHour(DateTime.fromISO(isoDate).setZone('utc')).toISO()
 
   test('rounds hour forward', () => {
@@ -108,5 +139,19 @@ describe('roundDateTimeHour', () => {
     expect(roundDateTimeHourISO('2019-06-19T12:15:00.000Z')).toBe(
       '2019-06-19T12:00:00.000Z'
     )
+  })
+})
+
+describe('parseNextWipeDateFromName', () => {
+  function run(input: any, output: any) {
+    expect(parseNextWipeDateFromName(input).toISO()).toContain(output)
+  }
+
+  test('works', () => {
+    run('Next wipe 18.2', '-02-18T')
+    run('Next wipe 18.2.', '-02-18T')
+    run('Next wipe 18.02.', '-02-18T')
+    run('Next wipe 08.02.', '-02-08T')
+    run('Next wipe 8.02.', '-02-08T')
   })
 })
