@@ -8,6 +8,7 @@
     "baconjs": "^3.0.17",
     "cheerio": "^1.0.0-rc.5",
     "discord.js": "^12.5.1",
+    "dotenv": "^8.2.0",
     "got": "^11.8.2",
     "javascript-time-ago": "^2.3.4",
     "luxon": "^1.26.0",
