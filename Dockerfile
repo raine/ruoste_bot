@@ -13,4 +13,4 @@ ENV NODE_ENV=production
 COPY --from=0 /app/dist ./dist
 COPY --from=0 /app/node_modules ./node_modules
 COPY --from=0 /app/src/legit-servers.json ./dist/legit-servers.json
-CMD ["node", "dist/index.js"]
+CMD ["node", "dist/main.js"]

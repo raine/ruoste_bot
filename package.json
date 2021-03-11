@@ -50,6 +50,6 @@
     "test:jest:watch": "yarn jest --watch",
     "test:lint": "eslint src/",
     "build": "tsc",
-    "dev": "ts-node-dev --files --no-notify --ignore-watch node_modules --respawn src/index.ts"
+    "dev": "ts-node-dev --files --no-notify --ignore-watch node_modules --respawn src/main.ts"
   }
 }
