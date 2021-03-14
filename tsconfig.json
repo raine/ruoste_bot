@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "esModuleInterop": true,
     "typeRoots": ["./src/types", "node_modules/@types"],
     "allowJs": true,
     "allowSyntheticDefaultImports": true,

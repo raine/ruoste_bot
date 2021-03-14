@@ -11,6 +11,7 @@ import {
   lastUpdatedAt
 } from './general'
 import { formatShortDateWithWeekday, formatTime } from '../date'
+import * as rustplus from '../rustplus'
 
 const RUST_COLOR = 0xce422a
 const DESCRIPTION_MAX_LENGTH = 2048
@@ -204,3 +205,11 @@ export const formatServerEmbed = (
     formatInlineEmbedField('Connect', `client.connect ${address}`)
   ]
 })
+
+export const formatSmartAlarmAlert = (
+  alert: rustplus.SmartAlarmNotificationData
+) => {
+  const title = Discord.Util.escapeMarkdown(alert.title)
+  const message = Discord.Util.escapeMarkdown(alert.message)
+  return `🚨 **${title}** — ${message}`
+}

@@ -1,7 +1,7 @@
 import got from 'got'
 import * as R from 'ramda'
 import * as qs from 'querystring'
-import * as cheerio from 'cheerio'
+import cheerio from 'cheerio'
 import { DateTime } from 'luxon'
 import { fromFormatUTC } from './date'
 import log from './logger'

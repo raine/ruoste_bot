@@ -1,4 +1,4 @@
-import * as memoizee from 'memoizee'
+import memoizee from 'memoizee'
 
 const pMemoize = <F extends (...args: any[]) => any>(
   fn: F,
