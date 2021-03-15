@@ -83,6 +83,8 @@ export async function getTeamInfo(): Promise<AppTeamInfo> {
   ).then((res) => res.teamInfo)
 }
 
+let connectAttempts = 0
+
 // NOTE: The websocket will connect with incorrect player token and steam id,
 // you have to request some data to check if the credentials work
 export function listen(config: RustPlusConfig) {
@@ -111,15 +113,24 @@ export function listen(config: RustPlusConfig) {
     log.error(err, 'Rust websocket error')
   })
 
+  socket.on('connecting', () => {
+    connectAttempts += 1
+    log.info('Rust websocket connecting')
+  })
+
   socket.on('disconnected', () => {
-    log.error('Rust websocket disconnected')
-    listen(config)
+    const backOffDelay = Math.min(10000, 10 ** connectAttempts)
+    log.error(`Rust websocket disconnected, reconnecting in ${backOffDelay}ms`)
+    setTimeout(() => {
+      listen(config)
+    }, backOffDelay)
   })
 
   socket.connect()
 
   socketConnectedP = new Promise<void>((resolve) => {
     socket.once('connected', () => {
+      connectAttempts = 0
       log.info('Connected to rust server')
       resolve()
     })
