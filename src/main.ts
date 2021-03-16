@@ -5,6 +5,7 @@ import log from './logger'
 import startTelegramBot from './telegram'
 import startDiscordBot from './discord'
 import * as rustplus from './rustplus'
+import { validate } from './validate'
 
 async function main() {
   try {

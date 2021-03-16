@@ -73,8 +73,13 @@ export const RustPlusConfigField = t.keyof({
 
 export type RustPlusConfigField = t.TypeOf<typeof RustPlusConfigField>
 
+export type MapEvent = {
+  type: 'CARGO_SHIP_ENTERED' | 'CARGO_SHIP_LEFT'
+}
+
 export interface RustPlusEvents {
   alarm: (data: SmartAlarmNotificationData) => void
   pairing: (data: PairingNotificationData) => void
   team: (data: TeamNotificationData) => void
+  mapEvent: (data: MapEvent) => void
 }

@@ -24,6 +24,7 @@
     "p-map": "^4.0.0",
     "pg-promise": "^10.9.5",
     "pino": "^6.11.2",
+    "protobufjs": "^6.10.2",
     "push-receiver": "^2.1.1",
     "ramda": "^0.27.1",
     "telegraf": "^3.38.0",

@@ -4,6 +4,7 @@ const logger = pino({
   prettyPrint:
     process.env.NODE_ENV !== 'production'
       ? { ignore: 'pid,hostname,time' }
-      : false
+      : false,
+  level: 'info'
 })
 export default logger

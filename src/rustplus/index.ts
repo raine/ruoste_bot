@@ -9,6 +9,7 @@ export * from './types'
 import snakecase from 'lodash.snakecase'
 import * as rustplus from './rustplus-socket'
 export * from './rustplus-socket'
+import { trackMapEvents } from './map-events'
 import _ from 'lodash'
 
 const useFakePushReceiver = process.env.FAKE_FCM === '1'
@@ -113,6 +114,10 @@ export async function init(): Promise<void> {
     log.info(pairing.body, 'Got a request to pair')
   })
 
+  events.on('mapEvent', (mapEvent) => {
+    log.info(mapEvent, 'Map event')
+  })
+
   await initEmptyConfig()
 
   let config
@@ -125,4 +130,5 @@ export async function init(): Promise<void> {
 
   if (config.fcmCredentials) await fcmListen(config.fcmCredentials)
   await rustplus.listen(config)
+  trackMapEvents(events)
 }
