@@ -1,4 +1,4 @@
-import * as d from 'dedent'
+import d from 'dedent'
 import { parseRawWipeDate } from '../src/just-wiped'
 import _nextWipe, { parseNextWipeDateFromName } from '../src/next-wipe'
 import { DateTime } from 'luxon'
@@ -109,7 +109,7 @@ describe('nextWipe', () => {
     })
   })
 
-  test.only('parses next wipe from server title and overrides the guessed date and preserves time', () => {
+  test('parses next wipe from server title and overrides the guessed date and preserves time', () => {
     const serverName =
       '[EU/FIN]Kuningas servu/Vanilla/Max 5/Wiped 4.2/Next wipe 18.2'
     const wipes = toDateTimes(d`
@@ -144,7 +144,7 @@ describe('roundDateTimeHour', () => {
 
 describe('parseNextWipeDateFromName', () => {
   function run(input: any, output: any) {
-    expect(parseNextWipeDateFromName(input).toISO()).toContain(output)
+    expect(parseNextWipeDateFromName(input)!.toISO()).toContain(output)
   }
 
   test('works', () => {

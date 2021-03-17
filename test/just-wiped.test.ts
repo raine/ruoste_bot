@@ -113,7 +113,7 @@ describe('parseServerPage', () => {
     )
     const server = parseServerPage(rawServerPage)
     expect(server.mapImageUrl).toBe(
-      'https://just-wiped.net/maps/219212/9c37e072a8d10d91a1b06a0b8f252bc4e4ae3605.jpg'
+      '/maps/219212/9c37e072a8d10d91a1b06a0b8f252bc4e4ae3605.jpg'
     )
   })
 
