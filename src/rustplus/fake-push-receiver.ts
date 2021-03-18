@@ -1,10 +1,9 @@
 import { TypedEmitter } from 'tiny-typed-emitter'
-import { FcmNotification } from '.'
 import * as uuid from 'uuid'
 
-type OnFcmNotification = (n: FcmNotification) => void
+type OnFcmNotification = (n: any) => void
 
-const STORAGE_MONITOR_PAIRING: FcmNotification = {
+const STORAGE_MONITOR_PAIRING = {
   notification: {
     data: {
       title: 'Storage Monitor',
@@ -17,7 +16,7 @@ const STORAGE_MONITOR_PAIRING: FcmNotification = {
   persistentId: uuid.v4()
 }
 
-const ALARM: FcmNotification = {
+const ALARM = {
   notification: {
     data: {
       title: 'Alarm',

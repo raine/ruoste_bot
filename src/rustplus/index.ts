@@ -62,7 +62,20 @@ async function onFcmNotification(raw: any) {
 
   try {
     const data = validate(FcmNotification, raw)
+    const config = await getConfig()
     await addPersistentId(data.persistentId)
+    const { ip, port } = data.notification.data.body
+    const isNotificationFromCurrentServer =
+      ip === config.serverHost && port === config.serverPort
+    const isServerPairingNotification =
+      data.notification.data.channelId === 'pairing' &&
+      data.notification.data.body.type === 'server'
+
+    // Ignored alarms etc. from FCM notifications that are not from the current server
+    // Still need the server pairing notification though
+    if (!isNotificationFromCurrentServer && !isServerPairingNotification) return
+
+    //@ts-ignore
     events.emit(data.notification.data.channelId, data.notification.data)
   } catch (err) {
     log.warn(err)

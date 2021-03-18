@@ -4,46 +4,59 @@ import { JsonFromString } from 'io-ts-types/lib/JsonFromString'
 
 type ChannelId = 'alarm' | 'team' | 'pairing'
 
-const notification = (channelId: ChannelId) =>
-  t.intersection([
-    BaseNotificationData,
-    t.type({
-      channelId: t.literal(channelId),
-      body: t.any
-    })
-  ])
+const Server = t.type({
+  ip: t.string,
+  port: t.string.pipe(NumberFromString)
+})
 
 export const BaseNotificationData = t.type({
   title: t.string,
   message: t.string
 })
 
-export const TeamNotificationData = notification('team')
-export const SmartAlarmNotificationData = notification('alarm')
+export const TeamNotificationData = t.intersection([
+  BaseNotificationData,
+  t.type({
+    channelId: t.literal('team'),
+    body: t.string.pipe(JsonFromString).pipe(Server)
+  })
+])
+
+export const SmartAlarmNotificationData = t.intersection([
+  BaseNotificationData,
+  t.type({
+    channelId: t.literal('alarm'),
+    body: t.string.pipe(JsonFromString).pipe(Server)
+  })
+])
 
 export const EntityPairingData = t.type({
   channelId: t.literal('pairing'),
   body: t.string.pipe(JsonFromString).pipe(
-    t.strict({
-      entityId: t.string,
-      entityName: t.string,
-      entityType: t.string,
-      type: t.literal('entity')
-    })
+    t.intersection([
+      Server,
+      t.type({
+        entityId: t.string,
+        entityName: t.string,
+        entityType: t.string,
+        type: t.literal('entity')
+      })
+    ])
   )
 })
 
 export const ServerPairingData = t.type({
   channelId: t.literal('pairing'),
   body: t.string.pipe(JsonFromString).pipe(
-    t.strict({
-      ip: t.string,
-      port: t.string.pipe(NumberFromString),
-      name: t.string,
-      type: t.literal('server'),
-      playerId: t.string,
-      playerToken: t.string.pipe(NumberFromString)
-    })
+    t.intersection([
+      Server,
+      t.strict({
+        name: t.string,
+        type: t.literal('server'),
+        playerId: t.string,
+        playerToken: t.string.pipe(NumberFromString)
+      })
+    ])
   )
 })
 
