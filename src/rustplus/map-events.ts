@@ -66,6 +66,7 @@ export function trackMapEvents(emitter: TypedEmitter<RustPlusEvents>) {
       log.error(err, 'Error while checking for map events')
     }
 
-    timeoutId = setTimeout(loop, 5000)
+    // TODO!
+    timeoutId = setTimeout(loop, 60000)
   })()
 }
