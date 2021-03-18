@@ -78,7 +78,7 @@ export const AppMarker = t.type({
   steamId: t.string,
   rotation: t.number,
   radius: t.number,
-  name: t.string
+  name: t.union([t.string, t.undefined])
 })
 
 export type AppMarker = t.TypeOf<typeof AppMarker>
