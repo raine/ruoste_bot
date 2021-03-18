@@ -1,4 +1,5 @@
 import * as t from 'io-ts'
+import { NumberFromString } from 'io-ts-types/lib/NumberFromString'
 import { JsonFromString } from 'io-ts-types/lib/JsonFromString'
 
 type ChannelId = 'alarm' | 'team' | 'pairing'
@@ -19,18 +20,36 @@ export const BaseNotificationData = t.type({
 
 export const TeamNotificationData = notification('team')
 export const SmartAlarmNotificationData = notification('alarm')
+
+export const EntityPairingData = t.type({
+  channelId: t.literal('pairing'),
+  body: t.string.pipe(JsonFromString).pipe(
+    t.strict({
+      entityId: t.string,
+      entityName: t.string,
+      entityType: t.string,
+      type: t.literal('entity')
+    })
+  )
+})
+
+export const ServerPairingData = t.type({
+  channelId: t.literal('pairing'),
+  body: t.string.pipe(JsonFromString).pipe(
+    t.strict({
+      ip: t.string,
+      port: t.string.pipe(NumberFromString),
+      name: t.string,
+      type: t.literal('server'),
+      playerId: t.string,
+      playerToken: t.string.pipe(NumberFromString)
+    })
+  )
+})
+
 export const PairingNotificationData = t.intersection([
   BaseNotificationData,
-  t.type({
-    channelId: t.literal('pairing'),
-    body: t.string.pipe(JsonFromString).pipe(
-      t.strict({
-        entityId: t.string,
-        entityName: t.string,
-        entityType: t.string
-      })
-    )
-  })
+  t.union([EntityPairingData, ServerPairingData])
 ])
 
 export const NotificationData = t.union([
@@ -82,4 +101,5 @@ export interface RustPlusEvents {
   pairing: (data: PairingNotificationData) => void
   team: (data: TeamNotificationData) => void
   mapEvent: (data: MapEvent) => void
+  connected: () => void
 }

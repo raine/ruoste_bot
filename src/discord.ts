@@ -98,19 +98,16 @@ const commands: (client: Discord.Client) => Commands = (client) => ({
               serverPort: parseInt(port)
             })
             await msg.reply('Server updated!')
-            updateBotActivityLoop(client)
             return
           }
           case 'steamid': {
             await rustplus.configure({ playerSteamId: value })
             await msg.reply('Player steam id updated!')
-            updateBotActivityLoop(client)
             return
           }
           case 'playertoken': {
             await rustplus.configure({ playerToken: parseInt(value) })
             await msg.reply('Player token updated!')
-            updateBotActivityLoop(client)
             return
           }
           case 'alerts_channel': {
@@ -210,6 +207,10 @@ export default function start() {
     }
   }
 
+  function onRustSocketConnected() {
+    updateBotActivityLoop(client)
+  }
+
   client.on('ready', () => {
     log.info(`Logged in as ${client.user?.tag}!`)
 
@@ -218,7 +219,11 @@ export default function start() {
 
     // The promise may not exist if there's configuration missing at start
     rustplus.socketConnectedP
-      ?.then(() => updateBotActivityLoop(client))
+      ?.then(() => {
+        rustplus.events.removeListener('connected', onRustSocketConnected)
+        rustplus.events.on('connected', onRustSocketConnected)
+        updateBotActivityLoop(client)
+      })
       .catch((err) => log.error(err))
   })
 

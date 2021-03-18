@@ -4,6 +4,7 @@ import { validate } from '../validate'
 import log from '../logger'
 import { RustPlusConfig } from '.'
 import protobuf, { Message } from 'protobufjs'
+import { events } from './'
 
 export let socket: any
 export let socketConnectedP: Promise<void>
@@ -147,11 +148,16 @@ export async function getMapMarkers(): Promise<AppMarker[]> {
 }
 
 let connectAttempts = 0
+let onSocketDisconnected: (() => void) | undefined
 
 // NOTE: The websocket will connect with incorrect player token and steam id,
 // you have to request some data to check if the credentials work
 export async function listen(config: RustPlusConfig) {
-  if (socket) socket.disconnect()
+  if (socket) {
+    log.info('Disconnecting existing socket')
+    socket.removeListener('disconnected', onSocketDisconnected)
+    socket.disconnect()
+  }
 
   socket = new RustPlus(
     config.serverHost,
@@ -181,14 +187,16 @@ export async function listen(config: RustPlusConfig) {
     log.info('Rust websocket connecting')
   })
 
-  socket.on('disconnected', () => {
+  onSocketDisconnected = () => {
     socketConnected = false
     const backOffDelay = Math.min(10000, 10 ** connectAttempts)
     log.error(`Rust websocket disconnected, reconnecting in ${backOffDelay}ms`)
     setTimeout(() => {
       listen(config)
     }, backOffDelay)
-  })
+  }
+
+  socket.on('disconnected', onSocketDisconnected)
 
   socket.connect()
 
@@ -196,7 +204,7 @@ export async function listen(config: RustPlusConfig) {
     socket.once('connected', () => {
       socketConnected = true
       connectAttempts = 0
-      log.info('Connected to rust server')
+      events.emit('connected')
       resolve()
     })
   })

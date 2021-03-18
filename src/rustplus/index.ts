@@ -110,12 +110,24 @@ export async function init(): Promise<void> {
     log.info(alert, 'Got an alert')
   })
 
-  events.on('pairing', (pairing) => {
-    log.info(pairing.body, 'Got a request to pair')
+  events.on('pairing', async (pairing) => {
+    log.info(pairing.body, `Got a request to pair ${pairing.body.type}`)
+    if (pairing.body.type === 'server') {
+      await configure({
+        serverHost: pairing.body.ip,
+        serverPort: pairing.body.port,
+        playerToken: pairing.body.playerToken,
+        playerSteamId: pairing.body.playerId
+      })
+    }
   })
 
   events.on('mapEvent', (mapEvent) => {
     log.info(mapEvent, 'Map event')
+  })
+
+  events.on('connected', () => {
+    log.info('Connected to rust server')
   })
 
   await initEmptyConfig()
@@ -130,5 +142,8 @@ export async function init(): Promise<void> {
 
   if (config.fcmCredentials) await fcmListen(config.fcmCredentials)
   await rustplus.listen(config)
+
+  // TODO: This should happen in .listen and clear the state
+  // Otherwise, when changing servers, new markers will be registered
   trackMapEvents(events)
 }
