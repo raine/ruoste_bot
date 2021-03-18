@@ -38,11 +38,12 @@ export function getMapEvents(
   ]
 }
 
-let lastMapMarkers: AppMarker[]
-let timeoutId: NodeJS.Timeout
+let lastMapMarkers: AppMarker[] | undefined
+let timeoutId: NodeJS.Timeout | undefined
 
 export function trackMapEvents(emitter: TypedEmitter<RustPlusEvents>) {
-  clearInterval(timeoutId)
+  if (timeoutId) clearInterval(timeoutId)
+  lastMapMarkers = undefined
   log.info('Starting to track map events')
   ;(async function loop() {
     try {
