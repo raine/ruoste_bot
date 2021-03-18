@@ -20,9 +20,7 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  log.error(err)
-})
+main()
 
 process.on('unhandledRejection', (err) => {
   if (err) log.error(err)
