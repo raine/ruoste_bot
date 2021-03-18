@@ -217,14 +217,11 @@ export default function start() {
     rustplus.events.removeListener('alarm', onSmartAlarmAlert)
     rustplus.events.on('alarm', onSmartAlarmAlert)
 
+    rustplus.events.removeListener('connected', onRustSocketConnected)
+    rustplus.events.on('connected', onRustSocketConnected)
+
     // The promise may not exist if there's configuration missing at start
-    rustplus.socketConnectedP
-      ?.then(() => {
-        rustplus.events.removeListener('connected', onRustSocketConnected)
-        rustplus.events.on('connected', onRustSocketConnected)
-        updateBotActivityLoop(client)
-      })
-      .catch((err) => log.error(err))
+    rustplus.socketConnectedP?.then(() => updateBotActivityLoop(client))
   })
 
   client.on('message', (msg) => {

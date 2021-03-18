@@ -148,6 +148,7 @@ export async function getMapMarkers(): Promise<AppMarker[]> {
 }
 
 let connectAttempts = 0
+let backOffDelayTimeout: NodeJS.Timeout
 let onSocketDisconnected: (() => void) | undefined
 
 // NOTE: The websocket will connect with incorrect player token and steam id,
@@ -155,6 +156,7 @@ let onSocketDisconnected: (() => void) | undefined
 export async function listen(config: RustPlusConfig) {
   if (socket) {
     log.info('Disconnecting existing socket')
+    clearTimeout(backOffDelayTimeout)
     socket.removeListener('disconnected', onSocketDisconnected)
     socket.disconnect()
   }
@@ -191,7 +193,7 @@ export async function listen(config: RustPlusConfig) {
     socketConnected = false
     const backOffDelay = Math.min(10000, 10 ** connectAttempts)
     log.error(`Rust websocket disconnected, reconnecting in ${backOffDelay}ms`)
-    setTimeout(() => {
+    backOffDelayTimeout = setTimeout(() => {
       listen(config)
     }, backOffDelay)
   }

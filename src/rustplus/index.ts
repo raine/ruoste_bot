@@ -53,7 +53,7 @@ export async function configure(cfg: Partial<RustPlusConfig>): Promise<void> {
     cfg.playerToken ||
     cfg.playerSteamId
   ) {
-    await rustplus.listen(await getConfig())
+    rustplus.listen(await getConfig())
   }
 }
 
@@ -128,6 +128,7 @@ export async function init(): Promise<void> {
 
   events.on('connected', () => {
     log.info('Connected to rust server')
+    trackMapEvents(events)
   })
 
   await initEmptyConfig()
@@ -141,9 +142,6 @@ export async function init(): Promise<void> {
   }
 
   if (config.fcmCredentials) await fcmListen(config.fcmCredentials)
-  await rustplus.listen(config)
 
-  // TODO: This should happen in .listen and clear the state
-  // Otherwise, when changing servers, new markers will be registered
-  trackMapEvents(events)
+  rustplus.listen(config)
 }
