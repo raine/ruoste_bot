@@ -95,14 +95,19 @@ async function parseResponse<T>(
 ): Promise<T> {
   const proto = await protobuf.load(RUSTPLUS_PROTO_PATH)
   const AppResponse = proto.lookupType('rustplus.AppResponse')
-  return validate(
-    type,
-    AppResponse.toObject(response, {
-      longs: String,
-      enums: String,
-      bytes: String
-    })
-  )
+  try {
+    return validate(
+      type,
+      AppResponse.toObject(response, {
+        longs: String,
+        enums: String,
+        bytes: String
+      })
+    )
+  } catch (err) {
+    log.error(response, 'Failed to validate response')
+    throw new Error(err)
+  }
 }
 
 export async function sendRequestAsync(...args: any[]): Promise<any> {
