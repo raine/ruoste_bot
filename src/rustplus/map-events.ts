@@ -3,6 +3,7 @@ import * as _ from 'lodash'
 import { MapEvent, RustPlusEvents } from './types'
 import { TypedEmitter } from 'tiny-typed-emitter'
 import log from '../logger'
+import db from '../db'
 
 const isMarkerCargoShip = (marker: AppMarker) => marker.type === 'CargoShip'
 
@@ -48,6 +49,10 @@ export function trackMapEvents(emitter: TypedEmitter<RustPlusEvents>) {
   ;(async function loop() {
     try {
       const markers = await getMapMarkers()
+      await db.none(
+        `insert into map_markers (markers) values ($1)`,
+        JSON.stringify(markers)
+      )
       if (lastMapMarkers) {
         const newMarkers = getNewMarkers(lastMapMarkers, markers)
         newMarkers.forEach((marker) => {
