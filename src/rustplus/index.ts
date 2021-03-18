@@ -125,7 +125,10 @@ export async function init(): Promise<void> {
 
   events.on('pairing', async (pairing) => {
     log.info(pairing.body, `Got a request to pair ${pairing.body.type}`)
-    if (pairing.body.type === 'server') {
+    if (
+      pairing.body.type === 'server' &&
+      process.env.NODE_ENV !== 'production'
+    ) {
       await configure({
         serverHost: pairing.body.ip,
         serverPort: pairing.body.port,
