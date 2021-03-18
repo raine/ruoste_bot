@@ -184,7 +184,9 @@ let timeoutId: NodeJS.Timeout | undefined
 
 function updateBotActivityLoop(client: Discord.Client): void {
   if (timeoutId) clearInterval(timeoutId)
-  updateBotActivity(client)
+  if (process.env.NODE_ENV !== 'production') {
+    updateBotActivity(client)
+  }
   timeoutId = setTimeout(
     () => updateBotActivityLoop(client),
     BOT_STATUS_UPDATE_INTERVAL
