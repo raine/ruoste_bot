@@ -68,6 +68,7 @@
     "test:jest:watch": "yarn jest --watch",
     "test:lint": "eslint src/",
     "build": "tsc",
-    "dev": "ts-node-dev --files --no-notify --ignore-watch node_modules --respawn src/main.ts"
+    "run-script-dev": "ts-node-dev --files --no-notify --respawn --project tsconfig.json",
+    "dev": "yarn run-script-dev src/main.ts"
   }
 }
