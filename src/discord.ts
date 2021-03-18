@@ -156,18 +156,27 @@ const handleServerEmbedReply = async (msg: Discord.Message): Promise<void> => {
 
 const BOT_STATUS_UPDATE_INTERVAL = 60000
 
+function formatBotActivityText(
+  serverInfo: rustplus.AppInfo,
+  teamInfo: rustplus.AppTeamInfo
+): string {
+  const teamOnlineCount = teamInfo.members.filter((member) => member.isOnline)
+    .length
+  const teamOnlineText = `${teamOnlineCount}/${teamInfo.members.length}`
+  const serverPlayersText = `${serverInfo.players}/${serverInfo.maxPlayers} players`
+  return `${teamOnlineText} (${serverPlayersText})`
+}
+
 async function updateBotActivity(client: Discord.Client): Promise<void> {
   try {
     const [serverInfo, teamInfo] = await Promise.all([
       rustplus.getServerInfo(),
       rustplus.getTeamInfo()
     ])
-    const teamOnlineCount = teamInfo.members.filter((member) => member.isOnline)
-      .length
-    const teamOnlineText = `${teamOnlineCount}/${teamInfo.members.length}`
-    const serverPlayersText = `${serverInfo.players}/${serverInfo.maxPlayers} players`
-    const activityText = `${teamOnlineText} (${serverPlayersText})`
-    await client.user?.setActivity(activityText, { type: 'PLAYING' })
+    await client.user?.setActivity(
+      formatBotActivityText(serverInfo, teamInfo),
+      { type: 'PLAYING' }
+    )
     log.info('Bot activity updated')
   } catch (err) {
     log.error(err)
