@@ -4,7 +4,8 @@ create table rustplus_config (
   server_port                integer,
   player_steam_id            text,
   player_token               integer,
-  discord_alerts_channel_id  text
+  discord_alerts_channel_id  text,
+  discord_events_channel_id  text
 );
 
 create table fcm_persistent_ids (

@@ -86,6 +86,7 @@ export type FcmNotification = t.TypeOf<typeof FcmNotification>
 export const RustPlusConfig = t.strict({
   fcmCredentials: t.union([t.unknown, t.null]),
   discordAlertsChannelId: t.union([t.string, t.null]),
+  discordEventsChannelId: t.union([t.string, t.null]),
   serverHost: t.union([t.string, t.null]),
   serverPort: t.union([t.number, t.null]),
   playerSteamId: t.union([t.string, t.null]),
@@ -94,15 +95,7 @@ export const RustPlusConfig = t.strict({
 
 export type RustPlusConfig = t.TypeOf<typeof RustPlusConfig>
 
-export const RustPlusConfigField = t.keyof({
-  fcmCredentials: null,
-  discordAlertsChannelId: null,
-  serverHost: null,
-  serverPort: null,
-  playerSteamId: null,
-  playerToken: null
-})
-
+export const RustPlusConfigField = t.keyof(RustPlusConfig.type.props)
 export type RustPlusConfigField = t.TypeOf<typeof RustPlusConfigField>
 
 export type MapEvent = {

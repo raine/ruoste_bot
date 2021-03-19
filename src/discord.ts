@@ -39,7 +39,7 @@ type CommandHandler = (
 
 type Commands = Record<string, CommandHandler>
 
-const commands: (client: Discord.Client) => Commands = (client) => ({
+const commands: (client: Discord.Client) => Commands = () => ({
   '/wipes': async (text, msg, updateRepliesList) => {
     const searchParams = formatSearchParams({
       maxGroup: parseMaxGroupOption(text ?? '')
@@ -113,6 +113,11 @@ const commands: (client: Discord.Client) => Commands = (client) => ({
           case 'alerts_channel': {
             await rustplus.configure({ discordAlertsChannelId: value })
             await msg.reply('Alerts channel updated!')
+            return
+          }
+          case 'events_channel': {
+            await rustplus.configure({ discordEventsChannelId: value })
+            await msg.reply('Events channel updated!')
             return
           }
         }
