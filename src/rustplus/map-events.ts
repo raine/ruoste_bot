@@ -1,6 +1,6 @@
-import { AppMarker, getMapMarkers } from './rustplus-socket'
+import { getMapMarkers } from './rustplus-socket'
 import * as _ from 'lodash'
-import { MapEvent, RustPlusEvents } from './types'
+import { MapEvent, RustPlusEvents, AppMarker } from './types'
 import { TypedEmitter } from 'tiny-typed-emitter'
 import log from '../logger'
 import db from '../db'

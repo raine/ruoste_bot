@@ -2,7 +2,15 @@ import RustPlus from '@liamcottle/rustplus.js'
 import * as t from 'io-ts'
 import { validate } from '../validate'
 import log from '../logger'
-import { RustPlusConfig } from '.'
+import {
+  AppInfo,
+  AppMapMarkers,
+  AppMarker,
+  AppResponse,
+  AppTeamInfo,
+  AppTime,
+  RustPlusConfig
+} from './types'
 import protobuf, { Message } from 'protobufjs'
 import { events } from './'
 
@@ -13,81 +21,6 @@ export let socketConnected = false
 const RUSTPLUS_PROTO_PATH = require.resolve(
   '@liamcottle/rustplus.js/rustplus.proto'
 )
-
-const AppResponse = (propName: string, dataType: any) =>
-  t.type({
-    seq: t.number,
-    [propName]: dataType
-  })
-
-const AppInfo = t.type({
-  name: t.string,
-  headerImage: t.string,
-  url: t.string,
-  map: t.string,
-  mapSize: t.number,
-  wipeTime: t.number,
-  players: t.number,
-  maxPlayers: t.number,
-  queuedPlayers: t.number,
-  seed: t.number,
-  salt: t.number
-})
-
-export type AppInfo = t.TypeOf<typeof AppInfo>
-
-const AppTime = t.type({
-  dayLengthMinutes: t.number,
-  timeScale: t.number,
-  sunrise: t.number,
-  sunset: t.number,
-  time: t.number
-})
-
-export type AppTime = t.TypeOf<typeof AppTime>
-
-const Member = t.type({
-  steamId: t.unknown,
-  name: t.string,
-  x: t.number,
-  y: t.number,
-  isOnline: t.boolean,
-  spawnTime: t.number,
-  isAlive: t.boolean,
-  deathTime: t.number
-})
-
-const AppTeamInfo = t.type({
-  members: t.array(Member)
-})
-
-export type AppTeamInfo = t.TypeOf<typeof AppTeamInfo>
-
-export const AppMarker = t.type({
-  id: t.number,
-  type: t.keyof({
-    Crate: null,
-    VendingMachine: null,
-    Player: null,
-    Explosion: null,
-    CargoShip: null,
-    CH47: null
-  }),
-  x: t.number,
-  y: t.number,
-  steamId: t.string,
-  rotation: t.number,
-  radius: t.number,
-  name: t.union([t.string, t.undefined])
-})
-
-export type AppMarker = t.TypeOf<typeof AppMarker>
-
-const AppMapMarkers = t.type({
-  markers: t.array(AppMarker)
-})
-
-export type AppMapMarkers = t.TypeOf<typeof AppMapMarkers>
 
 async function parseResponse<T>(
   type: t.Decoder<unknown, T>,
