@@ -5,6 +5,6 @@ const logger = pino({
     process.env.NODE_ENV !== 'production'
       ? { ignore: 'pid,hostname,time' }
       : false,
-  level: 'info'
+  level: process.env.NODE_ENV !== 'production' ? 'debug' : 'info'
 })
 export default logger
