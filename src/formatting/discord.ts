@@ -213,3 +213,12 @@ export const formatSmartAlarmAlert = (
   const message = Discord.Util.escapeMarkdown(alert.message)
   return `🚨 **${title}** — ${message}`
 }
+
+export const formatMapEvent = ({ type }: rustplus.MapEvent) => {
+  switch (type) {
+    case 'CARGO_SHIP_ENTERED':
+      return `🚢 Cargo Ship has entered the map`
+    case 'CARGO_SHIP_LEFT':
+      return `🚢 Cargo Ship has left the map`
+  }
+}

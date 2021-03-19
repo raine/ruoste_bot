@@ -17,7 +17,8 @@ import {
   formatServerListReply,
   formatServerListReplyWithUpdatedAt,
   formatUpcomingWipeList,
-  formatSmartAlarmAlert
+  formatSmartAlarmAlert,
+  formatMapEvent
 } from './formatting/discord'
 import { initUpdateLoop, ServerListReply } from './update-loop'
 import { getNextWipes } from './get-next-wipes'
@@ -179,7 +180,7 @@ async function updateBotActivity(client: Discord.Client): Promise<void> {
       formatBotActivityText(serverInfo, teamInfo),
       { type: 'PLAYING' }
     )
-    log.info('Bot activity updated')
+    log.debug('Bot activity updated')
   } catch (err) {
     log.error(err)
   }
@@ -208,10 +209,18 @@ export default function start() {
 
   async function onSmartAlarmAlert(alert: rustplus.SmartAlarmNotificationData) {
     const { discordAlertsChannelId } = await rustplus.getConfig()
-    if (discordAlertsChannelId) {
-      const channel = client.channels.cache.get(discordAlertsChannelId)
-      if (channel?.isText()) channel.send(formatSmartAlarmAlert(alert))
-    }
+    if (!discordAlertsChannelId) return
+
+    const channel = client.channels.cache.get(discordAlertsChannelId)
+    if (channel?.isText()) channel.send(formatSmartAlarmAlert(alert))
+  }
+
+  async function onMapEvent(mapEvent: rustplus.MapEvent) {
+    const { discordEventsChannelId } = await rustplus.getConfig()
+    if (!discordEventsChannelId) return
+
+    const channel = client.channels.cache.get(discordEventsChannelId)
+    if (channel?.isText()) channel.send(formatMapEvent(mapEvent))
   }
 
   function onRustSocketConnected() {
@@ -224,11 +233,15 @@ export default function start() {
     rustplus.events.removeListener('alarm', onSmartAlarmAlert)
     rustplus.events.on('alarm', onSmartAlarmAlert)
 
+    rustplus.events.removeListener('mapEvent', onMapEvent)
+    rustplus.events.on('mapEvent', onMapEvent)
+
     rustplus.events.removeListener('connected', onRustSocketConnected)
     rustplus.events.on('connected', onRustSocketConnected)
 
     // The promise may not exist if there's configuration missing at start
-    rustplus.socketConnectedP?.then(() => updateBotActivityLoop(client))
+    // We need this because rust server is connected to before event above is bound
+    rustplus.socketConnectedP?.then(onRustSocketConnected)
   })
 
   client.on('message', (msg) => {
