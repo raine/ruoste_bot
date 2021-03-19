@@ -176,11 +176,9 @@ async function updateBotActivity(client: Discord.Client): Promise<void> {
       rustplus.getServerInfo(),
       rustplus.getTeamInfo()
     ])
-    await client.user?.setActivity(
-      formatBotActivityText(serverInfo, teamInfo),
-      { type: 'PLAYING' }
-    )
-    log.debug('Bot activity updated')
+    const text = formatBotActivityText(serverInfo, teamInfo)
+    await client.user?.setActivity(text, { type: 'PLAYING' })
+    log.debug({ text }, 'Bot activity updated')
   } catch (err) {
     log.error(err)
   }
