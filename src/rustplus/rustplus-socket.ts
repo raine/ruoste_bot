@@ -208,11 +208,12 @@ export async function listen(config: RustPlusConfig) {
   socket.connect()
 
   socketConnectedP = new Promise<void>((resolve) => {
-    socket.once('connected', () => {
+    socket.once('connected', async () => {
       socketConnected = true
       connectAttempts = 0
-      events.emit('connected')
-      resolve()
+      resolve() // sendRequestAsync pends on this promise
+      const info = await getServerInfo()
+      events.emit('connected', info)
     })
   })
 
