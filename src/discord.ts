@@ -121,6 +121,9 @@ const commands: (client: Discord.Client) => Commands = () => ({
             await msg.reply('Events channel updated!')
             return
           }
+          default: {
+            await msg.reply(`I don't know how to configure that`)
+          }
         }
       }
     }
