@@ -96,16 +96,35 @@ export type RustPlusConfig = t.TypeOf<typeof RustPlusConfig>
 export const RustPlusConfigField = t.keyof(RustPlusConfig.type.props)
 export type RustPlusConfigField = t.TypeOf<typeof RustPlusConfigField>
 
-export type MapEvent = {
-  type: 'CARGO_SHIP_ENTERED' | 'CARGO_SHIP_LEFT'
-}
+export type MapEventK<Type, Data = undefined> = { type: Type; data: Data }
+
+export type CargoShipEnteredMapEvent = MapEventK<
+  'CARGO_SHIP_ENTERED',
+  {
+    previousSpawn: string | null
+    dayLengthMinutes: number
+  }
+>
+
+export type CargoShipLeftMapEvent = MapEventK<'CARGO_SHIP_LEFT'>
+export type MapEvent = CargoShipEnteredMapEvent | CargoShipLeftMapEvent
+
+export type ServerConfig = Pick<RustPlusConfig, 'serverHost' | 'serverPort'>
+export type DbMapEvent = { createdAt?: string } & MapEvent & ServerConfig
+
+// 'PATROL_HELI_DOWN'
+// 'BRADLEY_APC_DESTROYED'
+// 'LARGE_OIL_RIG_CRATE_SPAWNED'
+// 'LARGE_OIL_RIG_CRATE_TAKEN'
+// 'SMALL_OIL_RIG_CRATE_SPAWNED'
+// 'SMALL_OIL_RIG_CRATE_TAKEN'
 
 export interface RustPlusEvents {
   alarm: (data: SmartAlarmNotificationData) => void
   pairing: (data: PairingNotificationData) => void
   team: (data: TeamNotificationData) => void
   mapEvent: (data: MapEvent) => void
-  connected: (data: AppInfo) => void
+  connected: (serverInfo: AppInfo, config: RustPlusConfig) => void
 }
 
 export const AppResponse = (propName: string, dataType: any) =>

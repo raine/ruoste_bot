@@ -1,5 +1,8 @@
 import pgPromise from 'pg-promise'
-import camelCase from 'lodash.camelcase'
+import { camelCase, memoize } from 'lodash'
+import { DateTime } from 'luxon'
+
+import * as path from 'path'
 
 // Based on https://github.com/vitaly-t/pg-promise/issues/78#issuecomment-171951303
 function camelizeColumnNames(data: any[]) {
@@ -18,13 +21,35 @@ function camelizeColumnNames(data: any[]) {
   }
 }
 
+export const sqlFile = memoize((file) => {
+  const queryFile = new pgp.QueryFile(path.join(__dirname, '..', 'sql', file), {
+    // sql files are reloaded automatically without having to restart node server
+    debug: process.env.NODE_ENV !== 'production'
+  })
+  if (queryFile.error) {
+    throw queryFile.error
+  } else {
+    return queryFile
+  }
+})
+
 export type Db = pgPromise.IBaseProtocol<unknown>
 export const pgp = pgPromise({
   receive: camelizeColumnNames
 })
 
+// Convert timestamptz field to ISO 8601
+pgp.pg.types.setTypeParser(1184, (str) =>
+  DateTime.fromJSDate(new Date(str)).toISO()
+)
+
 const db = pgp({
   connectionString: process.env.DATABASE_URL
 })
+
+export const DEFAULT = {
+  toPostgres: () => 'DEFAULT',
+  rawType: true
+}
 
 export default db

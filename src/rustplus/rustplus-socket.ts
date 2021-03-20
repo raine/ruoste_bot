@@ -131,7 +131,7 @@ export async function listen(config: RustPlusConfig) {
     socketConnected = false
     const backOffDelay = Math.min(10000, 10 ** connectAttempts)
     log.error(`Rust websocket disconnected, reconnecting in ${backOffDelay}ms`)
-    backOffDelayTimeout = setTimeout(() => {
+    backOffDelayTimeout = global.setTimeout(() => {
       listen(config)
     }, backOffDelay)
   }
@@ -146,7 +146,7 @@ export async function listen(config: RustPlusConfig) {
       connectAttempts = 0
       resolve() // sendRequestAsync pends on this promise
       const info = await getServerInfo()
-      events.emit('connected', info)
+      events.emit('connected', info, config)
     })
   })
 

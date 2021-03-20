@@ -1,5 +1,9 @@
 import { DateTime } from 'luxon'
 import * as R from 'ramda'
+import prettyMs from 'pretty-ms'
+import TimeAgo from 'javascript-time-ago'
+TimeAgo.addLocale(require('javascript-time-ago/locale/en'))
+const timeAgo = new TimeAgo('en-US')
 
 const HEL_TZ = 'Europe/Helsinki'
 
@@ -43,3 +47,9 @@ export const formatShortDateTime = (date: DateTime): string => {
 export const formatTime = (date: DateTime): string => {
   return date.setZone(HEL_TZ).toFormat('HH:mm')
 }
+
+export const formatRelativeDate = (date: DateTime, style: string): string =>
+  timeAgo.format(date.toMillis(), style) || '1m'
+
+export const formatTimeAgo = (date: DateTime): string =>
+  prettyMs(+DateTime.local() - +date)

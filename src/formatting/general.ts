@@ -1,12 +1,5 @@
 import { DateTime } from 'luxon'
-import TimeAgo from 'javascript-time-ago'
 import { ListServer } from '../just-wiped'
-
-TimeAgo.addLocale(require('javascript-time-ago/locale/en'))
-const timeAgo = new TimeAgo('en-US')
-
-export const formatRelativeDate = (date: DateTime, style: string): string =>
-  timeAgo.format(date.toMillis(), style) || '1m'
 
 // prettier-ignore
 export const formatMaxGroup = (count: number | null) => 

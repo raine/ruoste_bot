@@ -143,9 +143,9 @@ export async function init(): Promise<void> {
     log.info(mapEvent, 'Map event')
   })
 
-  events.on('connected', (server) => {
+  events.on('connected', (server, config) => {
     log.info(server, 'Connected to rust server')
-    trackMapEvents(events)
+    trackMapEvents(config, events)
   })
 
   await initEmptyConfig()

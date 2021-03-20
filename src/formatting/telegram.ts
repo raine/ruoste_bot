@@ -1,7 +1,11 @@
 import { ListServer, FullServer } from '../just-wiped'
-import { formatShortDate, formatShortDateTime } from '../date'
+import {
+  formatShortDate,
+  formatShortDateTime,
+  formatRelativeDate
+} from '../date'
 import * as R from 'ramda'
-import { formatMaxGroup, formatRelativeDate, lastUpdatedAt } from './general'
+import { formatMaxGroup, lastUpdatedAt } from './general'
 
 const LAGGY_SERVERS = (process.env.LAGGY_SERVERS || '').split(',')
 

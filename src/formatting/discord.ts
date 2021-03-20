@@ -1,22 +1,23 @@
 import * as Discord from 'discord.js'
-import { DateTime } from 'luxon'
+import { DateTime, Interval } from 'luxon'
 import * as R from 'ramda'
 import { FullServer, ListServer } from '../just-wiped'
-import TimeAgo from 'javascript-time-ago'
 import {
   filterServerNoise,
   formatMaxGroup,
   formatPlayerCount,
-  formatRelativeDate,
   lastUpdatedAt
 } from './general'
-import { formatShortDateWithWeekday, formatTime } from '../date'
+import {
+  formatShortDateWithWeekday,
+  formatTime,
+  formatTimeAgo,
+  formatRelativeDate
+} from '../date'
 import * as rustplus from '../rustplus'
 
 const RUST_COLOR = 0xce422a
 const DESCRIPTION_MAX_LENGTH = 2048
-
-TimeAgo.addLocale(require('javascript-time-ago/locale/en'))
 
 // There is no way to escape [ in text, so replacing [ -> ( etc.
 const link = (text: string, href: string): string =>
@@ -214,11 +215,28 @@ export const formatSmartAlarmAlert = (
   return `🚨 **${title}** — ${message}`
 }
 
-export const formatMapEvent = ({ type }: rustplus.MapEvent) => {
-  switch (type) {
-    case 'CARGO_SHIP_ENTERED':
-      return `🚢 Cargo Ship has entered the map`
-    case 'CARGO_SHIP_LEFT':
-      return `🚢 Cargo Ship has left the map`
+export const formatMapEvent = (event: rustplus.MapEvent) => {
+  switch (event.type) {
+    case 'CARGO_SHIP_ENTERED': {
+      const more = event.data.previousSpawn
+        ? (() => {
+            const previousSpawnDateTime = DateTime.fromISO(
+              event.data.previousSpawn
+            )
+            const previousSpawnTimeAgo = formatTimeAgo(previousSpawnDateTime)
+            const previousSpawnMinutesAgo = Interval.fromDateTimes(
+              previousSpawnDateTime,
+              DateTime.local()
+            ).count('minute')
+            const rustDaysAgo =
+              previousSpawnMinutesAgo / event.data.dayLengthMinutes
+            return `previous spawn was ${previousSpawnTimeAgo} ago (${rustDaysAgo} rust days)`
+          })()
+        : ''
+      return `🚢 Cargo Ship entered the map${more ? ` — ${more}` : ''}`
+    }
+    case 'CARGO_SHIP_LEFT': {
+      return `🚢 Cargo Ship left the map`
+    }
   }
 }
