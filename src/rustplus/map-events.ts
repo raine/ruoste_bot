@@ -6,7 +6,8 @@ import {
   AppMarker,
   DbMapEvent,
   ServerConfig,
-  CargoShipEnteredMapEvent
+  CargoShipEnteredMapEvent,
+  CargoShipLeftMapEvent
 } from './types'
 import { TypedEmitter } from 'tiny-typed-emitter'
 import log from '../logger'
@@ -73,6 +74,11 @@ const createCargoShipEnteredEvent = (
   }
 })
 
+const createCargoShipLeftEvent = (): CargoShipLeftMapEvent => ({
+  type: 'CARGO_SHIP_LEFT' as const,
+  data: undefined
+})
+
 export async function generateMapEventsFromMarkersDiff(
   server: ServerConfig,
   prevMarkers: AppMarker[],
@@ -88,10 +94,7 @@ export async function generateMapEventsFromMarkersDiff(
         .map(createCargoShipEnteredEvent(server))
     )),
 
-    ...removedMarkers.filter(isMarkerCargoShip).map(() => ({
-      type: 'CARGO_SHIP_LEFT' as const,
-      data: undefined
-    }))
+    ...removedMarkers.filter(isMarkerCargoShip).map(createCargoShipLeftEvent)
   ]
 }
 

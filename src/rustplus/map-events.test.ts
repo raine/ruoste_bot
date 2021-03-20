@@ -83,6 +83,10 @@ describe('checkMapEvents()', () => {
     ...server
   }
 
+  async function getLastMapEvent() {
+    return db.one(`select * from map_events order by created_at desc limit 1`)
+  }
+
   beforeEach(async () => {
     resetLastMapMarkers()
     await resetDb()
@@ -97,10 +101,6 @@ describe('checkMapEvents()', () => {
 
       await checkMapEvents(server, emitter)
       await checkMapEvents(server, emitter)
-    }
-
-    async function getLastMapEvent() {
-      return db.one(`select * from map_events order by created_at desc limit 1`)
     }
 
     test('no previous spawn', async () => {
@@ -142,5 +142,29 @@ describe('checkMapEvents()', () => {
     })
 
     test.todo('safeguard against spawn very long time ago?')
+  })
+
+  describe('cargo ship left', () => {
+    async function removeCargo() {
+      mockedGetMapMarkers
+        .mockResolvedValueOnce([CARGO_SHIP])
+        .mockResolvedValueOnce([])
+
+      await checkMapEvents(server, emitter)
+      await checkMapEvents(server, emitter)
+    }
+
+    async function getLastMapEvent() {
+      return db.one(`select * from map_events order by created_at desc limit 1`)
+    }
+
+    test('no previous spawn', async () => {
+      await removeCargo()
+      expect(await getLastMapEvent()).toEqual({
+        type: 'CARGO_SHIP_LEFT',
+        data: null,
+        ...baseFields
+      })
+    })
   })
 })
