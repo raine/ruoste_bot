@@ -202,10 +202,6 @@ describe('checkMapEvents()', () => {
       await checkMapEvents(SERVER_INFO, emitter)
     }
 
-    async function getLastMapEvent() {
-      return db.one(`select * from map_events order by created_at desc limit 1`)
-    }
-
     test('no previous spawn', async () => {
       await removeCargo()
       expect(await getLastMapEvent()).toEqual({
