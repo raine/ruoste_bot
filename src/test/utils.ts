@@ -1,4 +1,4 @@
-import db, { sqlFile } from '../src/db'
+import db, { sqlFile } from '../db'
 
 export async function resetDb(): Promise<void> {
   await db.any(`

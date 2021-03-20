@@ -19,5 +19,5 @@
     "target": "esnext",
     "resolveJsonModule": true
   },
-  "include": ["src/**/*", "types/**/*"]
+  "include": ["src/**/*"]
 }

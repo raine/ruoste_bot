@@ -1,4 +1,4 @@
-import { parseMaxGroupOption } from '../src/input'
+import { parseMaxGroupOption } from './input'
 
 describe('parseMaxGroupOption', () => {
   test('lower and upper bound', () => {

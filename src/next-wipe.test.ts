@@ -1,8 +1,8 @@
 import d from 'dedent'
-import { parseRawWipeDate } from '../src/just-wiped'
-import _nextWipe, { parseNextWipeDateFromName } from '../src/next-wipe'
+import { parseRawWipeDate } from './just-wiped'
+import _nextWipe, { parseNextWipeDateFromName } from './next-wipe'
 import { DateTime } from 'luxon'
-import { roundDateTimeHour, objDateTimeToISO } from '../src/date'
+import { roundDateTimeHour, objDateTimeToISO } from './date'
 
 //@ts-ignore
 const nextWipe = (...args) => objDateTimeToISO(_nextWipe(...args))

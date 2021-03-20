@@ -9,7 +9,7 @@ import {
   parseModdedMultiplier,
   getServer,
   parseMaxGroup
-} from '../src/just-wiped'
+} from './just-wiped'
 import { DateTime } from 'luxon'
 import { back as nockBack } from 'nock'
 

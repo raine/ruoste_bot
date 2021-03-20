@@ -2,7 +2,7 @@ FROM mhart/alpine-node:14
 WORKDIR /app
 COPY package.json yarn.lock ./
 RUN yarn install
-COPY tsconfig.json ./
+COPY tsconfig.json tsconfig.production.json ./
 COPY src ./src
 RUN yarn build
 RUN npm prune --production

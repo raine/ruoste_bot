@@ -1,18 +1,18 @@
-import { resetDb } from '../utils'
-import db from '../../src/db'
+import { resetDb } from '../test/utils'
+import db from '../db'
 import { DateTime } from 'luxon'
 import { TypedEmitter } from 'tiny-typed-emitter'
-import { validate } from '../../src/validate'
+import { validate } from '../validate'
 import { mocked } from 'ts-jest/utils'
 import * as t from 'io-ts'
-import { AppMarker, RustPlusEvents } from '../../src/rustplus'
+import { AppMarker, RustPlusEvents } from '.'
 import {
   getNewMarkers,
   getRemovedMarkers,
   checkMapEvents,
   insertMapEvents,
   resetLastMapMarkers
-} from '../../src/rustplus/map-events'
+} from './map-events'
 
 jest.mock('../../src/rustplus/rustplus-socket', () => ({
   __esModule: true,
@@ -26,7 +26,7 @@ jest.mock('../../src/rustplus/rustplus-socket', () => ({
   })
 }))
 
-import { getMapMarkers } from '../../src/rustplus/rustplus-socket'
+import { getMapMarkers } from './rustplus-socket'
 const mockedGetMapMarkers = mocked(getMapMarkers, true)
 
 const CRATE = {
