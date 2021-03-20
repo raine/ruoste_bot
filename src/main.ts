@@ -23,7 +23,7 @@ async function main() {
 void main()
 
 process.on('unhandledRejection', (err) => {
-  if (err) log.error(err)
+  if (err) log.error(err, 'Unhandled rejection')
   Sentry.captureException(err)
   process.exit(1)
 })
