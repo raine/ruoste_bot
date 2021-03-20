@@ -52,4 +52,4 @@ export const formatRelativeDate = (date: DateTime, style: string): string =>
   timeAgo.format(date.toMillis(), style) || '1m'
 
 export const formatTimeAgo = (date: DateTime): string =>
-  prettyMs(+DateTime.local() - +date)
+  prettyMs(+DateTime.local() - +date, { unitCount: 2 })

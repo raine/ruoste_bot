@@ -7,12 +7,14 @@ describe('formatMapEvent()', () => {
       formatMapEvent({
         type: 'CARGO_SHIP_ENTERED',
         data: {
-          previousSpawn: DateTime.local().minus({ minute: 80 }).toISO(),
+          previousSpawn: DateTime.local()
+            .minus({ minute: 81, second: 5, millisecond: 500 })
+            .toISO(),
           dayLengthMinutes: 60
         }
       })
     ).toBe(
-      '🚢 Cargo Ship entered the map — previous spawn was 1h 20m ago (1.35 rust days)'
+      '🚢 Cargo Ship entered the map — previous spawn was 1h 21m ago (1.37 rust days)'
     )
   })
 })

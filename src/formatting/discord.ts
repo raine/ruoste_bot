@@ -228,8 +228,9 @@ export const formatMapEvent = (event: rustplus.MapEvent) => {
               previousSpawnDateTime,
               DateTime.local()
             ).count('minute')
-            const rustDaysAgo =
+            const rustDaysAgo = (
               previousSpawnMinutesAgo / event.data.dayLengthMinutes
+            ).toFixed(2)
             return `previous spawn was ${previousSpawnTimeAgo} ago (${rustDaysAgo} rust days)`
           })()
         : ''
