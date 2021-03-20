@@ -145,8 +145,12 @@ export async function listen(config: RustPlusConfig) {
       socketConnected = true
       connectAttempts = 0
       resolve() // sendRequestAsync pends on this promise
-      const info = await getServerInfo()
-      events.emit('connected', info, config)
+      try {
+        const info = await getServerInfo()
+        events.emit('connected', info, config)
+      } catch (err) {
+        log.error(err)
+      }
     })
   })
 
