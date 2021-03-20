@@ -5,13 +5,15 @@ import {
   RustPlusEvents,
   AppMarker,
   DbMapEvent,
-  ServerConfig,
   CargoShipEnteredMapEvent,
-  CargoShipLeftMapEvent
+  CargoShipLeftMapEvent,
+  ServerInfo,
+  RustPlusConfig
 } from './types'
 import { TypedEmitter } from 'tiny-typed-emitter'
 import log from '../logger'
 import db, { pgp, DEFAULT } from '../db'
+import { DateTime } from 'luxon'
 
 const isMarkerCargoShip = (marker: AppMarker) => marker.type === 'CargoShip'
 
@@ -35,10 +37,18 @@ const mapEventsColumnSet = new pgp.helpers.ColumnSet(
   { table: 'map_events' }
 )
 
+const serverInfoToConfig = ({
+  host,
+  port
+}: ServerInfo): Pick<RustPlusConfig, 'serverHost' | 'serverPort'> => ({
+  serverHost: host,
+  serverPort: port
+})
+
 const createDbMapEvent = (
-  serverConfig: ServerConfig,
+  serverInfo: ServerInfo,
   event: MapEvent
-): DbMapEvent => ({ ...event, ...serverConfig })
+): DbMapEvent => ({ ...event, ...serverInfoToConfig(serverInfo) })
 
 export async function insertMapEvents(events: DbMapEvent[]): Promise<void> {
   await db.none(pgp.helpers.insert(events, mapEventsColumnSet))
@@ -58,23 +68,27 @@ export function getRemovedMarkers(
   return _.differenceBy(prevMarkers, currentMarkers, (marker) => marker.id)
 }
 
-function getPreviousCargoSpawn(server: ServerConfig): Promise<string | null> {
+function getPreviousCargoSpawn(server: ServerInfo): Promise<string | null> {
+  const wipeDateTime = DateTime.fromSeconds(server.wipeTime).toISO()
+  const { host, port } = server
+
   return db
     .oneOrNone(
       `select created_at
          from map_events
-        where server_host = $[serverHost]
-          and server_port = $[serverPort]
+        where server_host = $[host]
+          and server_port = $[port]
           and type = 'CARGO_SHIP_ENTERED'
+          and created_at > $[wipeDateTime]
         order by created_at desc
         limit 1`,
-      server
+      { host, port, wipeDateTime }
     )
     .then((res) => (res ? res.createdAt : null))
 }
 
 const createCargoShipEnteredEvent = (
-  server: ServerConfig
+  server: ServerInfo
 ) => async (): Promise<CargoShipEnteredMapEvent> => ({
   type: 'CARGO_SHIP_ENTERED' as const,
   data: {
@@ -89,7 +103,7 @@ const createCargoShipLeftEvent = (): CargoShipLeftMapEvent => ({
 })
 
 export async function generateMapEventsFromMarkersDiff(
-  server: ServerConfig,
+  server: ServerInfo,
   prevMarkers: AppMarker[],
   currentMarkers: AppMarker[]
 ): Promise<MapEvent[]> {
@@ -110,14 +124,19 @@ export async function generateMapEventsFromMarkersDiff(
 let lastMapMarkers: AppMarker[] | undefined
 
 export async function checkMapEvents(
-  config: ServerConfig,
+  serverInfo: ServerInfo,
   emitter: TypedEmitter<RustPlusEvents>
 ) {
   const markers = await getMapMarkers()
   if (markers.length)
     await db.none(
       pgp.helpers.insert(
-        [{ ...config, markers: JSON.stringify(markers) }],
+        [
+          {
+            ...serverInfoToConfig(serverInfo),
+            markers: JSON.stringify(markers)
+          }
+        ],
         mapMarkersColumnSet
       )
     )
@@ -125,12 +144,14 @@ export async function checkMapEvents(
     const newMarkers = getNewMarkers(lastMapMarkers, markers)
     newMarkers.forEach((marker) => log.info(marker, 'New map marker'))
     const mapEvents = await generateMapEventsFromMarkersDiff(
-      config,
+      serverInfo,
       lastMapMarkers,
       markers
     )
     if (mapEvents.length)
-      await insertMapEvents(mapEvents.map((e) => createDbMapEvent(config, e)))
+      await insertMapEvents(
+        mapEvents.map((e) => createDbMapEvent(serverInfo, e))
+      )
     mapEvents.forEach((ev) => emitter.emit('mapEvent', ev))
   }
   lastMapMarkers = markers
@@ -143,7 +164,7 @@ export function resetLastMapMarkers() {
 }
 
 export function trackMapEvents(
-  config: ServerConfig,
+  serverInfo: ServerInfo,
   emitter: TypedEmitter<RustPlusEvents>
 ) {
   if (timeoutId) clearInterval(timeoutId)
@@ -151,7 +172,7 @@ export function trackMapEvents(
   log.info('Starting to track map events')
   void (async function loop() {
     try {
-      await checkMapEvents(config, emitter)
+      await checkMapEvents(serverInfo, emitter)
     } catch (err) {
       log.error(err, 'Error while checking for map events')
     }

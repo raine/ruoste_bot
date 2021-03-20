@@ -6,10 +6,11 @@ import {
   AppInfo,
   AppMapMarkers,
   AppMarker,
-  AppResponse,
   AppTeamInfo,
   AppTime,
-  RustPlusConfig
+  RustPlusConfig,
+  ServerHostPort,
+  ServerInfo
 } from './types'
 import protobuf, { Message } from 'protobufjs'
 import { events } from './'
@@ -17,6 +18,7 @@ import { events } from './'
 export let socket: any
 export let socketConnectedP: Promise<void>
 export let socketConnected = false
+export let connectedServer: ServerHostPort | undefined
 
 const RUSTPLUS_PROTO_PATH = require.resolve(
   '@liamcottle/rustplus.js/rustplus.proto'
@@ -50,37 +52,40 @@ export async function sendRequestAsync(...args: any[]): Promise<any> {
   return socket.sendRequestAsync(...args)
 }
 
-export async function getServerInfo(): Promise<AppInfo> {
+export async function getServerInfo(): Promise<ServerInfo> {
   return parseResponse(
-    AppResponse('info', AppInfo),
+    t.type({ seq: t.number, info: AppInfo }),
     await sendRequestAsync({ getInfo: {} })
-  ).then((res) => res.info)
+  ).then((res) => ({
+    ...res.info,
+    ...connectedServer!
+  }))
 }
 
 export async function getTime(): Promise<AppTime> {
   return parseResponse(
-    AppResponse('time', AppTime),
+    t.type({ seq: t.number, time: AppTime }),
     await sendRequestAsync({ getTime: {} })
   ).then((res) => res.time)
 }
 
 export async function getTeamInfo(): Promise<AppTeamInfo> {
   return parseResponse(
-    AppResponse('teamInfo', AppTeamInfo),
+    t.type({ seq: t.number, teamInfo: AppTeamInfo }),
     await sendRequestAsync({ getTeamInfo: {} })
   ).then((res) => res.teamInfo)
 }
 
 export async function getMap(): Promise<any> {
   return parseResponse(
-    AppResponse('map', t.any),
+    t.type({ seq: t.number, map: t.unknown }),
     await sendRequestAsync({ getMap: {} })
   ).then((res) => res.map)
 }
 
 export async function getMapMarkers(): Promise<AppMarker[]> {
   return parseResponse(
-    AppResponse('mapMarkers', AppMapMarkers),
+    t.type({ seq: t.number, mapMarkers: AppMapMarkers }),
     await sendRequestAsync({ getMapMarkers: {} })
   ).then((res) => res.mapMarkers.markers)
 }
@@ -142,6 +147,7 @@ export async function listen(config: RustPlusConfig) {
 
   socketConnectedP = new Promise<void>((resolve) => {
     socket.once('connected', async () => {
+      connectedServer = { host: config.serverHost!, port: config.serverPort! }
       socketConnected = true
       connectAttempts = 0
       resolve() // sendRequestAsync pends on this promise

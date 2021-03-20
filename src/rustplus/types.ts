@@ -109,6 +109,7 @@ export type CargoShipEnteredMapEvent = MapEventK<
 export type CargoShipLeftMapEvent = MapEventK<'CARGO_SHIP_LEFT'>
 export type MapEvent = CargoShipEnteredMapEvent | CargoShipLeftMapEvent
 
+export type ServerHostPort = { host: string; port: number }
 export type ServerConfig = Pick<RustPlusConfig, 'serverHost' | 'serverPort'>
 export type DbMapEvent = { createdAt?: string } & MapEvent & ServerConfig
 
@@ -124,14 +125,8 @@ export interface RustPlusEvents {
   pairing: (data: PairingNotificationData) => void
   team: (data: TeamNotificationData) => void
   mapEvent: (data: MapEvent) => void
-  connected: (serverInfo: AppInfo, config: RustPlusConfig) => void
+  connected: (serverInfo: ServerInfo, config: RustPlusConfig) => void
 }
-
-export const AppResponse = (propName: string, dataType: any) =>
-  t.type({
-    seq: t.number,
-    [propName]: dataType
-  })
 
 export const AppInfo = t.type({
   name: t.string,
@@ -148,6 +143,16 @@ export const AppInfo = t.type({
 })
 
 export type AppInfo = t.TypeOf<typeof AppInfo>
+
+export const ServerInfo = t.intersection([
+  AppInfo,
+  t.type({
+    host: t.string,
+    port: t.number
+  })
+])
+
+export type ServerInfo = t.TypeOf<typeof ServerInfo>
 
 export const AppTime = t.type({
   dayLengthMinutes: t.number,

@@ -5,7 +5,7 @@ import { TypedEmitter } from 'tiny-typed-emitter'
 import { validate } from '../validate'
 import { mocked } from 'ts-jest/utils'
 import * as t from 'io-ts'
-import { AppMarker, RustPlusEvents } from '.'
+import { AppMarker, RustPlusEvents, ServerInfo } from '.'
 import {
   getNewMarkers,
   getRemovedMarkers,
@@ -28,6 +28,27 @@ jest.mock('../../src/rustplus/rustplus-socket', () => ({
 
 import { getMapMarkers } from './rustplus-socket'
 const mockedGetMapMarkers = mocked(getMapMarkers, true)
+
+const SERVER_INFO: ServerInfo = {
+  name: '',
+  headerImage: '',
+  url: 'https://www.google.com',
+  map: 'Procedural Map',
+  mapSize: 3650,
+  wipeTime: 1616237757,
+  players: 225,
+  maxPlayers: 250,
+  queuedPlayers: 0,
+  seed: 1628075253,
+  salt: 1035734960,
+  host: '127.0.0.1',
+  port: 28083
+}
+
+const SERVER_DB = {
+  serverHost: '127.0.0.1',
+  serverPort: 28083
+}
 
 const CRATE = {
   id: 137827068,
@@ -77,10 +98,9 @@ describe('getRemovedMarkers()', () => {
 
 describe('checkMapEvents()', () => {
   let emitter: TypedEmitter<RustPlusEvents>
-  const server = { serverHost: '127.0.0.1', serverPort: 28083 }
   const baseFields = {
     createdAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}/),
-    ...server
+    ...SERVER_DB
   }
 
   async function getLastMapEvent() {
@@ -94,13 +114,13 @@ describe('checkMapEvents()', () => {
   })
 
   describe('cargo ship entered', () => {
-    async function spawnCargo() {
+    async function spawnCargo(serverInfo = SERVER_INFO) {
       mockedGetMapMarkers
         .mockResolvedValueOnce([])
         .mockResolvedValueOnce([CARGO_SHIP])
 
-      await checkMapEvents(server, emitter)
-      await checkMapEvents(server, emitter)
+      await checkMapEvents(serverInfo, emitter)
+      await checkMapEvents(serverInfo, emitter)
     }
 
     test('no previous spawn', async () => {
@@ -125,7 +145,7 @@ describe('checkMapEvents()', () => {
             dayLengthMinutes: 60,
             previousSpawn: null
           },
-          ...server
+          ...SERVER_DB
         }
       ])
 
@@ -141,7 +161,35 @@ describe('checkMapEvents()', () => {
       })
     })
 
-    test.todo('safeguard against spawn very long time ago?')
+    test('does not return previous spawn from earlier wipe', async () => {
+      const previousSpawnDate = DateTime.local().minus({ minutes: 80 }).toISO()
+      await insertMapEvents([
+        {
+          createdAt: previousSpawnDate,
+          type: 'CARGO_SHIP_ENTERED',
+          data: {
+            dayLengthMinutes: 60,
+            previousSpawn: null
+          },
+          ...SERVER_DB
+        }
+      ])
+
+      // Server wiped 10 minutes ago, last spawn 80 minutes ago
+      await spawnCargo({
+        ...SERVER_INFO,
+        wipeTime: DateTime.local().minus({ minutes: 10 }).toSeconds()
+      })
+
+      expect(await getLastMapEvent()).toEqual({
+        type: 'CARGO_SHIP_ENTERED',
+        data: {
+          dayLengthMinutes: 60,
+          previousSpawn: null
+        },
+        ...baseFields
+      })
+    })
   })
 
   describe('cargo ship left', () => {
@@ -150,8 +198,8 @@ describe('checkMapEvents()', () => {
         .mockResolvedValueOnce([CARGO_SHIP])
         .mockResolvedValueOnce([])
 
-      await checkMapEvents(server, emitter)
-      await checkMapEvents(server, emitter)
+      await checkMapEvents(SERVER_INFO, emitter)
+      await checkMapEvents(SERVER_INFO, emitter)
     }
 
     async function getLastMapEvent() {
