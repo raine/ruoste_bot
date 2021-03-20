@@ -203,10 +203,7 @@ let timeoutId: NodeJS.Timeout | undefined
 
 function updateBotActivityLoop(client: Discord.Client): void {
   if (timeoutId) clearInterval(timeoutId)
-  // Temporary
-  if (process.env.NODE_ENV !== 'production') {
-    void updateBotActivity(client)
-  }
+  void updateBotActivity(client)
   timeoutId = setTimeout(
     () => updateBotActivityLoop(client),
     BOT_STATUS_UPDATE_INTERVAL
