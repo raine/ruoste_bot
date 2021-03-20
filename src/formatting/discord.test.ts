@@ -14,7 +14,7 @@ describe('formatMapEvent()', () => {
         }
       })
     ).toBe(
-      '🚢 Cargo Ship entered the map — previous spawn was 1h 21m ago (1.37 rust days)'
+      '🚢 Cargo Ship entered the map — previous spawn was 1h 21m ago (1.4 rust days)'
     )
   })
 })
