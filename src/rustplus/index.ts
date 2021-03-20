@@ -6,7 +6,7 @@ import log from '../logger'
 import { TypedEmitter } from 'tiny-typed-emitter'
 import { FcmNotification, RustPlusConfig, RustPlusEvents } from './types'
 export * from './types'
-import snakecase from 'lodash.snakecase'
+import { snakeCase } from 'lodash'
 import * as rustplus from './rustplus-socket'
 export * from './rustplus-socket'
 import { trackMapEvents } from './map-events'
@@ -29,7 +29,7 @@ export async function getConfig(): Promise<RustPlusConfig> {
 }
 
 export async function configure(cfg: Partial<RustPlusConfig>): Promise<void> {
-  const cfgSnakeCase = _.mapKeys(cfg, (v, k) => snakecase(k))
+  const cfgSnakeCase = _.mapKeys(cfg, (v, k) => snakeCase(k))
   const rustplusConfigColumnSet = new pgp.helpers.ColumnSet(
     [
       { name: 'fcm_credentials', cast: 'json' },
