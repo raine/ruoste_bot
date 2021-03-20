@@ -140,14 +140,17 @@ export const formatUpcomingWipeListFields = (serversGroupedByDate: {
 export const formatUpcomingWipeList = (
   serverCount: number,
   fetchedCount: number,
-  servers: FullServer[]
+  servers: FullServer[],
+  range?: Interval
 ): Discord.MessageEmbedOptions => {
-  const nextWeeksWipes = servers.filter(
-    (server) => server.nextWipe!.date < DateTime.local().plus({ days: 5 })
+  const filteredByDate = servers.filter((server) =>
+    range
+      ? range.contains(server.nextWipe!.date)
+      : server.nextWipe!.date < DateTime.local().plus({ days: 5 })
   )
   const sortedByNextWipe = R.sortWith(
     [R.ascend(({ nextWipe }) => (nextWipe ? nextWipe.date : 0))],
-    nextWeeksWipes
+    filteredByDate
   )
   const groupedByDate = R.groupBy(
     (server) => formatShortDateWithWeekday(server.nextWipe!.date),

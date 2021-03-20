@@ -23,6 +23,7 @@ import {
 import { initUpdateLoop, ServerListReply } from './update-loop'
 import { getNextWipes } from './get-next-wipes'
 import { parseMaxGroupOption } from './input'
+import { Interval, DateTime } from 'luxon'
 import * as rustplus from './rustplus'
 
 type DiscordServerListReply = ServerListReply<Discord.Message>
@@ -69,12 +70,23 @@ const commands: (client: Discord.Client) => Commands = () => ({
       embed: { description: 'Loading...' }
     })
 
+    const today = text?.includes('today')
     getNextWipes()
       .skip(1)
       .throttle(1000)
       .onValue(({ serverCount, fetchedCount, servers }) => {
         return sent.edit({
-          embed: formatUpcomingWipeList(serverCount, fetchedCount, servers)
+          embed: formatUpcomingWipeList(
+            serverCount,
+            fetchedCount,
+            servers,
+            today
+              ? Interval.fromDateTimes(
+                  DateTime.local(),
+                  DateTime.local().endOf('day')
+                )
+              : undefined
+          )
         })
       })
   },
