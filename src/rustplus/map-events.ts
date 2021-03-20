@@ -15,6 +15,15 @@ import db, { pgp, DEFAULT } from '../db'
 
 const isMarkerCargoShip = (marker: AppMarker) => marker.type === 'CargoShip'
 
+const mapMarkersColumnSet = new pgp.helpers.ColumnSet(
+  [
+    { name: 'server_host', prop: 'serverHost' },
+    { name: 'server_port', prop: 'serverPort' },
+    { name: 'markers', cast: 'json' }
+  ],
+  { table: 'map_markers' }
+)
+
 const mapEventsColumnSet = new pgp.helpers.ColumnSet(
   [
     { name: 'created_at', prop: 'createdAt', def: DEFAULT },
@@ -107,8 +116,10 @@ export async function checkMapEvents(
   const markers = await getMapMarkers()
   if (markers.length)
     await db.none(
-      `insert into map_markers (markers) values ($1)`,
-      JSON.stringify(markers)
+      pgp.helpers.insert(
+        [{ ...config, markers: JSON.stringify(markers) }],
+        mapMarkersColumnSet
+      )
     )
   if (lastMapMarkers) {
     const newMarkers = getNewMarkers(lastMapMarkers, markers)

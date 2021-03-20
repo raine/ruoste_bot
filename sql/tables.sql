@@ -21,6 +21,8 @@ create table map_events (
 );
 
 create table map_markers (
-  created_at       timestamptz default  now() not null,
-  markers          jsonb
+  created_at    timestamptz default now() not null,
+  server_host   text not null,
+  server_port   integer not null,
+  markers       jsonb
 );
