@@ -135,7 +135,7 @@ export function trackMapEvents(
   if (timeoutId) clearInterval(timeoutId)
   lastMapMarkers = undefined
   log.info('Starting to track map events')
-  ;(async function loop() {
+  void (async function loop() {
     try {
       await checkMapEvents(config, emitter)
     } catch (err) {

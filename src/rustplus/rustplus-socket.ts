@@ -132,7 +132,7 @@ export async function listen(config: RustPlusConfig) {
     const backOffDelay = Math.min(10000, 10 ** connectAttempts)
     log.error(`Rust websocket disconnected, reconnecting in ${backOffDelay}ms`)
     backOffDelayTimeout = global.setTimeout(() => {
-      listen(config)
+      void listen(config)
     }, backOffDelay)
   }
 

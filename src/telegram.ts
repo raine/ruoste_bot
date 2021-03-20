@@ -81,7 +81,7 @@ const replyWithServers = (
     .catch((err) => {
       Sentry.captureException(err)
       log.error(err, 'failed to reply with servers')
-      ctx.reply('something went wrong 😳')
+      return ctx.reply('something went wrong 😳')
     })
 }
 
@@ -116,7 +116,7 @@ export default function start() {
       .skip(1)
       .throttle(1000)
       .onValue(({ serverCount, fetchedCount, servers }) => {
-        updateMessage(
+        return updateMessage(
           formatUpcomingWipeList(serverCount, fetchedCount, servers)
         )
       })

@@ -23,6 +23,7 @@
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/no-extra-semi": "off",
     "@typescript-eslint/no-empty-function": "off",
+    "@typescript-eslint/no-floating-promises": ["error"],
     "react/react-in-jsx-scope": "off",
     "react/prop-types": "off",
     "no-empty": ["error", { "allowEmptyCatch": true }],
@@ -33,6 +34,7 @@
   },
   "parserOptions": {
     "ecmaVersion": 2019,
-    "sourceType": "module"
+    "sourceType": "module",
+    "project": "tsconfig.json"
   }
 }

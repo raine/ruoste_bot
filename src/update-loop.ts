@@ -53,7 +53,7 @@ async function updateLoop<T>(
   )
 
   setTimeout(() => {
-    updateLoop(get, set, updateServerListMessage)
+    void updateLoop(get, set, updateServerListMessage)
   }, 1000)
 }
 
@@ -63,7 +63,7 @@ export function initUpdateLoop<T>(
   updateServerListMessage: (msg: T, userMessage: T) => Promise<ListServer[]>,
   getChannelId: (msg: T) => unknown
 ) {
-  updateLoop(get, set, updateServerListMessage)
+  void updateLoop(get, set, updateServerListMessage)
 
   function updateRepliesList(
     servers: ListServer[],

@@ -54,7 +54,7 @@ export async function configure(cfg: Partial<RustPlusConfig>): Promise<void> {
     cfg.playerToken ||
     cfg.playerSteamId
   ) {
-    rustplus.listen(await getConfig())
+    void rustplus.listen(await getConfig())
   }
 }
 
@@ -160,5 +160,5 @@ export async function init(): Promise<void> {
 
   if (config.fcmCredentials) await fcmListen(config.fcmCredentials)
 
-  rustplus.listen(config)
+  void rustplus.listen(config)
 }

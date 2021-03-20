@@ -20,7 +20,7 @@ async function main() {
   }
 }
 
-main()
+void main()
 
 process.on('unhandledRejection', (err) => {
   if (err) log.error(err)

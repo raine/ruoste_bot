@@ -117,7 +117,7 @@ describe('checkMapEvents()', () => {
 
     test('previous spawn', async () => {
       const previousSpawnDate = DateTime.local().minus({ minutes: 80 }).toISO()
-      insertMapEvents([
+      await insertMapEvents([
         {
           createdAt: previousSpawnDate,
           type: 'CARGO_SHIP_ENTERED',

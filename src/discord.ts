@@ -61,7 +61,7 @@ const commands: (client: Discord.Client) => Commands = () => ({
       .catch((err) => {
         Sentry.captureException(err)
         log.error(err, 'failed to reply with servers')
-        msg.reply('something went wrong 😳')
+        return msg.reply('something went wrong 😳')
       })
   },
   '/nextwipes': async (text, msg) => {
@@ -73,7 +73,7 @@ const commands: (client: Discord.Client) => Commands = () => ({
       .skip(1)
       .throttle(1000)
       .onValue(({ serverCount, fetchedCount, servers }) => {
-        sent.edit({
+        return sent.edit({
           embed: formatUpcomingWipeList(serverCount, fetchedCount, servers)
         })
       })
@@ -191,8 +191,9 @@ let timeoutId: NodeJS.Timeout | undefined
 
 function updateBotActivityLoop(client: Discord.Client): void {
   if (timeoutId) clearInterval(timeoutId)
+  // Temporary
   if (process.env.NODE_ENV !== 'production') {
-    updateBotActivity(client)
+    void updateBotActivity(client)
   }
   timeoutId = setTimeout(
     () => updateBotActivityLoop(client),
@@ -213,7 +214,7 @@ export default function start() {
     if (!discordAlertsChannelId) return
 
     const channel = client.channels.cache.get(discordAlertsChannelId)
-    if (channel?.isText()) channel.send(formatSmartAlarmAlert(alert))
+    if (channel?.isText()) return channel.send(formatSmartAlarmAlert(alert))
   }
 
   async function onMapEvent(mapEvent: rustplus.MapEvent) {
@@ -221,7 +222,7 @@ export default function start() {
     if (!discordEventsChannelId) return
 
     const channel = client.channels.cache.get(discordEventsChannelId)
-    if (channel?.isText()) channel.send(formatMapEvent(mapEvent))
+    if (channel?.isText()) return channel.send(formatMapEvent(mapEvent))
   }
 
   function onRustSocketConnected() {
@@ -242,7 +243,7 @@ export default function start() {
 
     // The promise may not exist if there's configuration missing at start
     // We need this because rust server is connected to before event above is bound
-    rustplus.socketConnectedP?.then(onRustSocketConnected)
+    void rustplus.socketConnectedP?.then(onRustSocketConnected).catch(log.error)
   })
 
   client.on('message', (msg) => {
@@ -259,7 +260,7 @@ export default function start() {
     })
   })
 
-  client.login(token)
+  void client.login(token)
 
   const updateRepliesList = initUpdateLoop<Discord.Message>(
     () => updatedServerListReplies,
