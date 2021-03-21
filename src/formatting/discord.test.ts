@@ -23,4 +23,13 @@ describe('formatMapEvent()', () => {
       })
     ).toBe('🚢 Cargo Ship left the map')
   })
+
+  test('bradley apc destroyed', () => {
+    expect(
+      formatMapEvent({
+        type: 'BRADLEY_APC_DESTROYED',
+        data: undefined
+      })
+    ).toBe('💥 Bradley APC destroyed')
+  })
 })
