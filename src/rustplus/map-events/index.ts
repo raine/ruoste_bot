@@ -106,6 +106,8 @@ export async function checkMapEvents(
   if (lastMapMarkers) {
     const newMarkers = getNewMarkers(lastMapMarkers, markers)
     newMarkers.forEach((marker) => log.info(marker, 'New map marker'))
+    const removedMarkers = getRemovedMarkers(lastMapMarkers, markers)
+    removedMarkers.forEach((marker) => log.info(marker, 'Removed map marker'))
     const mapEvents = await generateMapEventsFromMarkersDiff(
       serverInfo,
       lastMapMarkers,
