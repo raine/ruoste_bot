@@ -1,11 +1,8 @@
 import _ from 'lodash'
-import { DateTime } from 'luxon'
-import db from '../../db'
-import { validateP } from '../../validate'
+import { getMonuments } from '../map'
 import {
   AppMarker,
   BradleyApcDestroyedMapEvent,
-  Monument,
   PatrolHeliDownMapEvent,
   ServerInfo
 } from '../types'
@@ -30,44 +27,21 @@ const createPatrolHeliDownEvent = (): PatrolHeliDownMapEvent => ({
   data: undefined
 })
 
-function getLaunchSiteCoords(server: ServerInfo): Promise<Monument> {
-  const wipeDateTime = DateTime.fromSeconds(server.wipeTime).toISO()
-  return validateP(
-    Monument,
-    db
-      .one(
-        `with wipe as (
-           select *
-             from maps
-            where wiped_at = $[wipeDateTime]
-         )
-         select monument.*
-           from wipe,
-                jsonb_to_recordset(wipe.data->'monuments') AS monument(token text, x numeric, y numeric)
-          where token = 'launchsite'`,
-        { wipeDateTime }
-      )
-      // https://github.com/brianc/node-postgres/issues/811
-      // numeric is returned as string
-      .then((row) => ({
-        ...row,
-        x: parseFloat(row.x),
-        y: parseFloat(row.y)
-      }))
-  )
-}
-
 const MAX_LAUNCH_SITE_DISTANCE = 250
 
 export async function bradleyDestroyedOrPatrolHeliDown(
   server: ServerInfo,
   newMarkers: AppMarker[]
 ): Promise<(BradleyApcDestroyedMapEvent | PatrolHeliDownMapEvent)[]> {
-  const launchSiteCoords = await getLaunchSiteCoords(server)
+  const monuments = await getMonuments(server)
+  const launchSite = monuments.find(
+    (monument) => monument.token === 'launchsite'
+  )
+  if (!launchSite) throw new Error('The map has no launch site')
   const explosions = newMarkers.filter(isMarkerExplosion)
   const [explosionsNearLaunchSite, explosionsSomewhereElse] = _.partition(
     explosions,
-    (marker) => distance(marker, launchSiteCoords) <= MAX_LAUNCH_SITE_DISTANCE
+    (marker) => distance(marker, launchSite) <= MAX_LAUNCH_SITE_DISTANCE
   )
 
   return [

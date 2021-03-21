@@ -1,9 +1,11 @@
-import { ServerInfo } from './types'
+import { Monument, ServerInfo } from './types'
 import { getMap } from '.'
 import db from '../db'
 import log from '../logger'
 import { DateTime } from 'luxon'
 import _ from 'lodash'
+import { validateP } from '../validate'
+import * as t from 'io-ts'
 
 export async function saveMap(serverInfo: ServerInfo): Promise<void> {
   return db.tx(async (t) => {
@@ -32,4 +34,34 @@ export async function saveMap(serverInfo: ServerInfo): Promise<void> {
       log.info('Server map saved to database')
     }
   })
+}
+
+export function getMonuments(serverInfo: ServerInfo): Promise<Monument[]> {
+  const wipeDateTime = DateTime.fromSeconds(serverInfo.wipeTime).toISO()
+  return validateP(
+    t.array(Monument),
+    db
+      .many(
+        `with wipe as (
+           select *
+             from maps
+            where wiped_at = $[wipeDateTime]
+              and server_host = $[host]
+              and server_port = $[port]
+         )
+         select monument.*
+           from wipe,
+                jsonb_to_recordset(wipe.data->'monuments') AS monument(token text, x numeric, y numeric)`,
+        { wipeDateTime, ...serverInfo }
+      )
+      // https://github.com/brianc/node-postgres/issues/811
+      // numeric is returned as string
+      .then((rows: any) =>
+        rows.map((row: any) => ({
+          ...row,
+          x: parseFloat(row.x),
+          y: parseFloat(row.y)
+        }))
+      )
+  )
 }
