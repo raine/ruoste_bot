@@ -32,4 +32,13 @@ describe('formatMapEvent()', () => {
       })
     ).toBe('💥 Bradley APC destroyed')
   })
+
+  test('patrol heli down', () => {
+    expect(
+      formatMapEvent({
+        type: 'PATROL_HELI_DOWN',
+        data: undefined
+      })
+    ).toBe('💥 Patrol Helicopter taken down')
+  })
 })
