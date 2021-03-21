@@ -124,16 +124,16 @@ export async function checkMapEvents(
   serverInfo: ServerInfo,
   emitter: TypedEmitter<RustPlusEvents>
 ) {
-  const markers = await getMapMarkers()
+  const markers = (await getMapMarkers()).filter(
+    (marker) => !['VendingMachine', 'Player'].includes(marker.type)
+  )
   if (markers.length)
     await db.none(
       pgp.helpers.insert(
-        [
-          {
-            ...serverInfoToConfig(serverInfo),
-            markers: JSON.stringify(markers)
-          }
-        ],
+        {
+          ...serverInfoToConfig(serverInfo),
+          markers: JSON.stringify(markers)
+        },
         mapMarkersColumnSet
       )
     )
