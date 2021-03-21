@@ -12,6 +12,16 @@ create table fcm_persistent_ids (
   persistent_id    text primary key
 );
 
+create table maps (
+  created_at    timestamptz default now() not null,
+  server_host   text not null,
+  server_port   integer not null,
+  wiped_at      timestamptz not null,
+  data          jsonb,
+
+  primary key (server_host, server_port, wiped_at)
+);
+
 create table map_events (
   created_at    timestamptz default now() not null,
   server_host   text not null,

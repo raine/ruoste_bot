@@ -203,3 +203,20 @@ export const AppMapMarkers = t.type({
 })
 
 export type AppMapMarkers = t.TypeOf<typeof AppMapMarkers>
+
+export const AppMap = t.type({
+  width: t.number,
+  height: t.number,
+  jpgImage: t.string,
+  oceanMargin: t.number,
+  monuments: t.array(
+    t.type({
+      token: t.string,
+      x: t.number,
+      y: t.number
+    })
+  ),
+  background: t.string
+})
+
+export type AppMap = t.TypeOf<typeof AppMap>

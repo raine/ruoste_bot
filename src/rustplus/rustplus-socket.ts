@@ -10,7 +10,8 @@ import {
   AppTime,
   RustPlusConfig,
   ServerHostPort,
-  ServerInfo
+  ServerInfo,
+  AppMap
 } from './types'
 import protobuf, { Message } from 'protobufjs'
 import { events } from './'
@@ -76,9 +77,9 @@ export async function getTeamInfo(): Promise<AppTeamInfo> {
   ).then((res) => res.teamInfo)
 }
 
-export async function getMap(): Promise<any> {
+export async function getMap(): Promise<AppMap> {
   return parseResponse(
-    t.type({ seq: t.number, map: t.unknown }),
+    t.type({ seq: t.number, map: AppMap }),
     await sendRequestAsync({ getMap: {} })
   ).then((res) => res.map)
 }

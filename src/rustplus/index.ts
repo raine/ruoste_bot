@@ -11,6 +11,7 @@ import * as rustplus from './rustplus-socket'
 export * from './rustplus-socket'
 import { trackMapEvents } from './map-events'
 import _ from 'lodash'
+import { saveMap } from './map'
 
 const useFakePushReceiver = process.env.FAKE_FCM === '1'
 const fcm = useFakePushReceiver ? fakePushReceiver : pushReceiver
@@ -146,6 +147,7 @@ export async function init(): Promise<void> {
   events.on('connected', (serverInfo) => {
     log.info(serverInfo, 'Connected to rust server')
     trackMapEvents(serverInfo, events)
+    saveMap(serverInfo).catch((err) => log.error(err, 'Failed to save map'))
   })
 
   await initEmptyConfig()
