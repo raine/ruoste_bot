@@ -14,4 +14,13 @@ describe('formatMapEvent()', () => {
       })
     ).toBe('🚢 Cargo Ship entered the map — previous spawn was 1h 21m ago')
   })
+
+  test('cargo ship left', () => {
+    expect(
+      formatMapEvent({
+        type: 'CARGO_SHIP_LEFT',
+        data: undefined
+      })
+    ).toBe('🚢 Cargo Ship left the map')
+  })
 })
