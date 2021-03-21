@@ -1,4 +1,5 @@
 import { DateTime } from 'luxon'
+import { CargoShipLeftMapEvent, MapEvent, MonumentToken } from '../rustplus'
 import { formatMapEvent } from './discord'
 
 describe('formatMapEvent()', () => {
@@ -40,5 +41,52 @@ describe('formatMapEvent()', () => {
         data: undefined
       })
     ).toBe('💥 Patrol Helicopter taken down')
+  })
+
+  describe('crate', () => {
+    test('spawned to large oil rig', () => {
+      expect(
+        formatMapEvent({
+          type: 'CRATE_SPAWNED',
+          data: { monument: 'large_oil_rig' }
+        })
+      ).toBe('📦 Locked Crate spawned to Large Oil Rig')
+    })
+
+    test('spawned to no monument', () => {
+      expect(
+        formatMapEvent({
+          type: 'CRATE_SPAWNED',
+          data: { monument: null }
+        })
+      ).toBe('📦 Locked Crate spawned')
+    })
+
+    test('spawned to seemingly wrong monument has token as name', () => {
+      expect(
+        formatMapEvent({
+          type: 'CRATE_SPAWNED',
+          data: { monument: 'fishing_village_display_name' }
+        })
+      ).toBe('📦 Locked Crate spawned to fishing_village_display_name')
+    })
+
+    test('gone from large oil rig', () => {
+      expect(
+        formatMapEvent({
+          type: 'CRATE_GONE',
+          data: { monument: 'large_oil_rig' }
+        })
+      ).toBe('📦 Locked Crate taken from Large Oil Rig')
+    })
+
+    test('gone from no monument', () => {
+      expect(
+        formatMapEvent({
+          type: 'CRATE_GONE',
+          data: { monument: null }
+        })
+      ).toBe('📦 Locked Crate taken')
+    })
   })
 })

@@ -1,4 +1,4 @@
-import { Monument, ServerInfo } from './types'
+import { Monument, MonumentToken, ServerInfo } from './types'
 import { getMap } from '.'
 import db from '../db'
 import log from '../logger'
@@ -36,7 +36,9 @@ export async function saveMap(serverInfo: ServerInfo): Promise<void> {
   })
 }
 
-export function getMonuments(serverInfo: ServerInfo): Promise<Monument[]> {
+export function getMonuments(
+  serverInfo: Pick<ServerInfo, 'host' | 'port' | 'wipeTime'>
+): Promise<Monument[]> {
   const wipeDateTime = DateTime.fromSeconds(serverInfo.wipeTime).toISO()
   return validateP(
     t.array(Monument),
@@ -64,4 +66,25 @@ export function getMonuments(serverInfo: ServerInfo): Promise<Monument[]> {
         }))
       )
   )
+}
+
+const MONUMENT_NAMES: { [k: string]: string | undefined } = {
+  military_tunnels_display_name: 'Military Tunnel',
+  power_plant_display_name: 'Power Plant',
+  oil_rig_small: 'Small Oil Rig',
+  sewer_display_name: 'Sewer Branch',
+  satellite_dish_display_name: 'Satellite Dish Array',
+  airfield_display_name: 'Airfield',
+  dome_monument_name: 'Dome',
+  junkyard_display_name: 'Junkyard',
+  train_yard_display_name: 'Trainyard',
+  large_oil_rig: 'Large Oil Rig',
+  launchsite: 'Launch Site',
+  water_treatment_plant_display_name: 'Water Treatment Plant'
+}
+
+export function monumentNameFromToken(
+  token: MonumentToken
+): string | undefined {
+  return MONUMENT_NAMES[token]
 }

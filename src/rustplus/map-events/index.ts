@@ -13,6 +13,7 @@ import log from '../../logger'
 import db, { pgp, DEFAULT } from '../../db'
 import { cargoShipLeft, cargoShipEntered } from './cargo-ship'
 import { bradleyDestroyedOrPatrolHeliDown } from './explosion'
+import { crate } from './crate'
 
 const mapMarkersColumnSet = new pgp.helpers.ColumnSet(
   [
@@ -76,7 +77,8 @@ export async function generateMapEventsFromMarkersDiff(
   return [
     ...(await cargoShipEntered(server, newMarkers)),
     ...cargoShipLeft(removedMarkers),
-    ...(await bradleyDestroyedOrPatrolHeliDown(server, newMarkers))
+    ...(await bradleyDestroyedOrPatrolHeliDown(server, newMarkers)),
+    ...(await crate(server, newMarkers, removedMarkers))
   ]
 }
 

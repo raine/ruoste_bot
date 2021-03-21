@@ -15,6 +15,7 @@ import {
   formatRelativeDate
 } from '../date'
 import * as rustplus from '../rustplus'
+import { monumentNameFromToken } from '../rustplus/map'
 
 const RUST_COLOR = 0xce422a
 const DESCRIPTION_MAX_LENGTH = 2048
@@ -240,6 +241,17 @@ export const formatMapEvent = (event: rustplus.MapEvent) => {
     }
     case 'PATROL_HELI_DOWN': {
       return '💥 Patrol Helicopter taken down'
+    }
+    case 'CRATE_SPAWNED':
+    case 'CRATE_GONE': {
+      const monumentName = event.data.monument
+        ? monumentNameFromToken(event.data.monument) ?? event.data.monument
+        : ''
+      const action =
+        event.type === 'CRATE_SPAWNED'
+          ? `spawned ${monumentName ? 'to' : ''}`
+          : `taken ${monumentName ? 'from' : ''}`
+      return `📦 Locked Crate ${action} ${monumentName}`.trim()
     }
   }
 }

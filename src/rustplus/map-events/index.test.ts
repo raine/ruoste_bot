@@ -114,6 +114,11 @@ describe('checkMapEvents()', () => {
           x: 1208.7484130859375,
           y: 1980.2667236328125,
           token: 'launchsite'
+        },
+        {
+          x: 3992.656005859375,
+          y: 295.356689453125,
+          token: 'oil_rig_small'
         }
       ]
     }
@@ -280,6 +285,44 @@ describe('checkMapEvents()', () => {
       expect(await getLastMapEvent()).toEqual({
         type: 'PATROL_HELI_DOWN',
         data: null,
+        ...baseFields
+      })
+    })
+  })
+
+  describe('crate spawn', () => {
+    async function spawnCrate(crate: AppMarker) {
+      mockedGetMapMarkers
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([crate])
+      await checkMapEvents(SERVER_INFO, emitter)
+      await checkMapEvents(SERVER_INFO, emitter)
+    }
+
+    test('small oil rig', async () => {
+      await spawnCrate({ ...CRATE, x: 3996, y: 267 })
+      expect(await getLastMapEvent()).toEqual({
+        type: 'CRATE_SPAWNED',
+        data: { monument: 'oil_rig_small' },
+        ...baseFields
+      })
+    })
+  })
+
+  describe('crate gone', () => {
+    async function unspawnCrate(crate: AppMarker) {
+      mockedGetMapMarkers
+        .mockResolvedValueOnce([crate])
+        .mockResolvedValueOnce([])
+      await checkMapEvents(SERVER_INFO, emitter)
+      await checkMapEvents(SERVER_INFO, emitter)
+    }
+
+    test('small oil rig', async () => {
+      await unspawnCrate({ ...CRATE, x: 3996, y: 267 })
+      expect(await getLastMapEvent()).toEqual({
+        type: 'CRATE_GONE',
+        data: { monument: 'oil_rig_small' },
         ...baseFields
       })
     })

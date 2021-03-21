@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import { distance } from '../../math'
 import { getMonuments } from '../map'
 import {
   AppMarker,
@@ -8,14 +9,6 @@ import {
 } from '../types'
 
 const isMarkerExplosion = (marker: AppMarker) => marker.type === 'Explosion'
-
-type XY = { x: number; y: number }
-
-function distance({ x: x1, y: y1 }: XY, { x: x2, y: y2 }: XY) {
-  const a = x1 - x2
-  const b = y1 - y2
-  return Math.sqrt(a * a + b * b)
-}
 
 const createBradleyApcDestroyedEvent = (): BradleyApcDestroyedMapEvent => ({
   type: 'BRADLEY_APC_DESTROYED' as const,
