@@ -16,14 +16,7 @@ import {
 
 jest.mock('../../src/rustplus/rustplus-socket', () => ({
   __esModule: true,
-  getMapMarkers: jest.fn(),
-  getTime: jest.fn().mockResolvedValue({
-    dayLengthMinutes: 60,
-    timeScale: 1,
-    sunrise: 8,
-    sunset: 20,
-    time: 12
-  })
+  getMapMarkers: jest.fn()
 }))
 
 import { getMapMarkers } from './rustplus-socket'
@@ -128,7 +121,6 @@ describe('checkMapEvents()', () => {
       expect(await getLastMapEvent()).toEqual({
         type: 'CARGO_SHIP_ENTERED',
         data: {
-          dayLengthMinutes: 60,
           previousSpawn: null
         },
         ...baseFields
@@ -142,7 +134,6 @@ describe('checkMapEvents()', () => {
           createdAt: previousSpawnDate,
           type: 'CARGO_SHIP_ENTERED',
           data: {
-            dayLengthMinutes: 60,
             previousSpawn: null
           },
           ...SERVER_DB
@@ -154,7 +145,6 @@ describe('checkMapEvents()', () => {
       expect(await getLastMapEvent()).toEqual({
         type: 'CARGO_SHIP_ENTERED',
         data: {
-          dayLengthMinutes: 60,
           previousSpawn: previousSpawnDate
         },
         ...baseFields
@@ -168,7 +158,6 @@ describe('checkMapEvents()', () => {
           createdAt: previousSpawnDate,
           type: 'CARGO_SHIP_ENTERED',
           data: {
-            dayLengthMinutes: 60,
             previousSpawn: null
           },
           ...SERVER_DB
@@ -184,7 +173,6 @@ describe('checkMapEvents()', () => {
       expect(await getLastMapEvent()).toEqual({
         type: 'CARGO_SHIP_ENTERED',
         data: {
-          dayLengthMinutes: 60,
           previousSpawn: null
         },
         ...baseFields

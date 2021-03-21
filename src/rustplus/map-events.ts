@@ -91,10 +91,7 @@ const createCargoShipEnteredEvent = (
   server: ServerInfo
 ) => async (): Promise<CargoShipEnteredMapEvent> => ({
   type: 'CARGO_SHIP_ENTERED' as const,
-  data: {
-    previousSpawn: await getPreviousCargoSpawn(server),
-    dayLengthMinutes: (await getTime()).dayLengthMinutes
-  }
+  data: { previousSpawn: await getPreviousCargoSpawn(server) }
 })
 
 const createCargoShipLeftEvent = (): CargoShipLeftMapEvent => ({

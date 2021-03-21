@@ -100,10 +100,7 @@ export type MapEventK<Type, Data = undefined> = { type: Type; data: Data }
 
 export type CargoShipEnteredMapEvent = MapEventK<
   'CARGO_SHIP_ENTERED',
-  {
-    previousSpawn: string | null
-    dayLengthMinutes: number
-  }
+  { previousSpawn: string | null }
 >
 
 export type CargoShipLeftMapEvent = MapEventK<'CARGO_SHIP_LEFT'>

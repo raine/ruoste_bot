@@ -227,14 +227,7 @@ export const formatMapEvent = (event: rustplus.MapEvent) => {
               event.data.previousSpawn
             )
             const previousSpawnTimeAgo = formatTimeAgo(previousSpawnDateTime)
-            const previousSpawnMinutesAgo = Interval.fromDateTimes(
-              previousSpawnDateTime,
-              DateTime.local()
-            ).count('minute')
-            const rustDaysAgo = (
-              previousSpawnMinutesAgo / event.data.dayLengthMinutes
-            ).toFixed(1)
-            return `previous spawn was ${previousSpawnTimeAgo} ago (${rustDaysAgo} rust days)`
+            return `previous spawn was ${previousSpawnTimeAgo} ago`
           })()
         : ''
       return `🚢 Cargo Ship entered the map${more ? ` — ${more}` : ''}`
