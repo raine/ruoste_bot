@@ -1,5 +1,4 @@
 import { DateTime } from 'luxon'
-import { CargoShipLeftMapEvent, MapEvent, MonumentToken } from '../rustplus'
 import { formatMapEvent } from './discord'
 
 describe('formatMapEvent()', () => {

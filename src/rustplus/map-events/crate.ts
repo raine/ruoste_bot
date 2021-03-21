@@ -8,7 +8,7 @@ import {
   MonumentToken,
   ServerInfo
 } from '../types'
-import { distance } from '../../math'
+import { distance, XY } from '../../math'
 
 const isMarkerCrate = (marker: AppMarker) => marker.type === 'Crate'
 
@@ -42,23 +42,39 @@ const createCrateGoneEvent = (
   data: { monument: getMonument(crate) }
 })
 
+function haveSameCoords({ x: x1, y: y1 }: XY, { x: x2, y: y2 }: XY): boolean {
+  return x1 == x2 && y1 === y2
+}
+
 export async function crate(
   server: ServerInfo,
   newMarkers: AppMarker[],
   removedMarkers: AppMarker[]
 ): Promise<(CrateSpawnedEvent | CrateGoneEvent)[]> {
   const monuments = await getMonuments(server)
-  return [
-    ...newMarkers
-      .filter(isMarkerCrate)
-      .map((crate) =>
-        createCrateSpawnedEvent(getNearestMonumentToken(monuments), crate)
-      ),
+  const newCrates = newMarkers.filter(isMarkerCrate)
+  const removedCrates = removedMarkers.filter(isMarkerCrate)
 
-    ...removedMarkers
-      .filter(isMarkerCrate)
-      .map((crate) =>
-        createCrateGoneEvent(getNearestMonumentToken(monuments), crate)
+  // Small and large oilrig crates respawn every once in a while with new id.
+  // Take this into account by not considering crate as spawned if it was removed in the
+  // same location in same tick. Same for the opposite.
+  const newCratesNotInRemovedCrates = newCrates.filter(
+    (newCrate) =>
+      !removedCrates.some((removedCrate) =>
+        haveSameCoords(newCrate, removedCrate)
       )
+  )
+  const removedCratesNotInNewCrates = removedCrates.filter(
+    (removedCrate) =>
+      !newCrates.some((newCrate) => haveSameCoords(removedCrate, newCrate))
+  )
+
+  return [
+    ...newCratesNotInRemovedCrates.map((crate) =>
+      createCrateSpawnedEvent(getNearestMonumentToken(monuments), crate)
+    ),
+    ...removedCratesNotInNewCrates.map((crate) =>
+      createCrateGoneEvent(getNearestMonumentToken(monuments), crate)
+    )
   ]
 }

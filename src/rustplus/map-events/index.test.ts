@@ -290,40 +290,54 @@ describe('checkMapEvents()', () => {
     })
   })
 
-  describe('crate spawn', () => {
-    async function spawnCrate(crate: AppMarker) {
-      mockedGetMapMarkers
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([crate])
-      await checkMapEvents(SERVER_INFO, emitter)
-      await checkMapEvents(SERVER_INFO, emitter)
-    }
+  describe('crate', () => {
+    const smallOilrigCrate = { ...CRATE, x: 3996, y: 267 }
 
-    test('small oil rig', async () => {
-      await spawnCrate({ ...CRATE, x: 3996, y: 267 })
-      expect(await getLastMapEvent()).toEqual({
-        type: 'CRATE_SPAWNED',
-        data: { monument: 'oil_rig_small' },
-        ...baseFields
+    describe('spawn', () => {
+      async function spawnCrate(crate: AppMarker) {
+        mockedGetMapMarkers
+          .mockResolvedValueOnce([])
+          .mockResolvedValueOnce([crate])
+        await checkMapEvents(SERVER_INFO, emitter)
+        await checkMapEvents(SERVER_INFO, emitter)
+      }
+
+      test('small oil rig', async () => {
+        await spawnCrate({ ...CRATE, ...smallOilrigCrate })
+        expect(await getLastMapEvent()).toEqual({
+          type: 'CRATE_SPAWNED',
+          data: { monument: 'oil_rig_small' },
+          ...baseFields
+        })
+      })
+
+      test('crate respawn with new id does not an trigger event', async () => {
+        mockedGetMapMarkers
+          .mockResolvedValueOnce([{ ...CRATE, ...smallOilrigCrate, id: 1 }])
+          .mockResolvedValueOnce([{ ...CRATE, ...smallOilrigCrate, id: 2 }])
+        await checkMapEvents(SERVER_INFO, emitter)
+        await checkMapEvents(SERVER_INFO, emitter)
+
+        expect(await getLastMapEvent()).toBe(null)
       })
     })
-  })
 
-  describe('crate gone', () => {
-    async function unspawnCrate(crate: AppMarker) {
-      mockedGetMapMarkers
-        .mockResolvedValueOnce([crate])
-        .mockResolvedValueOnce([])
-      await checkMapEvents(SERVER_INFO, emitter)
-      await checkMapEvents(SERVER_INFO, emitter)
-    }
+    describe('gone', () => {
+      async function unspawnCrate(crate: AppMarker) {
+        mockedGetMapMarkers
+          .mockResolvedValueOnce([crate])
+          .mockResolvedValueOnce([])
+        await checkMapEvents(SERVER_INFO, emitter)
+        await checkMapEvents(SERVER_INFO, emitter)
+      }
 
-    test('small oil rig', async () => {
-      await unspawnCrate({ ...CRATE, x: 3996, y: 267 })
-      expect(await getLastMapEvent()).toEqual({
-        type: 'CRATE_GONE',
-        data: { monument: 'oil_rig_small' },
-        ...baseFields
+      test('small oil rig', async () => {
+        await unspawnCrate({ ...CRATE, x: 3996, y: 267 })
+        expect(await getLastMapEvent()).toEqual({
+          type: 'CRATE_GONE',
+          data: { monument: 'oil_rig_small' },
+          ...baseFields
+        })
       })
     })
   })
