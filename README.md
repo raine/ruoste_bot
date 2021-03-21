@@ -1,8 +1,6 @@
 # ruoste_bot
 
-A telegram/discord bot that retrieves recently wiped Rust servers from
-[just-wiped.net](https://just-wiped.net) and interacts with the server you're
-playing on through the Rust+ companion API.
+A telegram/discord bot for Rust
 
 ## features
 
@@ -10,8 +8,9 @@ playing on through the Rust+ companion API.
 - List future wipes calculated based on servers' prior history of wipes
 - Rust+ related features
   - Show group online status and server player count in the bot activity
-  - Receive smart alarm notifications in a specified discord channel
-  - Map events (WIP)
+  - Receive smart alarm notifications to a channel
+  - Post map events to a channel (e.g. cargo ship spawned)
+  - Some kind of support for controlling smart switches through script API (TBD)
 
 ![](https://raine.github.io/ruoste_bot/wipes.png?1)
 ![](https://raine.github.io/ruoste_bot/discord.png)
@@ -20,6 +19,8 @@ playing on through the Rust+ companion API.
 
 - `/wipes [maxgroup=x-y|x]` - List of recently wiped servers.
 - `/nextwipes` - List servers that will be wiped in future.
+- `/rustplus configure <option> <value>`
+    - Where `<option` is one of `fcm`, `server`, `steamid`, `playertoken`, `alerts_channel` or `events_channel`
 
 ## deployment
 
