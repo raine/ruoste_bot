@@ -233,7 +233,13 @@ export const formatMapEvent = (event: rustplus.MapEvent) => {
       return `🚢 Cargo Ship entered the map${more ? ` — ${more}` : ''}`
     }
     case 'CARGO_SHIP_LEFT': {
-      return `🚢 Cargo Ship left the map`
+      return '🚢 Cargo Ship left the map'
+    }
+    case 'BRADLEY_APC_DESTROYED': {
+      return '💥 Bradley APC destroyed'
+    }
+    case 'PATROL_HELI_DOWN': {
+      return '💥 Patrol Helicopter taken down'
     }
   }
 }

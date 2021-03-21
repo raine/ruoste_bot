@@ -1,21 +1,18 @@
-import { getMapMarkers, getTime } from './rustplus-socket'
+import { getMapMarkers } from '../rustplus-socket'
 import * as _ from 'lodash'
 import {
   MapEvent,
   RustPlusEvents,
   AppMarker,
   DbMapEvent,
-  CargoShipEnteredMapEvent,
-  CargoShipLeftMapEvent,
   ServerInfo,
   RustPlusConfig
-} from './types'
+} from '../types'
 import { TypedEmitter } from 'tiny-typed-emitter'
-import log from '../logger'
-import db, { pgp, DEFAULT } from '../db'
-import { DateTime } from 'luxon'
-
-const isMarkerCargoShip = (marker: AppMarker) => marker.type === 'CargoShip'
+import log from '../../logger'
+import db, { pgp, DEFAULT } from '../../db'
+import { cargoShipLeft, cargoShipEntered } from './cargo-ship'
+import { bradleyDestroyedOrPatrolHeliDown } from './explosion'
 
 const mapMarkersColumnSet = new pgp.helpers.ColumnSet(
   [
@@ -68,37 +65,6 @@ export function getRemovedMarkers(
   return _.differenceBy(prevMarkers, currentMarkers, (marker) => marker.id)
 }
 
-function getPreviousCargoSpawn(server: ServerInfo): Promise<string | null> {
-  const wipeDateTime = DateTime.fromSeconds(server.wipeTime).toISO()
-  const { host, port } = server
-
-  return db
-    .oneOrNone(
-      `select created_at
-         from map_events
-        where server_host = $[host]
-          and server_port = $[port]
-          and type = 'CARGO_SHIP_ENTERED'
-          and created_at > $[wipeDateTime]
-        order by created_at desc
-        limit 1`,
-      { host, port, wipeDateTime }
-    )
-    .then((res) => (res ? res.createdAt : null))
-}
-
-const createCargoShipEnteredEvent = (
-  server: ServerInfo
-) => async (): Promise<CargoShipEnteredMapEvent> => ({
-  type: 'CARGO_SHIP_ENTERED' as const,
-  data: { previousSpawn: await getPreviousCargoSpawn(server) }
-})
-
-const createCargoShipLeftEvent = (): CargoShipLeftMapEvent => ({
-  type: 'CARGO_SHIP_LEFT' as const,
-  data: undefined
-})
-
 export async function generateMapEventsFromMarkersDiff(
   server: ServerInfo,
   prevMarkers: AppMarker[],
@@ -108,13 +74,9 @@ export async function generateMapEventsFromMarkersDiff(
   const removedMarkers = getRemovedMarkers(prevMarkers, currentMarkers)
 
   return [
-    ...(await Promise.all(
-      newMarkers
-        .filter(isMarkerCargoShip)
-        .map(createCargoShipEnteredEvent(server))
-    )),
-
-    ...removedMarkers.filter(isMarkerCargoShip).map(createCargoShipLeftEvent)
+    ...(await cargoShipEntered(server, newMarkers)),
+    ...cargoShipLeft(removedMarkers),
+    ...(await bradleyDestroyedOrPatrolHeliDown(server, newMarkers))
   ]
 }
 
@@ -127,6 +89,7 @@ export async function checkMapEvents(
   const markers = (await getMapMarkers()).filter(
     (marker) => !['VendingMachine', 'Player'].includes(marker.type)
   )
+
   if (markers.length)
     await db.none(
       pgp.helpers.insert(
@@ -137,6 +100,7 @@ export async function checkMapEvents(
         mapMarkersColumnSet
       )
     )
+
   if (lastMapMarkers) {
     const newMarkers = getNewMarkers(lastMapMarkers, markers)
     newMarkers.forEach((marker) => log.info(marker, 'New map marker'))
@@ -145,10 +109,12 @@ export async function checkMapEvents(
       lastMapMarkers,
       markers
     )
+
     if (mapEvents.length)
       await insertMapEvents(
         mapEvents.map((e) => createDbMapEvent(serverInfo, e))
       )
+
     mapEvents.forEach((ev) => emitter.emit('mapEvent', ev))
   }
   lastMapMarkers = markers

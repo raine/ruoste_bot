@@ -104,14 +104,18 @@ export type CargoShipEnteredMapEvent = MapEventK<
 >
 
 export type CargoShipLeftMapEvent = MapEventK<'CARGO_SHIP_LEFT'>
-export type MapEvent = CargoShipEnteredMapEvent | CargoShipLeftMapEvent
+export type BradleyApcDestroyedMapEvent = MapEventK<'BRADLEY_APC_DESTROYED'>
+export type PatrolHeliDownMapEvent = MapEventK<'PATROL_HELI_DOWN'>
+export type MapEvent =
+  | CargoShipEnteredMapEvent
+  | CargoShipLeftMapEvent
+  | BradleyApcDestroyedMapEvent
+  | PatrolHeliDownMapEvent
 
 export type ServerHostPort = { host: string; port: number }
 export type ServerConfig = Pick<RustPlusConfig, 'serverHost' | 'serverPort'>
 export type DbMapEvent = { createdAt?: string } & MapEvent & ServerConfig
 
-// 'PATROL_HELI_DOWN'
-// 'BRADLEY_APC_DESTROYED'
 // 'LARGE_OIL_RIG_CRATE_SPAWNED'
 // 'LARGE_OIL_RIG_CRATE_TAKEN'
 // 'SMALL_OIL_RIG_CRATE_SPAWNED'
@@ -204,18 +208,20 @@ export const AppMapMarkers = t.type({
 
 export type AppMapMarkers = t.TypeOf<typeof AppMapMarkers>
 
+export const Monument = t.type({
+  token: t.string,
+  x: t.number,
+  y: t.number
+})
+
+export type Monument = t.TypeOf<typeof Monument>
+
 export const AppMap = t.type({
   width: t.number,
   height: t.number,
   jpgImage: t.string,
   oceanMargin: t.number,
-  monuments: t.array(
-    t.type({
-      token: t.string,
-      x: t.number,
-      y: t.number
-    })
-  ),
+  monuments: t.array(Monument),
   background: t.string
 })
 

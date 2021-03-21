@@ -1,26 +1,29 @@
-import { resetDb } from '../test/utils'
-import db from '../db'
+import { resetDb } from '../../test/utils'
+import db from '../../db'
 import { DateTime } from 'luxon'
 import { TypedEmitter } from 'tiny-typed-emitter'
-import { validate } from '../validate'
+import { validate } from '../../validate'
 import { mocked } from 'ts-jest/utils'
 import * as t from 'io-ts'
-import { AppMarker, RustPlusEvents, ServerInfo } from '.'
+import { AppMarker, RustPlusEvents, ServerInfo } from '..'
 import {
   getNewMarkers,
   getRemovedMarkers,
   checkMapEvents,
   insertMapEvents,
   resetLastMapMarkers
-} from './map-events'
+} from '.'
+import { saveMap } from '../map'
 
-jest.mock('../../src/rustplus/rustplus-socket', () => ({
+jest.mock('../rustplus-socket', () => ({
   __esModule: true,
-  getMapMarkers: jest.fn()
+  getMapMarkers: jest.fn(),
+  getMap: jest.fn()
 }))
 
-import { getMapMarkers } from './rustplus-socket'
+import { getMapMarkers, getMap } from '../rustplus-socket'
 const mockedGetMapMarkers = mocked(getMapMarkers, true)
+const mockedGetMap = mocked(getMap, true)
 
 const SERVER_INFO: ServerInfo = {
   name: '',
@@ -97,13 +100,33 @@ describe('checkMapEvents()', () => {
   }
 
   async function getLastMapEvent() {
-    return db.one(`select * from map_events order by created_at desc limit 1`)
+    return db.oneOrNone(
+      `select * from map_events order by created_at desc limit 1`
+    )
+  }
+
+  async function setupMap(serverInfo = SERVER_INFO) {
+    const map: any = {
+      width: 2825,
+      height: 2825,
+      monuments: [
+        {
+          x: 1208.7484130859375,
+          y: 1980.2667236328125,
+          token: 'launchsite'
+        }
+      ]
+    }
+
+    mockedGetMap.mockResolvedValue(map)
+    await saveMap(serverInfo)
   }
 
   beforeEach(async () => {
     resetLastMapMarkers()
     await resetDb()
     emitter = new TypedEmitter<RustPlusEvents>()
+    await setupMap()
   })
 
   describe('cargo ship entered', () => {
@@ -152,7 +175,14 @@ describe('checkMapEvents()', () => {
     })
 
     test('does not return previous spawn from earlier wipe', async () => {
+      const wipeDateTime = DateTime.local().minus({ minutes: 10 })
       const previousSpawnDate = DateTime.local().minus({ minutes: 80 }).toISO()
+      const serverInfo = { ...SERVER_INFO, wipeTime: wipeDateTime.toSeconds() }
+
+      // Setup the map again for this wipe (this test does not need it, but
+      // would error because of other event)
+      await setupMap(serverInfo)
+
       await insertMapEvents([
         {
           createdAt: previousSpawnDate,
@@ -165,10 +195,7 @@ describe('checkMapEvents()', () => {
       ])
 
       // Server wiped 10 minutes ago, last spawn 80 minutes ago
-      await spawnCargo({
-        ...SERVER_INFO,
-        wipeTime: DateTime.local().minus({ minutes: 10 }).toSeconds()
-      })
+      await spawnCargo(serverInfo)
 
       expect(await getLastMapEvent()).toEqual({
         type: 'CARGO_SHIP_ENTERED',
@@ -194,6 +221,64 @@ describe('checkMapEvents()', () => {
       await removeCargo()
       expect(await getLastMapEvent()).toEqual({
         type: 'CARGO_SHIP_LEFT',
+        data: null,
+        ...baseFields
+      })
+    })
+  })
+
+  describe('explosion', () => {
+    async function explode(explosion: AppMarker) {
+      mockedGetMapMarkers
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([explosion])
+      await checkMapEvents(SERVER_INFO, emitter)
+      await checkMapEvents(SERVER_INFO, emitter)
+    }
+
+    test('explosion near launch site', async () => {
+      const explosion = {
+        id: 17012574,
+        x: 1175.514892578125,
+        y: 1872.5616455078125,
+        name: '',
+        type: 'Explosion' as const,
+        alpha: 0,
+        color1: { w: 0, x: 0, y: 0, z: 0 },
+        color2: { w: 0, x: 0, y: 0, z: 0 },
+        radius: 0,
+        steamId: '0',
+        rotation: 0
+      }
+
+      await explode(explosion)
+
+      expect(await getLastMapEvent()).toEqual({
+        type: 'BRADLEY_APC_DESTROYED',
+        data: null,
+        ...baseFields
+      })
+    })
+
+    test('explosion somewhere else', async () => {
+      const explosion = {
+        id: 17012574,
+        x: 900,
+        y: 1872.5616455078125,
+        name: '',
+        type: 'Explosion' as const,
+        alpha: 0,
+        color1: { w: 0, x: 0, y: 0, z: 0 },
+        color2: { w: 0, x: 0, y: 0, z: 0 },
+        radius: 0,
+        steamId: '0',
+        rotation: 0
+      }
+
+      await explode(explosion)
+
+      expect(await getLastMapEvent()).toEqual({
+        type: 'PATROL_HELI_DOWN',
         data: null,
         ...baseFields
       })
