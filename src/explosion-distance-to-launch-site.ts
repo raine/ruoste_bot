@@ -1,12 +1,7 @@
 require('dotenv').config()
 import db from './db'
 import _ from 'lodash'
-
-function distance({ x: x1, y: y1 }: any, { x: x2, y: y2 }: any) {
-  const a = x1 - x2
-  const b = y1 - y2
-  return Math.sqrt(a * a + b * b)
-}
+import { distance } from './math'
 
 const host = '178.33.128.186'
 const port = 28108
