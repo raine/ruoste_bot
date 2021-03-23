@@ -73,7 +73,7 @@ async function onFcmNotification(raw: any) {
       data.notification.data.channelId === 'pairing' &&
       data.notification.data.body.type === 'server'
 
-    // Ignored alarms etc. from FCM notifications that are not from the current server
+    // Ignore alarms etc. from FCM notifications that are not from the current server
     // Still need the server pairing notification though
     if (!isNotificationFromCurrentServer && !isServerPairingNotification) return
 
