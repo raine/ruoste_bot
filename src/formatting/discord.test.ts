@@ -47,7 +47,7 @@ describe('formatMapEvent()', () => {
       expect(
         formatMapEvent({
           type: 'CRATE_SPAWNED',
-          data: { monument: 'large_oil_rig' }
+          data: { monument: 'large_oil_rig', onCargoShip: false }
         })
       ).toBe('📦 Locked Crate spawned to Large Oil Rig')
     })
@@ -56,7 +56,7 @@ describe('formatMapEvent()', () => {
       expect(
         formatMapEvent({
           type: 'CRATE_SPAWNED',
-          data: { monument: null }
+          data: { monument: null, onCargoShip: false }
         })
       ).toBe('📦 Locked Crate spawned')
     })
@@ -65,7 +65,7 @@ describe('formatMapEvent()', () => {
       expect(
         formatMapEvent({
           type: 'CRATE_SPAWNED',
-          data: { monument: 'fishing_village_display_name' }
+          data: { monument: 'fishing_village_display_name', onCargoShip: false }
         })
       ).toBe('📦 Locked Crate spawned to fishing_village_display_name')
     })
@@ -74,16 +74,16 @@ describe('formatMapEvent()', () => {
       expect(
         formatMapEvent({
           type: 'CRATE_GONE',
-          data: { monument: 'large_oil_rig' }
+          data: { monument: 'large_oil_rig', onCargoShip: false }
         })
-      ).toBe('📦 Locked Crate taken from Large Oil Rig')
+      ).toBe('📦 Locked Crate disappeared from Large Oil Rig')
     })
 
     test('gone from no monument', () => {
       expect(
         formatMapEvent({
           type: 'CRATE_GONE',
-          data: { monument: null }
+          data: { monument: null, onCargoShip: false }
         })
       ).toBe('📦 Locked Crate taken')
     })

@@ -230,6 +230,12 @@ export default function start() {
     const { discordEventsChannelId } = await rustplus.getConfig()
     if (!discordEventsChannelId) return
 
+    if (
+      (mapEvent.type === 'CRATE_SPAWNED' || mapEvent.type === 'CRATE_GONE') &&
+      mapEvent.data.onCargoShip
+    )
+      return
+
     const channel = client.channels.cache.get(discordEventsChannelId)
     if (channel?.isText()) return channel.send(formatMapEvent(mapEvent))
   }
