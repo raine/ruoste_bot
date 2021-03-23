@@ -106,14 +106,14 @@ export type CargoShipEnteredMapEvent = MapEventK<
 export type CargoShipLeftMapEvent = MapEventK<'CARGO_SHIP_LEFT'>
 export type BradleyApcDestroyedMapEvent = MapEventK<'BRADLEY_APC_DESTROYED'>
 export type PatrolHeliDownMapEvent = MapEventK<'PATROL_HELI_DOWN'>
-export type CrateSpawnedEvent = MapEventK<
-  'CRATE_SPAWNED',
-  { monument: MonumentToken | null }
->
-export type CrateGoneEvent = MapEventK<
-  'CRATE_GONE',
-  { monument: MonumentToken | null }
->
+
+type CrateEventData = {
+  monument: MonumentToken | null
+  onCargoShip: boolean
+}
+
+export type CrateSpawnedEvent = MapEventK<'CRATE_SPAWNED', CrateEventData>
+export type CrateGoneEvent = MapEventK<'CRATE_GONE', CrateEventData>
 
 export type MapEvent =
   | CargoShipEnteredMapEvent

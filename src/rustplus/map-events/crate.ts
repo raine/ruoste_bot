@@ -9,6 +9,7 @@ import {
   ServerInfo
 } from '../types'
 import { distance, XY } from '../../math'
+import { isMarkerCargoShip } from './cargo-ship'
 
 const isMarkerCrate = (marker: AppMarker) => marker.type === 'Crate'
 
@@ -16,7 +17,7 @@ const SUFFICIENTLY_CLOSE = 100
 
 const getNearestMonumentToken = (monuments: Monument[]) => (
   marker: AppMarker
-) => {
+): MonumentToken | null => {
   const nearestMonument = _.minBy(monuments, (m) => distance(m, marker))
   const nearestMonumentDistance = nearestMonument
     ? distance(nearestMonument, marker)
@@ -26,20 +27,39 @@ const getNearestMonumentToken = (monuments: Monument[]) => (
     : null
 }
 
+// Observing real data showed that crate on cargo ship is max ~50 units away
+// from cargo ship
+const CRATE_CARGO_MAX_DISTANCE = 100
+
+const isMarkerOnCargoShip = (currentMarkers: AppMarker[]) => (
+  marker: AppMarker
+): boolean => {
+  const cargoShip = currentMarkers.find(isMarkerCargoShip)
+  return !!cargoShip && distance(marker, cargoShip) <= CRATE_CARGO_MAX_DISTANCE
+}
+
 const createCrateSpawnedEvent = (
   getMonument: (crate: AppMarker) => MonumentToken | null,
+  isMarkerOnCargoShip: (crate: AppMarker) => boolean,
   crate: AppMarker
 ): CrateSpawnedEvent => ({
   type: 'CRATE_SPAWNED' as const,
-  data: { monument: getMonument(crate) }
+  data: {
+    monument: getMonument(crate),
+    onCargoShip: isMarkerOnCargoShip(crate)
+  }
 })
 
 const createCrateGoneEvent = (
   getMonument: (crate: AppMarker) => MonumentToken | null,
+  isCrateOnCargoShip: (crate: AppMarker) => boolean,
   crate: AppMarker
 ): CrateGoneEvent => ({
   type: 'CRATE_GONE' as const,
-  data: { monument: getMonument(crate) }
+  data: {
+    monument: getMonument(crate),
+    onCargoShip: isCrateOnCargoShip(crate)
+  }
 })
 
 function haveSameCoords({ x: x1, y: y1 }: XY, { x: x2, y: y2 }: XY): boolean {
@@ -48,6 +68,7 @@ function haveSameCoords({ x: x1, y: y1 }: XY, { x: x2, y: y2 }: XY): boolean {
 
 export async function crate(
   server: ServerInfo,
+  currentMarkers: AppMarker[],
   newMarkers: AppMarker[],
   removedMarkers: AppMarker[]
 ): Promise<(CrateSpawnedEvent | CrateGoneEvent)[]> {
@@ -71,10 +92,18 @@ export async function crate(
 
   return [
     ...newCratesNotInRemovedCrates.map((crate) =>
-      createCrateSpawnedEvent(getNearestMonumentToken(monuments), crate)
+      createCrateSpawnedEvent(
+        getNearestMonumentToken(monuments),
+        isMarkerOnCargoShip(currentMarkers),
+        crate
+      )
     ),
     ...removedCratesNotInNewCrates.map((crate) =>
-      createCrateGoneEvent(getNearestMonumentToken(monuments), crate)
+      createCrateGoneEvent(
+        getNearestMonumentToken(monuments),
+        isMarkerOnCargoShip(currentMarkers),
+        crate
+      )
     )
   ]
 }

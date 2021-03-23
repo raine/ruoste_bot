@@ -99,6 +99,18 @@ describe('checkMapEvents()', () => {
     ...SERVER_DB
   }
 
+  async function checkMapEventsWithMarkers(
+    first: AppMarker[],
+    second: AppMarker[],
+    serverInfo = SERVER_INFO
+  ) {
+    mockedGetMapMarkers
+      .mockResolvedValueOnce(first)
+      .mockResolvedValueOnce(second)
+    await checkMapEvents(serverInfo, emitter)
+    await checkMapEvents(serverInfo, emitter)
+  }
+
   async function getLastMapEvent() {
     return db.oneOrNone(
       `select * from map_events order by created_at desc limit 1`
@@ -136,12 +148,7 @@ describe('checkMapEvents()', () => {
 
   describe('cargo ship entered', () => {
     async function spawnCargo(serverInfo = SERVER_INFO) {
-      mockedGetMapMarkers
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([CARGO_SHIP])
-
-      await checkMapEvents(serverInfo, emitter)
-      await checkMapEvents(serverInfo, emitter)
+      await checkMapEventsWithMarkers([], [CARGO_SHIP], serverInfo)
     }
 
     test('no previous spawn', async () => {
@@ -214,12 +221,7 @@ describe('checkMapEvents()', () => {
 
   describe('cargo ship left', () => {
     async function removeCargo() {
-      mockedGetMapMarkers
-        .mockResolvedValueOnce([CARGO_SHIP])
-        .mockResolvedValueOnce([])
-
-      await checkMapEvents(SERVER_INFO, emitter)
-      await checkMapEvents(SERVER_INFO, emitter)
+      return checkMapEventsWithMarkers([CARGO_SHIP], [])
     }
 
     test('no previous spawn', async () => {
@@ -234,11 +236,7 @@ describe('checkMapEvents()', () => {
 
   describe('explosion', () => {
     async function explode(explosion: AppMarker) {
-      mockedGetMapMarkers
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([explosion])
-      await checkMapEvents(SERVER_INFO, emitter)
-      await checkMapEvents(SERVER_INFO, emitter)
+      return checkMapEventsWithMarkers([], [explosion])
     }
 
     test('explosion near launch site', async () => {
@@ -295,47 +293,66 @@ describe('checkMapEvents()', () => {
 
     describe('spawn', () => {
       async function spawnCrate(crate: AppMarker) {
-        mockedGetMapMarkers
-          .mockResolvedValueOnce([])
-          .mockResolvedValueOnce([crate])
-        await checkMapEvents(SERVER_INFO, emitter)
-        await checkMapEvents(SERVER_INFO, emitter)
+        return checkMapEventsWithMarkers([], [crate])
       }
 
       test('small oil rig', async () => {
         await spawnCrate({ ...CRATE, ...smallOilrigCrate })
         expect(await getLastMapEvent()).toEqual({
           type: 'CRATE_SPAWNED',
-          data: { monument: 'oil_rig_small' },
+          data: { monument: 'oil_rig_small', onCargoShip: false },
           ...baseFields
         })
       })
 
       test('crate respawn with new id does not an trigger event', async () => {
-        mockedGetMapMarkers
-          .mockResolvedValueOnce([{ ...CRATE, ...smallOilrigCrate, id: 1 }])
-          .mockResolvedValueOnce([{ ...CRATE, ...smallOilrigCrate, id: 2 }])
-        await checkMapEvents(SERVER_INFO, emitter)
-        await checkMapEvents(SERVER_INFO, emitter)
+        await checkMapEventsWithMarkers(
+          [{ ...CRATE, ...smallOilrigCrate, id: 1 }],
+          [{ ...CRATE, ...smallOilrigCrate, id: 2 }]
+        )
 
         expect(await getLastMapEvent()).toBe(null)
+      })
+
+      test('crate on cargo', async () => {
+        const cargoShip = {
+          ...CARGO_SHIP,
+          x: 3174.115234375,
+          y: -970.6513671875
+        }
+
+        const cargoShipCrate = {
+          ...CRATE,
+          x: 3172.7568359375,
+          y: -989.865234375
+        }
+
+        await checkMapEventsWithMarkers(
+          [cargoShip],
+          [cargoShip, cargoShipCrate]
+        )
+
+        expect(await getLastMapEvent()).toEqual({
+          type: 'CRATE_SPAWNED',
+          data: {
+            onCargoShip: true,
+            monument: null
+          },
+          ...baseFields
+        })
       })
     })
 
     describe('gone', () => {
       async function unspawnCrate(crate: AppMarker) {
-        mockedGetMapMarkers
-          .mockResolvedValueOnce([crate])
-          .mockResolvedValueOnce([])
-        await checkMapEvents(SERVER_INFO, emitter)
-        await checkMapEvents(SERVER_INFO, emitter)
+        await checkMapEventsWithMarkers([crate], [])
       }
 
       test('small oil rig', async () => {
         await unspawnCrate({ ...CRATE, x: 3996, y: 267 })
         expect(await getLastMapEvent()).toEqual({
           type: 'CRATE_GONE',
-          data: { monument: 'oil_rig_small' },
+          data: { monument: 'oil_rig_small', onCargoShip: false },
           ...baseFields
         })
       })

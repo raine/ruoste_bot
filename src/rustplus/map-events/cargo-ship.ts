@@ -26,7 +26,8 @@ function getPreviousCargoSpawn(server: ServerInfo): Promise<string | null> {
     .then((res) => (res ? res.createdAt : null))
 }
 
-const isMarkerCargoShip = (marker: AppMarker) => marker.type === 'CargoShip'
+export const isMarkerCargoShip = (marker: AppMarker) =>
+  marker.type === 'CargoShip'
 
 const createCargoShipEnteredEvent = (
   server: ServerInfo

@@ -78,7 +78,7 @@ export async function generateMapEventsFromMarkersDiff(
     ...(await cargoShipEntered(server, newMarkers)),
     ...cargoShipLeft(removedMarkers),
     ...(await bradleyDestroyedOrPatrolHeliDown(server, newMarkers)),
-    ...(await crate(server, newMarkers, removedMarkers))
+    ...(await crate(server, currentMarkers, newMarkers, removedMarkers))
   ]
 }
 
