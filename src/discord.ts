@@ -18,6 +18,7 @@ import {
   formatServerListReplyWithUpdatedAt,
   formatUpcomingWipeList,
   formatSmartAlarmAlert,
+  formatServerPairing,
   formatMapEvent
 } from './formatting/discord'
 import { initUpdateLoop, ServerListReply } from './update-loop'
@@ -240,6 +241,32 @@ export default function start() {
     if (channel?.isText()) return channel.send(formatMapEvent(mapEvent))
   }
 
+  async function onPairing(pairing: rustplus.PairingNotificationData) {
+    if (rustplus.isServerPairingNotification(pairing)) {
+      const user = await client.users.fetch(process.env.DISCORD_OWNER_USER_ID!)
+      if (user) {
+        const msg = await user.send(formatServerPairing(pairing))
+        try {
+          await msg.awaitReactions(() => true, { max: 1, time: 60000 })
+          log.info('Got reaction, switching to server')
+          await rustplus.configure({
+            serverHost: pairing.body.ip,
+            serverPort: pairing.body.port,
+            playerToken: pairing.body.playerToken,
+            playerSteamId: pairing.body.playerId
+          })
+        } catch (err) {
+          log.info(err)
+        }
+      } else {
+        log.error(
+          { userId: process.env.DISCORD_OWNER_USER_ID },
+          'Could not find discord user'
+        )
+      }
+    }
+  }
+
   function onRustSocketConnected() {
     updateBotActivityLoop(client)
   }
@@ -252,6 +279,9 @@ export default function start() {
 
     rustplus.events.removeListener('mapEvent', onMapEvent)
     rustplus.events.on('mapEvent', onMapEvent)
+
+    rustplus.events.removeListener('pairing', onPairing)
+    rustplus.events.on('pairing', onPairing)
 
     rustplus.events.removeListener('connected', onRustSocketConnected)
     rustplus.events.on('connected', onRustSocketConnected)

@@ -58,6 +58,19 @@ export const ServerPairingData = t.type({
   )
 })
 
+export const ServerPairingNotificationData = t.intersection([
+  BaseNotificationData,
+  ServerPairingData
+])
+
+export type ServerPairingNotificationData = t.TypeOf<
+  typeof ServerPairingNotificationData
+>
+
+export const isServerPairingNotification = (
+  pairing: PairingNotificationData
+): pairing is ServerPairingNotificationData => pairing.body.type === 'server'
+
 export const PairingNotificationData = t.intersection([
   BaseNotificationData,
   t.union([EntityPairingData, ServerPairingData])

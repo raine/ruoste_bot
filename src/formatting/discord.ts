@@ -211,9 +211,14 @@ export const formatServerEmbed = (
   ]
 })
 
+export const formatServerPairing = (
+  pairing: rustplus.ServerPairingNotificationData
+): string =>
+  `🔃 Request to pair a server: ${pairing.body.name}\n\nAdd any reaction to switch to this server.`
+
 export const formatSmartAlarmAlert = (
   alert: rustplus.SmartAlarmNotificationData
-) => {
+): string => {
   const title = Discord.Util.escapeMarkdown(alert.title)
   const message = Discord.Util.escapeMarkdown(alert.message)
   return `🚨 **${title}** — ${message}`
