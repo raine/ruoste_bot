@@ -232,8 +232,9 @@ export default function start() {
     if (!discordEventsChannelId) return
 
     if (
-      (mapEvent.type === 'CRATE_SPAWNED' || mapEvent.type === 'CRATE_GONE') &&
-      mapEvent.data.onCargoShip
+      ((mapEvent.type === 'CRATE_SPAWNED' || mapEvent.type === 'CRATE_GONE') &&
+        mapEvent.data.onCargoShip) ||
+      mapEvent.type === 'CARGO_SHIP_LEFT'
     )
       return
 
