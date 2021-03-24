@@ -31,10 +31,14 @@ const getNearestMonumentToken = (monuments: Monument[]) => (
 // from cargo ship
 const CRATE_CARGO_MAX_DISTANCE = 100
 
-const isMarkerOnCargoShip = (currentMarkers: AppMarker[]) => (
-  marker: AppMarker
-): boolean => {
-  const cargoShip = currentMarkers.find(isMarkerCargoShip)
+const isMarkerOnCargoShip = (
+  currentMarkers: AppMarker[],
+  removedMarkers: AppMarker[]
+) => (marker: AppMarker): boolean => {
+  // Cargo ship is still on map or was removed in the same "tick"
+  const cargoShip = [...currentMarkers, ...removedMarkers].find(
+    isMarkerCargoShip
+  )
   return !!cargoShip && distance(marker, cargoShip) <= CRATE_CARGO_MAX_DISTANCE
 }
 
@@ -94,14 +98,14 @@ export async function crate(
     ...newCratesNotInRemovedCrates.map((crate) =>
       createCrateSpawnedEvent(
         getNearestMonumentToken(monuments),
-        isMarkerOnCargoShip(currentMarkers),
+        isMarkerOnCargoShip(currentMarkers, removedMarkers),
         crate
       )
     ),
     ...removedCratesNotInNewCrates.map((crate) =>
       createCrateGoneEvent(
         getNearestMonumentToken(monuments),
-        isMarkerOnCargoShip(currentMarkers),
+        isMarkerOnCargoShip(currentMarkers, removedMarkers),
         crate
       )
     )

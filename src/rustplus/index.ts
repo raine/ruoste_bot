@@ -136,7 +136,9 @@ export async function init(): Promise<void> {
   events.on('connected', (serverInfo) => {
     log.info(serverInfo, 'Connected to rust server')
     trackMapEvents(serverInfo, events)
-    saveMap(serverInfo).catch((err) => log.error(err, 'Failed to save map'))
+    saveMap(serverInfo).catch((err) => {
+      log.error(err, 'Failed to save map')
+    })
   })
 
   await initEmptyConfig()
