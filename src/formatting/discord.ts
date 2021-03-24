@@ -213,8 +213,18 @@ export const formatServerEmbed = (
 
 export const formatServerPairing = (
   pairing: rustplus.ServerPairingNotificationData
-): string =>
-  `🔃 Request to pair a server: ${pairing.body.name}\n\nAdd any reaction to switch to this server.`
+  // You need this intersect fuckery to have discord infer the return type for channel.send correctly
+): Discord.MessageOptions & { split: false } => ({
+  embed: {
+    title: 'Request to pair with server',
+    description: pairing.body.name,
+    color: RUST_COLOR,
+    footer: {
+      text: 'Add a reaction to switch to this server'
+    }
+  },
+  split: false
+})
 
 export const formatSmartAlarmAlert = (
   alert: rustplus.SmartAlarmNotificationData
