@@ -12,6 +12,7 @@ export * from './rustplus-socket'
 import { trackMapEvents } from './map-events'
 import _ from 'lodash'
 import { saveMap } from './map'
+import Sentry from '@sentry/node'
 
 const useFakePushReceiver = process.env.FAKE_FCM === '1'
 const fcm = useFakePushReceiver ? fakePushReceiver : pushReceiver
@@ -81,6 +82,7 @@ async function onFcmNotification(raw: any) {
     events.emit(data.notification.data.channelId, data.notification.data)
   } catch (err) {
     log.warn(err)
+    Sentry.captureException(err)
     return
   }
 }
