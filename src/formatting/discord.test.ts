@@ -85,7 +85,7 @@ describe('formatMapEvent()', () => {
           type: 'CRATE_GONE',
           data: { monument: null, onCargoShip: false }
         })
-      ).toBe('📦 Locked Crate taken')
+      ).toBe('📦 Locked Crate disappeared')
     })
   })
 })

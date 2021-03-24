@@ -255,7 +255,7 @@ export const formatMapEvent = (event: rustplus.MapEvent) => {
       const action =
         event.type === 'CRATE_SPAWNED'
           ? `spawned ${monumentName ? 'to' : ''}`
-          : `taken ${monumentName ? 'from' : ''}`
+          : `disappeared ${monumentName ? 'from' : ''}`
       return `📦 Locked Crate ${action} ${monumentName}`.trim()
     }
   }
