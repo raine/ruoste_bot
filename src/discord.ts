@@ -256,6 +256,7 @@ export default function start() {
             playerToken: pairing.body.playerToken,
             playerSteamId: pairing.body.playerId
           })
+          await msg.react('✅')
         } catch (err) {
           log.info(err)
         }
