@@ -76,7 +76,7 @@ describe('formatMapEvent()', () => {
           type: 'CRATE_GONE',
           data: { monument: 'large_oil_rig', onCargoShip: false }
         })
-      ).toBe('📦 Locked Crate disappeared from Large Oil Rig')
+      ).toBe('📦 Locked Crate gone from Large Oil Rig')
     })
 
     test('gone from no monument', () => {
@@ -85,7 +85,7 @@ describe('formatMapEvent()', () => {
           type: 'CRATE_GONE',
           data: { monument: null, onCargoShip: false }
         })
-      ).toBe('📦 Locked Crate disappeared')
+      ).toBe('📦 Locked Crate gone')
     })
   })
 })
