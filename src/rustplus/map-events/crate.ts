@@ -66,8 +66,8 @@ const createCrateGoneEvent = (
   }
 })
 
-function haveSameCoords({ x: x1, y: y1 }: XY, { x: x2, y: y2 }: XY): boolean {
-  return x1 == x2 && y1 === y2
+function haveAlmostSameCoords(a: XY, b: XY): boolean {
+  return distance(a, b) <= 1
 }
 
 export async function crate(
@@ -86,12 +86,14 @@ export async function crate(
   const newCratesNotInRemovedCrates = newCrates.filter(
     (newCrate) =>
       !removedCrates.some((removedCrate) =>
-        haveSameCoords(newCrate, removedCrate)
+        haveAlmostSameCoords(newCrate, removedCrate)
       )
   )
   const removedCratesNotInNewCrates = removedCrates.filter(
     (removedCrate) =>
-      !newCrates.some((newCrate) => haveSameCoords(removedCrate, newCrate))
+      !newCrates.some((newCrate) =>
+        haveAlmostSameCoords(removedCrate, newCrate)
+      )
   )
 
   return [
