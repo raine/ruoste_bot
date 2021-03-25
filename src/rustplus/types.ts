@@ -127,6 +127,7 @@ type CrateEventData = {
 
 export type CrateSpawnedEvent = MapEventK<'CRATE_SPAWNED', CrateEventData>
 export type CrateGoneEvent = MapEventK<'CRATE_GONE', CrateEventData>
+export type CrateEvent = CrateSpawnedEvent | CrateGoneEvent
 
 export type MapEvent =
   | CargoShipEnteredMapEvent

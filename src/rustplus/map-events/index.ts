@@ -6,14 +6,16 @@ import {
   AppMarker,
   DbMapEvent,
   ServerInfo,
-  RustPlusConfig
+  RustPlusConfig,
+  CrateEvent
 } from '../types'
 import { TypedEmitter } from 'tiny-typed-emitter'
 import log from '../../logger'
 import db, { pgp, DEFAULT } from '../../db'
 import { cargoShipLeft, cargoShipEntered } from './cargo-ship'
 import { bradleyDestroyedOrPatrolHeliDown } from './explosion'
-import { crate } from './crate'
+import { crate, isOilrigCrateEvent, removeCrateRefreshes } from './crate'
+import * as B from 'baconjs'
 
 const mapMarkersColumnSet = new pgp.helpers.ColumnSet(
   [
@@ -86,7 +88,7 @@ let lastMapMarkers: AppMarker[] | undefined
 
 export async function checkMapEvents(
   serverInfo: ServerInfo,
-  emitter: TypedEmitter<RustPlusEvents>
+  mapEventsBus: B.Bus<MapEvent>
 ) {
   const markers = (await getMapMarkers()).filter(
     (marker) => !['VendingMachine', 'Player'].includes(marker.type)
@@ -105,8 +107,8 @@ export async function checkMapEvents(
 
   if (lastMapMarkers) {
     const newMarkers = getNewMarkers(lastMapMarkers, markers)
-    newMarkers.forEach((marker) => log.info(marker, 'New map marker'))
     const removedMarkers = getRemovedMarkers(lastMapMarkers, markers)
+    newMarkers.forEach((marker) => log.info(marker, 'New map marker'))
     removedMarkers.forEach((marker) => log.info(marker, 'Removed map marker'))
     const mapEvents = await generateMapEventsFromMarkersDiff(
       serverInfo,
@@ -114,12 +116,7 @@ export async function checkMapEvents(
       markers
     )
 
-    if (mapEvents.length)
-      await insertMapEvents(
-        mapEvents.map((e) => createDbMapEvent(serverInfo, e))
-      )
-
-    mapEvents.forEach((ev) => emitter.emit('mapEvent', ev))
+    mapEvents.forEach((ev) => mapEventsBus.push(ev))
   }
   lastMapMarkers = markers
 }
@@ -137,9 +134,36 @@ export function trackMapEvents(
   if (timeoutId) clearInterval(timeoutId)
   lastMapMarkers = undefined
   log.info('Starting to track map events')
+
+  // Small and large oilrig crates respawn every once in a while with new id.
+  // It manifests by crate despawning and then appearing again and those two
+  // can happen more than 5 secs apart.
+  const mapEventsBus = new B.Bus<MapEvent>()
+  const otherMapEvents = mapEventsBus.filter((ev) => !isOilrigCrateEvent(ev))
+  const oilrigCrateMapEvents = mapEventsBus.filter((ev) =>
+    isOilrigCrateEvent(ev)
+  )
+  const oilrigCrateMapEventsWithoutRefreshes = oilrigCrateMapEvents
+    .bufferWithTime(10000)
+    //@ts-ignore
+    .flatMap((crateEvents: CrateEvent[]) =>
+      B.fromArray(removeCrateRefreshes(crateEvents))
+    )
+
+  otherMapEvents
+    .merge(oilrigCrateMapEventsWithoutRefreshes)
+    .flatMap((event) =>
+      B.fromPromise(insertMapEvents([createDbMapEvent(serverInfo, event)])).map(
+        () => event
+      )
+    )
+    .onValue((event) => {
+      emitter.emit('mapEvent', event)
+    })
+
   void (async function loop() {
     try {
-      await checkMapEvents(serverInfo, emitter)
+      await checkMapEvents(serverInfo, mapEventsBus)
     } catch (err) {
       log.error(err, 'Error while checking for map events')
     }

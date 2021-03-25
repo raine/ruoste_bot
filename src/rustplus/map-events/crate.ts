@@ -2,13 +2,15 @@ import _ from 'lodash'
 import { getMonuments } from '../map'
 import {
   AppMarker,
+  CrateEvent,
   CrateGoneEvent,
   CrateSpawnedEvent,
+  MapEvent,
   Monument,
   MonumentToken,
   ServerInfo
 } from '../types'
-import { distance, XY } from '../../math'
+import { distance } from '../../math'
 import { isMarkerCargoShip } from './cargo-ship'
 
 const isMarkerCrate = (marker: AppMarker) => marker.type === 'Crate'
@@ -66,10 +68,6 @@ const createCrateGoneEvent = (
   }
 })
 
-function haveAlmostSameCoords(a: XY, b: XY): boolean {
-  return distance(a, b) <= 1
-}
-
 export async function crate(
   server: ServerInfo,
   currentMarkers: AppMarker[],
@@ -80,31 +78,15 @@ export async function crate(
   const newCrates = newMarkers.filter(isMarkerCrate)
   const removedCrates = removedMarkers.filter(isMarkerCrate)
 
-  // Small and large oilrig crates respawn every once in a while with new id.
-  // Take this into account by not considering crate as spawned if it was removed in the
-  // same location in same tick. Same for the opposite.
-  const newCratesNotInRemovedCrates = newCrates.filter(
-    (newCrate) =>
-      !removedCrates.some((removedCrate) =>
-        haveAlmostSameCoords(newCrate, removedCrate)
-      )
-  )
-  const removedCratesNotInNewCrates = removedCrates.filter(
-    (removedCrate) =>
-      !newCrates.some((newCrate) =>
-        haveAlmostSameCoords(removedCrate, newCrate)
-      )
-  )
-
   return [
-    ...newCratesNotInRemovedCrates.map((crate) =>
+    ...newCrates.map((crate) =>
       createCrateSpawnedEvent(
         getNearestMonumentToken(monuments),
         isMarkerOnCargoShip(currentMarkers, removedMarkers),
         crate
       )
     ),
-    ...removedCratesNotInNewCrates.map((crate) =>
+    ...removedCrates.map((crate) =>
       createCrateGoneEvent(
         getNearestMonumentToken(monuments),
         isMarkerOnCargoShip(currentMarkers, removedMarkers),
@@ -112,4 +94,30 @@ export async function crate(
       )
     )
   ]
+}
+
+const isCrateEventAtMonument = (
+  eventType: 'CRATE_GONE' | 'CRATE_SPAWNED',
+  monument: MonumentToken
+) => ({ type, data }: CrateGoneEvent | CrateSpawnedEvent) =>
+  type === eventType && data.monument === monument
+
+export const isOilrigCrateEvent = (ev: MapEvent): ev is CrateEvent =>
+  (ev.type === 'CRATE_SPAWNED' || ev.type === 'CRATE_GONE') &&
+  (ev.data.monument === 'oil_rig_small' || ev.data.monument === 'large_oil_rig')
+
+export function removeCrateRefreshes(events: CrateEvent[]): CrateEvent[] {
+  const monuments = _.uniq(events.map(({ data }) => data.monument)).filter(
+    (m): m is MonumentToken => m !== null
+  )
+  const monumentsWithCrateRefreshes = monuments.filter(
+    (m) =>
+      events.some(isCrateEventAtMonument('CRATE_SPAWNED', m)) &&
+      events.some(isCrateEventAtMonument('CRATE_GONE', m))
+  )
+  return events.filter(
+    (e) =>
+      e.data.monument !== null &&
+      !monumentsWithCrateRefreshes.includes(e.data.monument)
+  )
 }
