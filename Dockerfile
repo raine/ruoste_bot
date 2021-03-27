@@ -1,11 +1,13 @@
 FROM mhart/alpine-node:14
 WORKDIR /app
-COPY package.json yarn.lock ./
+COPY package.json yarn.lock .yarnrc.yml ./
+COPY .yarn ./.yarn
+RUN yarn set version berry
 RUN yarn install
 COPY tsconfig.json tsconfig.production.json ./
 COPY src ./src
 RUN yarn build
-RUN npm prune --production
+RUN yarn workspaces focus --all --production
 
 FROM mhart/alpine-node:slim-14
 WORKDIR /app
