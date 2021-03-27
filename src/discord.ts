@@ -254,17 +254,22 @@ export default function start() {
       if (user) {
         const msg = await user.send(formatServerPairing(pairing))
         try {
-          await msg.awaitReactions(() => true, { max: 1, time: 60000 })
-          log.info('Got reaction, switching to server')
-          await rustplus.configure({
-            serverHost: pairing.body.ip,
-            serverPort: pairing.body.port,
-            playerToken: pairing.body.playerToken,
-            playerSteamId: pairing.body.playerId
+          const reactions = await msg.awaitReactions(() => true, {
+            max: 1,
+            time: 60000
           })
-          await msg.react('✅')
+          if (reactions.array().length) {
+            log.info('Got reaction, switching to server')
+            await rustplus.configure({
+              serverHost: pairing.body.ip,
+              serverPort: pairing.body.port,
+              playerToken: pairing.body.playerToken,
+              playerSteamId: pairing.body.playerId
+            })
+            await msg.react('✅')
+          }
         } catch (err) {
-          log.info(err)
+          log.error(err)
         }
       } else {
         log.error(
