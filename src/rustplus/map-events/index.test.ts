@@ -73,6 +73,35 @@ const CARGO_SHIP = {
   name: ''
 }
 
+const MAP: any = {
+  width: 2825,
+  height: 2825,
+  monuments: [
+    {
+      x: 1208.7484130859375,
+      y: 1980.2667236328125,
+      token: 'launchsite'
+    },
+    {
+      x: 3992.656005859375,
+      y: 295.356689453125,
+      token: 'oil_rig_small'
+    }
+  ]
+}
+
+const CH47 = {
+  id: 99874183,
+  name: '',
+  type: 'CH47' as const,
+  alpha: 0,
+  color1: { w: 0, x: 0, y: 0, z: 0 },
+  color2: { w: 0, x: 0, y: 0, z: 0 },
+  radius: 0,
+  steamId: '0',
+  rotation: 123.30290985107422
+}
+
 const markers = (xs: any) => validate(t.array(AppMarker), xs)
 
 describe('getNewMarkers()', () => {
@@ -115,24 +144,7 @@ describe('checkMapEvents()', () => {
     )
   }
 
-  async function setupMap(serverInfo = SERVER_INFO) {
-    const map: any = {
-      width: 2825,
-      height: 2825,
-      monuments: [
-        {
-          x: 1208.7484130859375,
-          y: 1980.2667236328125,
-          token: 'launchsite'
-        },
-        {
-          x: 3992.656005859375,
-          y: 295.356689453125,
-          token: 'oil_rig_small'
-        }
-      ]
-    }
-
+  async function setupMap(serverInfo = SERVER_INFO, map = MAP) {
     mockedGetMap.mockResolvedValue(map)
     await saveMap(serverInfo)
   }
@@ -140,10 +152,11 @@ describe('checkMapEvents()', () => {
   beforeEach(async () => {
     await resetDb()
     emitter = new TypedEmitter<RustPlusEvents>()
-    await setupMap()
   })
 
   describe('cargo ship entered', () => {
+    beforeEach(() => setupMap())
+
     async function spawnCargo(serverInfo = SERVER_INFO) {
       await checkMapEventsWithMarkers([], [CARGO_SHIP], serverInfo)
     }
@@ -217,6 +230,8 @@ describe('checkMapEvents()', () => {
   })
 
   describe('cargo ship left', () => {
+    beforeEach(() => setupMap())
+
     async function removeCargo() {
       return checkMapEventsWithMarkers([CARGO_SHIP], [])
     }
@@ -232,6 +247,8 @@ describe('checkMapEvents()', () => {
   })
 
   describe('explosion', () => {
+    beforeEach(() => setupMap())
+
     async function explode(explosion: AppMarker) {
       return checkMapEventsWithMarkers([], [explosion])
     }
@@ -286,6 +303,8 @@ describe('checkMapEvents()', () => {
   })
 
   describe('crate', () => {
+    beforeEach(() => setupMap())
+
     const smallOilrigCrate = { ...CRATE, x: 3996, y: 267 }
 
     describe('spawn', () => {
@@ -353,6 +372,34 @@ describe('checkMapEvents()', () => {
           ...baseFields
         })
       })
+    })
+  })
+
+  describe('large oil rig crate hacked', () => {
+    beforeEach(() =>
+      setupMap(SERVER_INFO, {
+        width: 3000,
+        height: 3000,
+        monuments: [
+          { x: 2986.567138671875, y: 4325.794921875, token: 'large_oil_rig' }
+        ]
+      })
+    )
+
+    test('event created when chinook spawns near large oil rig', async () => {
+      const ch47 = { ...CH47, x: 3181, y: 4742 }
+      await checkMapEventsWithMarkers([], [ch47])
+      expect(await getLastMapEvent()).toEqual({
+        type: 'LARGE_OIL_RIG_CRATE_HACKED',
+        data: null,
+        ...baseFields
+      })
+    })
+
+    test('event not created when chinook spawns far from large oil rig', async () => {
+      const ch47 = { ...CH47, x: 0, y: 0 }
+      await checkMapEventsWithMarkers([], [ch47])
+      expect(await getLastMapEvent()).toEqual(null)
     })
   })
 })

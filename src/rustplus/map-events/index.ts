@@ -15,6 +15,7 @@ import db, { pgp, DEFAULT } from '../../db'
 import { cargoShipLeft, cargoShipEntered } from './cargo-ship'
 import { bradleyDestroyedOrPatrolHeliDown } from './explosion'
 import { crate, isOilrigCrateEvent, removeCrateRefreshes } from './crate'
+import { ch47 } from './ch47'
 import * as B from 'baconjs'
 import delay from 'delay'
 
@@ -81,7 +82,8 @@ export async function generateMapEventsFromMarkersDiff(
     ...(await cargoShipEntered(server, newMarkers)),
     ...cargoShipLeft(removedMarkers),
     ...(await bradleyDestroyedOrPatrolHeliDown(server, newMarkers)),
-    ...(await crate(server, currentMarkers, newMarkers, removedMarkers))
+    ...(await crate(server, currentMarkers, newMarkers, removedMarkers)),
+    ...(await ch47(server, newMarkers))
   ]
 }
 

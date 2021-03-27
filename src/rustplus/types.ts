@@ -129,6 +129,8 @@ export type CrateSpawnedEvent = MapEventK<'CRATE_SPAWNED', CrateEventData>
 export type CrateGoneEvent = MapEventK<'CRATE_GONE', CrateEventData>
 export type CrateEvent = CrateSpawnedEvent | CrateGoneEvent
 
+export type LargeOilRigCrateHacked = MapEventK<'LARGE_OIL_RIG_CRATE_HACKED'>
+
 export type MapEvent =
   | CargoShipEnteredMapEvent
   | CargoShipLeftMapEvent
@@ -136,6 +138,7 @@ export type MapEvent =
   | PatrolHeliDownMapEvent
   | CrateSpawnedEvent
   | CrateGoneEvent
+  | LargeOilRigCrateHacked
 
 export type ServerHostPort = { host: string; port: number }
 export type ServerConfig = Pick<RustPlusConfig, 'serverHost' | 'serverPort'>

@@ -30,7 +30,7 @@ export async function bradleyDestroyedOrPatrolHeliDown(
   const launchSite = monuments.find(
     (monument) => monument.token === 'launchsite'
   )
-  if (!launchSite) throw new Error('The map has no launch site')
+  if (!launchSite) return []
   const explosions = newMarkers.filter(isMarkerExplosion)
   const [explosionsNearLaunchSite, explosionsSomewhereElse] = _.partition(
     explosions,

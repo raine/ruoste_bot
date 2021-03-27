@@ -268,5 +268,8 @@ export const formatMapEvent = (event: rustplus.MapEvent) => {
           : `gone ${monumentName ? 'from' : ''}`
       return `📦 Locked Crate ${action} ${monumentName}`.trim()
     }
+    case 'LARGE_OIL_RIG_CRATE_HACKED': {
+      return '💻 Large Oil Rig Crate hacked'
+    }
   }
 }
