@@ -8,7 +8,7 @@ import { getNewMarkers } from './rustplus/map-events'
 
 const host = '95.216.17.108'
 const port = 28082
-const wipedAt = DateTime.fromSQL('2021-03-25 15:59:34+02')
+const wipeTime = DateTime.fromSQL('2021-03-25 15:59:34+02')
 
 const formatXY = ({ x, y }: XY): string =>
   `X: ${Math.round(x).toString().padStart(5)} Y: ${Math.round(y)
@@ -32,7 +32,7 @@ async function main() {
   const monuments = await getMonuments({
     host,
     port,
-    wipeTime: wipedAt.toSeconds()
+    wipeTime
   })
 
   const largeOilrig: Monument = monuments.find(

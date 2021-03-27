@@ -1,4 +1,3 @@
-import { DateTime } from 'luxon'
 import db from '../../db'
 import {
   AppMarker,
@@ -8,8 +7,7 @@ import {
 } from '../types'
 
 function getPreviousCargoSpawn(server: ServerInfo): Promise<string | null> {
-  const wipeDateTime = DateTime.fromSeconds(server.wipeTime).toISO()
-  const { host, port } = server
+  const { host, port, wipeTime } = server
 
   return db
     .oneOrNone(
@@ -18,10 +16,10 @@ function getPreviousCargoSpawn(server: ServerInfo): Promise<string | null> {
         where server_host = $[host]
           and server_port = $[port]
           and type = 'CARGO_SHIP_ENTERED'
-          and created_at > $[wipeDateTime]
+          and created_at > $[wipeTime]
         order by created_at desc
         limit 1`,
-      { host, port, wipeDateTime }
+      { host, port, wipeTime }
     )
     .then((res) => (res ? res.createdAt : null))
 }

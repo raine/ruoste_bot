@@ -30,7 +30,7 @@ const SERVER_INFO: ServerInfo = {
   url: 'https://www.google.com',
   map: 'Procedural Map',
   mapSize: 3650,
-  wipeTime: 1616237757,
+  wipeTime: DateTime.fromSeconds(1616237757),
   players: 225,
   maxPlayers: 250,
   queuedPlayers: 0,
@@ -197,9 +197,9 @@ describe('checkMapEvents()', () => {
     })
 
     test('does not return previous spawn from earlier wipe', async () => {
-      const wipeDateTime = DateTime.local().minus({ minutes: 10 })
+      const wipeTime = DateTime.local().minus({ minutes: 10 })
       const previousSpawnDate = DateTime.local().minus({ minutes: 80 }).toISO()
-      const serverInfo = { ...SERVER_INFO, wipeTime: wipeDateTime.toSeconds() }
+      const serverInfo = { ...SERVER_INFO, wipeTime }
 
       // Setup the map again for this wipe (this test does not need it, but
       // would error because of other event)

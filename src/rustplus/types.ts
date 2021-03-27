@@ -1,6 +1,7 @@
 import * as t from 'io-ts'
 import { NumberFromString } from 'io-ts-types/lib/NumberFromString'
 import { JsonFromString } from 'io-ts-types/lib/JsonFromString'
+import { DateTimeFromUnixTime } from '../types/DateTimeFromUnixTime'
 
 const Server = t.type({
   ip: t.string,
@@ -158,7 +159,7 @@ export const AppInfo = t.type({
   url: t.string,
   map: t.string,
   mapSize: t.number,
-  wipeTime: t.number,
+  wipeTime: DateTimeFromUnixTime,
   players: t.number,
   maxPlayers: t.number,
   queuedPlayers: t.number,

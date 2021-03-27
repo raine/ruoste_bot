@@ -7,13 +7,13 @@ import { distance } from './math'
 
 const host = '178.33.128.186'
 const port = 28108
-const wipedAt = DateTime.fromSQL('2021-03-20 12:55:57+02')
+const wipeTime = DateTime.fromSQL('2021-03-20 12:55:57+02')
 
 async function main() {
   const monuments = await getMonuments({
     host,
     port,
-    wipeTime: wipedAt.toSeconds()
+    wipeTime
   })
 
   const mapMarkers = await db
