@@ -9,9 +9,8 @@ import { AppMarker, RustPlusEvents, ServerInfo } from '..'
 import {
   getNewMarkers,
   getRemovedMarkers,
-  checkMapEvents,
   insertMapEvents,
-  resetLastMapMarkers
+  trackMapEvents
 } from '.'
 import { saveMap } from '../map'
 
@@ -107,8 +106,7 @@ describe('checkMapEvents()', () => {
     mockedGetMapMarkers
       .mockResolvedValueOnce(first)
       .mockResolvedValueOnce(second)
-    await checkMapEvents(serverInfo, emitter)
-    await checkMapEvents(serverInfo, emitter)
+    await trackMapEvents(serverInfo, emitter, 0, 2, 10)
   }
 
   async function getLastMapEvent() {
@@ -140,7 +138,6 @@ describe('checkMapEvents()', () => {
   }
 
   beforeEach(async () => {
-    resetLastMapMarkers()
     await resetDb()
     emitter = new TypedEmitter<RustPlusEvents>()
     await setupMap()

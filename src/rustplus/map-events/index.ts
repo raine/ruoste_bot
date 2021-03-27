@@ -16,6 +16,7 @@ import { cargoShipLeft, cargoShipEntered } from './cargo-ship'
 import { bradleyDestroyedOrPatrolHeliDown } from './explosion'
 import { crate, isOilrigCrateEvent, removeCrateRefreshes } from './crate'
 import * as B from 'baconjs'
+import delay from 'delay'
 
 const mapMarkersColumnSet = new pgp.helpers.ColumnSet(
   [
@@ -127,9 +128,12 @@ export function resetLastMapMarkers() {
   lastMapMarkers = undefined
 }
 
-export function trackMapEvents(
+export async function trackMapEvents(
   serverInfo: ServerInfo,
-  emitter: TypedEmitter<RustPlusEvents>
+  emitter: TypedEmitter<RustPlusEvents>,
+  loopInterval = 5000,
+  maxLoopCount?: number,
+  oilrigTimeBuffer = 10000
 ) {
   if (timeoutId) clearInterval(timeoutId)
   lastMapMarkers = undefined
@@ -144,30 +148,40 @@ export function trackMapEvents(
     isOilrigCrateEvent(ev)
   )
   const oilrigCrateMapEventsWithoutRefreshes = oilrigCrateMapEvents
-    .bufferWithTime(10000)
+    .bufferWithTime(oilrigTimeBuffer)
     //@ts-ignore
     .flatMap((crateEvents: CrateEvent[]) =>
       B.fromArray(removeCrateRefreshes(crateEvents))
     )
 
-  otherMapEvents
+  const merged = otherMapEvents
     .merge(oilrigCrateMapEventsWithoutRefreshes)
     .flatMap((event) =>
       B.fromPromise(insertMapEvents([createDbMapEvent(serverInfo, event)])).map(
         () => event
       )
     )
-    .onValue((event) => {
-      emitter.emit('mapEvent', event)
-    })
 
-  void (async function loop() {
+  merged.onValue((event) => {
+    emitter.emit('mapEvent', event)
+  })
+
+  return (async function loop(loopCount: number): Promise<void> {
     try {
       await checkMapEvents(serverInfo, mapEventsBus)
     } catch (err) {
       log.error(err, 'Error while checking for map events')
     }
-
-    timeoutId = global.setTimeout(loop, 5000)
-  })()
+    if (maxLoopCount && loopCount >= maxLoopCount - 1) {
+      return new Promise((resolve) => {
+        merged.onEnd(resolve)
+        mapEventsBus.end()
+      })
+    } else if (maxLoopCount) {
+      await delay(loopInterval)
+      return loop(loopCount + 1)
+    } else {
+      timeoutId = global.setTimeout(() => loop(loopCount + 1), loopInterval)
+    }
+  })(0)
 }
