@@ -12,7 +12,7 @@ import {
   insertMapEvents,
   trackMapEvents
 } from '.'
-import { saveMap } from '../map'
+import { saveMapIfNotExist } from '../map'
 
 jest.mock('../rustplus-socket', () => ({
   __esModule: true,
@@ -21,6 +21,7 @@ jest.mock('../rustplus-socket', () => ({
 }))
 
 import { getMapMarkers, getMap } from '../rustplus-socket'
+import { createServerAndWipeIfNotExist } from '../server'
 const mockedGetMapMarkers = mocked(getMapMarkers, true)
 const mockedGetMap = mocked(getMap, true)
 
@@ -38,11 +39,6 @@ const SERVER_INFO: ServerInfo = {
   salt: 1035734960,
   host: '127.0.0.1',
   port: 28083
-}
-
-const SERVER_DB = {
-  serverHost: '127.0.0.1',
-  serverPort: 28083
 }
 
 const CRATE = {
@@ -124,7 +120,7 @@ describe('checkMapEvents()', () => {
   let emitter: TypedEmitter<RustPlusEvents>
   const baseFields = {
     createdAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}/),
-    ...SERVER_DB
+    wipeId: 1
   }
 
   async function checkMapEventsWithMarkers(
@@ -146,7 +142,8 @@ describe('checkMapEvents()', () => {
 
   async function setupMap(serverInfo = SERVER_INFO, map = MAP) {
     mockedGetMap.mockResolvedValue(map)
-    await saveMap(serverInfo)
+    await createServerAndWipeIfNotExist(serverInfo)
+    await saveMapIfNotExist(serverInfo)
   }
 
   beforeEach(async () => {
@@ -174,14 +171,13 @@ describe('checkMapEvents()', () => {
 
     test('previous spawn', async () => {
       const previousSpawnDate = DateTime.local().minus({ minutes: 80 }).toISO()
-      await insertMapEvents([
+      await insertMapEvents(SERVER_INFO, [
         {
           createdAt: previousSpawnDate,
           type: 'CARGO_SHIP_ENTERED',
           data: {
             previousSpawn: null
-          },
-          ...SERVER_DB
+          }
         }
       ])
 
@@ -204,15 +200,13 @@ describe('checkMapEvents()', () => {
       // Setup the map again for this wipe (this test does not need it, but
       // would error because of other event)
       await setupMap(serverInfo)
-
-      await insertMapEvents([
+      await insertMapEvents(serverInfo, [
         {
           createdAt: previousSpawnDate,
           type: 'CARGO_SHIP_ENTERED',
           data: {
             previousSpawn: null
-          },
-          ...SERVER_DB
+          }
         }
       ])
 
@@ -224,7 +218,9 @@ describe('checkMapEvents()', () => {
         data: {
           previousSpawn: null
         },
-        ...baseFields
+        ...baseFields,
+        // setupMap with different wipeTime creates a new wipe
+        wipeId: 2
       })
     })
   })

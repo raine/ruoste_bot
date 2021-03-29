@@ -4,28 +4,23 @@ import db from '../db'
 import log from '../logger'
 import _ from 'lodash'
 import { validateP } from '../validate'
+import { getWipeId } from './server'
 import * as t from 'io-ts'
 
-export async function saveMap(serverInfo: ServerInfo): Promise<void> {
+export async function saveMapIfNotExist(serverInfo: ServerInfo): Promise<void> {
   return db.tx(async (t) => {
-    const exists = await t.oneOrNone<{ column: 1 }>(
-      `select 1
-         from maps
-        where server_host = $[host]
-          and server_port = $[port]
-          and wiped_at = $[wipeTime]`,
-      serverInfo
+    const wipeId = await getWipeId(serverInfo, t)
+    const existing = await t.oneOrNone<{ column: 1 }>(
+      `select 1 from maps where wipe_id = $[wipeId]`,
+      { wipeId }
     )
-    if (!exists) {
+    if (!existing) {
       const map = await getMap()
       const mapWithoutJpgImage = _.omit(map, 'jpgImage')
       await t.none(
-        `insert into maps (server_host, server_port, wiped_at, data)
-         values ($[host], $[port], $[wipeTime], $[data])`,
-        {
-          ...serverInfo,
-          data: JSON.stringify(mapWithoutJpgImage)
-        }
+        `insert into maps (wipe_id, data)
+         values ($[wipeId], $[data])`,
+        { wipeId, data: JSON.stringify(mapWithoutJpgImage) }
       )
 
       log.info('Server map saved to database')
@@ -41,11 +36,13 @@ export function getMonuments(
     db
       .many(
         `with wipe as (
-           select *
-             from maps
-            where wiped_at = $[wipeTime]
-              and server_host = $[host]
+           select data
+             from servers
+             join wipes using (server_id)
+             join maps using (wipe_id)
+            where server_host = $[host]
               and server_port = $[port]
+              and wiped_at = $[wipeTime]
          )
          select monument.*
            from wipe,

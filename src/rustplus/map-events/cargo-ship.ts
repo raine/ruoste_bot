@@ -11,13 +11,16 @@ function getPreviousCargoSpawn(server: ServerInfo): Promise<string | null> {
 
   return db
     .oneOrNone(
-      `select created_at
-         from map_events
+      `select map_events.created_at
+         from servers
+         join wipes using (server_id)
+         join map_events using (wipe_id)
         where server_host = $[host]
           and server_port = $[port]
-          and type = 'CARGO_SHIP_ENTERED'
-          and created_at > $[wipeTime]
-        order by created_at desc
+          and wipes.wiped_at = $[wipeTime]
+          and map_events.type = 'CARGO_SHIP_ENTERED'
+          and map_events.created_at > $[wipeTime]
+        order by map_events.created_at desc
         limit 1`,
       { host, port, wipeTime }
     )

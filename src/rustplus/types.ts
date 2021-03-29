@@ -149,7 +149,7 @@ export type MapEvent =
 
 export type ServerHostPort = { host: string; port: number }
 export type ServerConfig = Pick<RustPlusConfig, 'serverHost' | 'serverPort'>
-export type DbMapEvent = { createdAt?: string } & MapEvent & ServerConfig
+export type DbMapEvent = { createdAt?: string; wipeId: number } & MapEvent
 
 export interface RustPlusEvents {
   alarm: (data: SmartAlarmNotificationData) => void

@@ -6,7 +6,6 @@ import {
   AppMarker,
   DbMapEvent,
   ServerInfo,
-  RustPlusConfig,
   CrateEvent
 } from '../types'
 import { TypedEmitter } from 'tiny-typed-emitter'
@@ -18,42 +17,29 @@ import { crate, isOilrigCrateEvent, removeCrateRefreshes } from './crate'
 import { ch47 } from './ch47'
 import * as B from 'baconjs'
 import delay from 'delay'
-
-const mapMarkersColumnSet = new pgp.helpers.ColumnSet(
-  [
-    { name: 'server_host', prop: 'serverHost' },
-    { name: 'server_port', prop: 'serverPort' },
-    { name: 'markers', cast: 'json' }
-  ],
-  { table: 'map_markers' }
-)
+import { getWipeId } from '../server'
 
 const mapEventsColumnSet = new pgp.helpers.ColumnSet(
   [
     { name: 'created_at', prop: 'createdAt', def: DEFAULT },
-    { name: 'server_host', prop: 'serverHost' },
-    { name: 'server_port', prop: 'serverPort' },
+    { name: 'wipe_id', prop: 'wipeId' },
     { name: 'type' },
     { name: 'data', cast: 'json' }
   ],
   { table: 'map_events' }
 )
 
-const serverInfoToConfig = ({
-  host,
-  port
-}: ServerInfo): Pick<RustPlusConfig, 'serverHost' | 'serverPort'> => ({
-  serverHost: host,
-  serverPort: port
-})
-
-const createDbMapEvent = (
+export async function insertMapEvents(
   serverInfo: ServerInfo,
-  event: MapEvent
-): DbMapEvent => ({ ...event, ...serverInfoToConfig(serverInfo) })
-
-export async function insertMapEvents(events: DbMapEvent[]): Promise<void> {
-  await db.none(pgp.helpers.insert(events, mapEventsColumnSet))
+  events: Omit<DbMapEvent, 'wipeId'>[]
+): Promise<void> {
+  const wipeId = await getWipeId(serverInfo)
+  await db.none(
+    pgp.helpers.insert(
+      events.map((e) => ({ ...e, wipeId })),
+      mapEventsColumnSet
+    )
+  )
 }
 
 export function getNewMarkers(
@@ -97,16 +83,14 @@ export async function checkMapEvents(
     (marker) => !['VendingMachine', 'Player'].includes(marker.type)
   )
 
-  if (markers.length)
+  if (markers.length) {
+    const wipeId = await getWipeId(serverInfo)
     await db.none(
-      pgp.helpers.insert(
-        {
-          ...serverInfoToConfig(serverInfo),
-          markers: JSON.stringify(markers)
-        },
-        mapMarkersColumnSet
-      )
+      `insert into map_markers (wipe_id, markers)
+       values ($[wipeId], $[markers])`,
+      { wipeId, markers: JSON.stringify(markers) }
     )
+  }
 
   if (lastMapMarkers) {
     const newMarkers = getNewMarkers(lastMapMarkers, markers)
@@ -159,9 +143,7 @@ export async function trackMapEvents(
   const merged = otherMapEvents
     .merge(oilrigCrateMapEventsWithoutRefreshes)
     .flatMap((event) =>
-      B.fromPromise(insertMapEvents([createDbMapEvent(serverInfo, event)])).map(
-        () => event
-      )
+      B.fromPromise(insertMapEvents(serverInfo, [event])).map(() => event)
     )
 
   merged.onValue((event) => {

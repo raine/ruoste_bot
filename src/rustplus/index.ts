@@ -11,8 +11,9 @@ import * as rustplus from './rustplus-socket'
 export * from './rustplus-socket'
 import { trackMapEvents } from './map-events'
 import _ from 'lodash'
-import { saveMap } from './map'
+import { saveMapIfNotExist } from './map'
 import * as Sentry from '@sentry/node'
+import { createServerAndWipeIfNotExist } from './server'
 
 const useFakePushReceiver = process.env.FAKE_FCM === '1'
 const fcm = useFakePushReceiver ? fakePushReceiver : pushReceiver
@@ -135,12 +136,11 @@ export async function init(): Promise<void> {
     log.info(mapEvent, 'Map event')
   })
 
-  events.on('connected', (serverInfo) => {
+  events.on('connected', async (serverInfo) => {
     log.info(serverInfo, 'Connected to rust server')
+    await createServerAndWipeIfNotExist(serverInfo)
+    await saveMapIfNotExist(serverInfo)
     void trackMapEvents(serverInfo, events)
-    saveMap(serverInfo).catch((err) => {
-      log.error(err, 'Failed to save map')
-    })
   })
 
   await initEmptyConfig()
