@@ -4,11 +4,6 @@ import { JsonFromString } from 'io-ts-types/lib/JsonFromString'
 import { DateTimeFromUnixTime } from '../types/DateTimeFromUnixTime'
 import { Message } from 'protobufjs'
 
-export const isMessageBroadcast = (
-  message: any
-): message is { broadcast: Message<any> } =>
-  typeof message === 'object' && message !== null && message.broadcast !== null
-
 const Server = t.type({
   ip: t.string,
   port: t.string.pipe(NumberFromString)
@@ -315,12 +310,49 @@ export const AppEntityChanged = t.type({
   payload: AppEntityPayload
 })
 
+export const AppTeamChanged = t.type({
+  playerId: t.string,
+  teamInfo: t.type({
+    leaderSteamId: t.string,
+    members: t.array(Member)
+  })
+})
+
 export type AppEntityPayload = t.TypeOf<typeof AppEntityPayload>
 export type AppEntityInfo = t.TypeOf<typeof AppEntityInfo>
 export type AppEntityChanged = t.TypeOf<typeof AppEntityChanged>
 
-export const AppBroadcast = t.type({
+export const AppEntityChangedBroadcast = t.type({
   entityChanged: AppEntityChanged
 })
 
+export const AppTeamChangedBroadcast = t.type({
+  teamChanged: AppTeamChanged
+})
+
+export const AppBroadcast = t.union([
+  AppEntityChangedBroadcast,
+  AppTeamChangedBroadcast
+])
+
+export type AppEntityChangedBroadcast = t.TypeOf<
+  typeof AppEntityChangedBroadcast
+>
+export type AppTeamChangedBroadcast = t.TypeOf<typeof AppTeamChangedBroadcast>
 export type AppBroadcast = t.TypeOf<typeof AppBroadcast>
+
+export function isMessageBroadcast(
+  message: any
+): message is { broadcast: Message<any> } {
+  return (
+    typeof message === 'object' &&
+    message !== null &&
+    message.broadcast !== null
+  )
+}
+
+export function isEntityChangedBroadcast(
+  broadcast: AppBroadcast
+): broadcast is AppEntityChangedBroadcast {
+  return 'entityChanged' in broadcast
+}

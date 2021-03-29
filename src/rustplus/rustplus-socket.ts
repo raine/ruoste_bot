@@ -17,7 +17,7 @@ import {
   isMessageBroadcast
 } from './types'
 import protobuf, { Message } from 'protobufjs'
-import { events } from './'
+import { events, isEntityChangedBroadcast } from './'
 
 export let socket: any
 export let socketConnectedP: Promise<void>
@@ -193,7 +193,9 @@ export async function listen(config: RustPlusConfig) {
     if (isMessageBroadcast(message)) {
       log.debug(message.broadcast, 'Got broadcast')
       const broadcast = await parseBroadcast(AppBroadcast, message.broadcast)
-      events.emit('entityChanged', broadcast.entityChanged)
+      if (isEntityChangedBroadcast(broadcast)) {
+        events.emit('entityChanged', broadcast.entityChanged)
+      }
     }
   })
 
