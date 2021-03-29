@@ -1,6 +1,12 @@
 require('dotenv').config()
-const Sentry = require('@sentry/node')
-Sentry.init({ dsn: process.env.SENTRY_DSN })
+import * as Sentry from '@sentry/node'
+if (process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment:
+      process.env.NODE_ENV === 'production' ? 'production' : 'development'
+  })
+}
 import log from './logger'
 import startTelegramBot from './telegram'
 import startDiscordBot from './discord'
