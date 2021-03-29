@@ -3,7 +3,10 @@ import * as t from 'io-ts'
 import { validate } from '../validate'
 import log from '../logger'
 import {
+  AppBroadcast,
+  AppEntityInfo,
   AppInfo,
+  AppMap,
   AppMapMarkers,
   AppMarker,
   AppTeamInfo,
@@ -11,7 +14,7 @@ import {
   RustPlusConfig,
   ServerHostPort,
   ServerInfo,
-  AppMap
+  isMessageBroadcast
 } from './types'
 import protobuf, { Message } from 'protobufjs'
 import { events } from './'
@@ -46,11 +49,54 @@ async function parseResponse<T>(
   }
 }
 
+async function parseBroadcast<T>(
+  type: t.Decoder<unknown, T>,
+  broadcast: Message<any>
+): Promise<T> {
+  const proto = await protobuf.load(RUSTPLUS_PROTO_PATH)
+  const AppBroadcast = proto.lookupType('rustplus.AppBroadcast')
+  try {
+    return validate(
+      type,
+      AppBroadcast.toObject(broadcast, {
+        longs: String,
+        enums: String,
+        bytes: String
+      })
+    )
+  } catch (err) {
+    log.error(broadcast, 'Failed to validate broadcast message')
+    throw new Error(err)
+  }
+}
+
 export async function sendRequestAsync(...args: any[]): Promise<any> {
   log.debug(args?.[0], 'Sending rustplus request')
   if (socketConnectedP) await socketConnectedP
   else throw new Error('Rust socket not connected')
   return socket.sendRequestAsync(...args)
+}
+
+export async function setEntityValueAsync(
+  entityId: number,
+  value: any
+): Promise<unknown> {
+  return sendRequestAsync({
+    entityId: entityId,
+    setEntityValue: {
+      value: value
+    }
+  })
+}
+
+export async function getEntityInfo(entityId: number): Promise<AppEntityInfo> {
+  return parseResponse(
+    t.type({ seq: t.number, entityInfo: AppEntityInfo }),
+    await sendRequestAsync({
+      entityId,
+      getEntityInfo: {}
+    })
+  ).then((res) => res.entityInfo)
 }
 
 export async function getServerInfo(): Promise<ServerInfo> {
@@ -143,6 +189,13 @@ export async function listen(config: RustPlusConfig) {
   }
 
   socket.on('disconnected', onSocketDisconnected)
+  socket.on('message', async (message: unknown) => {
+    if (isMessageBroadcast(message)) {
+      log.debug(message.broadcast, 'Got broadcast')
+      const broadcast = await parseBroadcast(AppBroadcast, message.broadcast)
+      events.emit('entityChanged', broadcast.entityChanged)
+    }
+  })
 
   socket.connect()
 

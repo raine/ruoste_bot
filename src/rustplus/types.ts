@@ -2,6 +2,12 @@ import * as t from 'io-ts'
 import { NumberFromString } from 'io-ts-types/lib/NumberFromString'
 import { JsonFromString } from 'io-ts-types/lib/JsonFromString'
 import { DateTimeFromUnixTime } from '../types/DateTimeFromUnixTime'
+import { Message } from 'protobufjs'
+
+export const isMessageBroadcast = (
+  message: any
+): message is { broadcast: Message<any> } =>
+  typeof message === 'object' && message !== null && message.broadcast !== null
 
 const Server = t.type({
   ip: t.string,
@@ -151,6 +157,7 @@ export interface RustPlusEvents {
   team: (data: TeamNotificationData) => void
   mapEvent: (data: MapEvent) => void
   connected: (serverInfo: ServerInfo, config: RustPlusConfig) => void
+  entityChanged: (data: AppEntityChanged) => void
 }
 
 export const AppInfo = t.type({
@@ -287,3 +294,33 @@ export const AppMap = t.type({
 })
 
 export type AppMap = t.TypeOf<typeof AppMap>
+
+export const AppEntityPayload = t.type({
+  value: t.boolean,
+  capacity: t.number,
+  hasProtection: t.boolean,
+  protectionExpiry: t.number
+})
+
+export const AppEntityInfo = t.type({
+  type: t.keyof({
+    Switch: null,
+    StorageMonitor: null
+  }),
+  payload: AppEntityPayload
+})
+
+export const AppEntityChanged = t.type({
+  entityId: t.number,
+  payload: AppEntityPayload
+})
+
+export type AppEntityPayload = t.TypeOf<typeof AppEntityPayload>
+export type AppEntityInfo = t.TypeOf<typeof AppEntityInfo>
+export type AppEntityChanged = t.TypeOf<typeof AppEntityChanged>
+
+export const AppBroadcast = t.type({
+  entityChanged: AppEntityChanged
+})
+
+export type AppBroadcast = t.TypeOf<typeof AppBroadcast>
