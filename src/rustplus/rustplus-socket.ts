@@ -195,6 +195,8 @@ export async function listen(config: RustPlusConfig) {
       const broadcast = await parseBroadcast(AppBroadcast, message.broadcast)
       if (isEntityChangedBroadcast(broadcast)) {
         events.emit('entityChanged', broadcast.entityChanged)
+      } else {
+        events.emit('teamChanged', broadcast.teamChanged)
       }
     }
   })

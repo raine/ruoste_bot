@@ -1,19 +1,24 @@
-import db, { pgp } from '../db'
-import { validate, validateP } from '../validate'
-import pushReceiver from 'push-receiver'
-import fakePushReceiver from './fake-push-receiver'
-import log from '../logger'
-import { TypedEmitter } from 'tiny-typed-emitter'
-import { FcmNotification, RustPlusConfig, RustPlusEvents } from './types'
-export * from './types'
-import { snakeCase } from 'lodash'
-import * as rustplus from './rustplus-socket'
-export * from './rustplus-socket'
-import { trackMapEvents } from './map-events'
-import _ from 'lodash'
-import { saveMapIfNotExist } from './map'
 import * as Sentry from '@sentry/node'
+import delay from 'delay'
+import * as _ from 'lodash'
+import pushReceiver from 'push-receiver'
+import { TypedEmitter } from 'tiny-typed-emitter'
+import db, { pgp } from '../db'
+import log from '../logger'
+import { main } from '../test-script'
+import { validate, validateP } from '../validate'
+import fakePushReceiver from './fake-push-receiver'
+import { saveMapIfNotExist } from './map'
+import { trackMapEvents } from './map-events'
+import * as socket from './rustplus-socket'
 import { createServerAndWipeIfNotExist } from './server'
+import { SmartSwitch } from './smart-switch'
+import { StorageMonitor } from './storage-monitor'
+import { SmartAlarm } from './smart-alarm'
+import { makeTeamMembersP } from './team-members-p'
+import { FcmNotification, RustPlusConfig, RustPlusEvents } from './types'
+export * from './rustplus-socket'
+export * from './types'
 
 const useFakePushReceiver = process.env.FAKE_FCM === '1'
 const fcm = useFakePushReceiver ? fakePushReceiver : pushReceiver
@@ -32,7 +37,7 @@ export async function getConfig(): Promise<RustPlusConfig> {
 }
 
 export async function configure(cfg: Partial<RustPlusConfig>): Promise<void> {
-  const cfgSnakeCase = _.mapKeys(cfg, (v, k) => snakeCase(k))
+  const cfgSnakeCase = _.mapKeys(cfg, (v, k) => _.snakeCase(k))
   const rustplusConfigColumnSet = new pgp.helpers.ColumnSet(
     [
       { name: 'fcm_credentials', cast: 'json' },
@@ -57,7 +62,7 @@ export async function configure(cfg: Partial<RustPlusConfig>): Promise<void> {
     cfg.playerToken ||
     cfg.playerSteamId
   ) {
-    void rustplus.listen(await getConfig())
+    void socket.listen(await getConfig())
   }
 }
 
@@ -140,7 +145,9 @@ export async function init(): Promise<void> {
     log.info(serverInfo, 'Connected to rust server')
     await createServerAndWipeIfNotExist(serverInfo)
     await saveMapIfNotExist(serverInfo)
+    const teamMembersP = makeTeamMembersP()
     void trackMapEvents(serverInfo, events)
+    void main({ SmartSwitch, StorageMonitor, SmartAlarm, teamMembersP })
   })
 
   await initEmptyConfig()
@@ -155,5 +162,5 @@ export async function init(): Promise<void> {
 
   if (config.fcmCredentials) await fcmListen(config.fcmCredentials)
 
-  void rustplus.listen(config)
+  void socket.listen(config)
 }

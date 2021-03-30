@@ -3,6 +3,17 @@ import { NumberFromString } from 'io-ts-types/lib/NumberFromString'
 import { JsonFromString } from 'io-ts-types/lib/JsonFromString'
 import { DateTimeFromUnixTime } from '../types/DateTimeFromUnixTime'
 import { Message } from 'protobufjs'
+import { SmartSwitch } from './smart-switch'
+import { SmartAlarm } from './smart-alarm'
+import { StorageMonitor } from './storage-monitor'
+import { makeTeamMembersP } from './team-members-p'
+
+export type RustPlus = {
+  SmartSwitch: typeof SmartSwitch
+  StorageMonitor: typeof StorageMonitor
+  SmartAlarm: typeof SmartAlarm
+  teamMembersP: ReturnType<typeof makeTeamMembersP>
+}
 
 const Server = t.type({
   ip: t.string,
@@ -153,6 +164,7 @@ export interface RustPlusEvents {
   mapEvent: (data: MapEvent) => void
   connected: (serverInfo: ServerInfo, config: RustPlusConfig) => void
   entityChanged: (data: AppEntityChanged) => void
+  teamChanged: (data: AppTeamChanged) => void
 }
 
 export const AppInfo = t.type({
@@ -201,6 +213,8 @@ export const Member = t.type({
   isAlive: t.boolean,
   deathTime: t.number
 })
+
+export type Member = t.TypeOf<typeof Member>
 
 export const AppTeamInfo = t.type({
   members: t.array(Member)
@@ -300,7 +314,8 @@ export const AppEntityPayload = t.type({
 export const AppEntityInfo = t.type({
   type: t.keyof({
     Switch: null,
-    StorageMonitor: null
+    StorageMonitor: null,
+    Alarm: null
   }),
   payload: AppEntityPayload
 })
@@ -312,15 +327,13 @@ export const AppEntityChanged = t.type({
 
 export const AppTeamChanged = t.type({
   playerId: t.string,
-  teamInfo: t.type({
-    leaderSteamId: t.string,
-    members: t.array(Member)
-  })
+  teamInfo: AppTeamInfo
 })
 
 export type AppEntityPayload = t.TypeOf<typeof AppEntityPayload>
 export type AppEntityInfo = t.TypeOf<typeof AppEntityInfo>
 export type AppEntityChanged = t.TypeOf<typeof AppEntityChanged>
+export type AppTeamChanged = t.TypeOf<typeof AppTeamChanged>
 
 export const AppEntityChangedBroadcast = t.type({
   entityChanged: AppEntityChanged
