@@ -7,12 +7,14 @@ import { SmartSwitch } from './smart-switch'
 import { SmartAlarm } from './smart-alarm'
 import { StorageMonitor } from './storage-monitor'
 import { makeTeamMembersP } from './team-members-p'
+import { makeTimeP } from './time-p'
 
 export type RustPlus = {
   SmartSwitch: typeof SmartSwitch
   StorageMonitor: typeof StorageMonitor
   SmartAlarm: typeof SmartAlarm
   teamMembersP: ReturnType<typeof makeTeamMembersP>
+  timeP: ReturnType<typeof makeTimeP>
 }
 
 const Server = t.type({
