@@ -230,7 +230,8 @@ export const AppMarker = t.type({
     Player: null,
     Explosion: null,
     CargoShip: null,
-    CH47: null
+    CH47: null,
+    GenericRadius: null
   }),
   x: t.number,
   y: t.number,
