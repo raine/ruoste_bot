@@ -11,6 +11,7 @@ import log from './logger'
 import startTelegramBot from './telegram'
 import startDiscordBot from './discord'
 import * as rustplus from './rustplus'
+import { pgp } from './db'
 
 async function main() {
   try {
@@ -36,5 +37,6 @@ process.on('unhandledRejection', (err) => {
 
 process.on('SIGTERM', () => {
   log.info('received SIGTERM')
+  pgp.end()
   process.exit(0)
 })
