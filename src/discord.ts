@@ -19,7 +19,8 @@ import {
   formatUpcomingWipeList,
   formatSmartAlarmAlert,
   formatServerPairing,
-  formatMapEvent
+  formatMapEvent,
+  formatBotActivityText
 } from './formatting/discord'
 import { initUpdateLoop, ServerListReply } from './update-loop'
 import { getNextWipes } from './get-next-wipes'
@@ -174,23 +175,6 @@ const handleServerEmbedReply = async (msg: Discord.Message): Promise<void> => {
 }
 
 const BOT_STATUS_UPDATE_INTERVAL = 60000
-
-function formatBotActivityText(
-  serverInfo: rustplus.AppInfo,
-  teamInfo: rustplus.AppTeamInfo
-): string {
-  const serverHasQueue = serverInfo.queuedPlayers > 0
-  // It's confusing to show 195/200 if the server has queue
-  const players = serverHasQueue ? serverInfo.maxPlayers : serverInfo.players
-  const teamOnlineCount = teamInfo.members.filter((member) => member.isOnline)
-    .length
-  const teamOnlineText = `${teamOnlineCount}/${teamInfo.members.length}`
-  const queueText = serverHasQueue
-    ? ` | Queue: ${serverInfo.queuedPlayers}`
-    : ''
-  const serverPlayersText = `${players}/${serverInfo.maxPlayers} players ${queueText}`.trim()
-  return `${teamOnlineText} (${serverPlayersText})`
-}
 
 async function updateBotActivity(client: Discord.Client): Promise<void> {
   try {

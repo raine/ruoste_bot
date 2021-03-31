@@ -273,3 +273,20 @@ export const formatMapEvent = (event: rustplus.MapEvent) => {
     }
   }
 }
+
+export function formatBotActivityText(
+  serverInfo: rustplus.AppInfo,
+  teamInfo: rustplus.AppTeamInfo
+): string {
+  const serverHasQueue = serverInfo.queuedPlayers > 0
+  // It's confusing to show 195/200 if the server has queue
+  const players = serverHasQueue ? serverInfo.maxPlayers : serverInfo.players
+  const teamOnlineCount = teamInfo.members.filter((member) => member.isOnline)
+    .length
+  const teamOnlineText = `${teamOnlineCount}/${teamInfo.members.length}`
+  const queueText = serverHasQueue
+    ? ` | Queue: ${serverInfo.queuedPlayers}`
+    : ''
+  const serverPlayersText = `${players}/${serverInfo.maxPlayers} players ${queueText}`.trim()
+  return `${teamOnlineText} (${serverPlayersText})`
+}
