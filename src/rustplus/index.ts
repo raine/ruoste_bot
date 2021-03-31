@@ -1,21 +1,15 @@
 import * as Sentry from '@sentry/node'
-import delay from 'delay'
 import * as _ from 'lodash'
 import pushReceiver from 'push-receiver'
 import { TypedEmitter } from 'tiny-typed-emitter'
 import db, { pgp } from '../db'
 import log from '../logger'
-import { main } from '../test-script'
 import { validate, validateP } from '../validate'
 import fakePushReceiver from './fake-push-receiver'
 import { saveMapIfNotExist } from './map'
 import { trackMapEvents } from './map-events'
 import * as socket from './rustplus-socket'
 import { createServerAndWipeIfNotExist } from './server'
-import { SmartSwitch } from './smart-switch'
-import { StorageMonitor } from './storage-monitor'
-import { SmartAlarm } from './smart-alarm'
-import { makeTeamMembersP } from './team-members-p'
 import { FcmNotification, RustPlusConfig, RustPlusEvents } from './types'
 export * from './rustplus-socket'
 export * from './types'
@@ -145,9 +139,7 @@ export async function init(): Promise<void> {
     log.info(serverInfo, 'Connected to rust server')
     await createServerAndWipeIfNotExist(serverInfo)
     await saveMapIfNotExist(serverInfo)
-    const teamMembersP = makeTeamMembersP()
     void trackMapEvents(serverInfo, events)
-    void main({ SmartSwitch, StorageMonitor, SmartAlarm, teamMembersP })
   })
 
   await initEmptyConfig()
