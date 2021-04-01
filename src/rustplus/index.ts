@@ -139,7 +139,8 @@ export async function init(): Promise<void> {
       await upsertServer({
         host: pairing.body.ip,
         port: pairing.body.port,
-        playerToken: pairing.body.playerToken
+        playerToken: pairing.body.playerToken,
+        playerSteamId: pairing.body.playerId
       })
     }
   })

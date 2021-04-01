@@ -2,14 +2,17 @@ import { ServerHostPort, ServerInfo } from './types'
 import db, { Db } from '../db'
 
 export function upsertServer(
-  server: ServerHostPort & { playerToken: number }
+  server: ServerHostPort & {
+    playerToken: number
+    playerSteamId: string
+  }
 ): Promise<any> {
   return db.task(async (t) => {
     await t.none(
-      `insert into servers (server_host, server_port, player_token)
-       values ($[host], $[port], $[playerToken])
+      `insert into servers (server_host, server_port, player_token, player_steam_id)
+       values ($[host], $[port], $[playerToken], $[playerSteamId])
        on conflict (server_host, server_port)
-       do update set player_token = excluded.player_token`,
+       do update set player_token = excluded.player_token, player_steam_id = excluded.player_steam_id`,
       server
     )
   })

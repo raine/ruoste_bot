@@ -13,11 +13,12 @@ create table fcm_persistent_ids (
 );
 
 create table servers (
-  server_id     serial primary key,
-  server_host   text not null,
-  server_port   integer not null,
-  player_token  integer not null,
-  created_at    timestamptz default now(),
+  server_id        serial primary key,
+  server_host      text not null,
+  server_port      integer not null,
+  player_token     integer not null,
+  player_steam_id  text not null,
+  created_at       timestamptz default now(),
   unique (server_host, server_port)
 );
 
