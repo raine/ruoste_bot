@@ -226,6 +226,33 @@ export const formatServerPairing = (
   split: false
 })
 
+export const formatEntityPairing = (
+  pairing: rustplus.EntityPairingNotificationData
+): Discord.MessageOptions & { split: false } => {
+  const entityIconFile = (() => {
+    switch (pairing.body.entityType) {
+      case '1':
+        return 'smart_switch.png'
+      case '2':
+        return 'smart_alarm.png'
+      case '3':
+        return 'storage_monitor.png'
+    }
+  })()
+
+  return {
+    embed: {
+      title: `New pairing: ${pairing.body.entityName}`,
+      color: RUST_COLOR,
+      footer: {
+        text: `ID: ${pairing.body.entityId}`,
+        iconURL: `https://ruoste-bot.netlify.app/${entityIconFile}`
+      }
+    },
+    split: false
+  }
+}
+
 export const formatSmartAlarmAlert = (
   alert: rustplus.SmartAlarmNotificationData
 ): string => {

@@ -20,7 +20,8 @@ import {
   formatSmartAlarmAlert,
   formatServerPairing,
   formatMapEvent,
-  formatBotActivityText
+  formatBotActivityText,
+  formatEntityPairing
 } from './formatting/discord'
 import { initUpdateLoop, ServerListReply } from './update-loop'
 import { getNextWipes } from './get-next-wipes'
@@ -233,34 +234,38 @@ export default function start() {
   }
 
   async function onPairing(pairing: rustplus.PairingNotificationData) {
+    const user = await client.users.fetch(process.env.DISCORD_OWNER_USER_ID!)
+    if (!user) {
+      log.error(
+        { userId: process.env.DISCORD_OWNER_USER_ID },
+        'Could not find discord user'
+      )
+
+      return
+    }
+
     if (rustplus.isServerPairingNotification(pairing)) {
-      const user = await client.users.fetch(process.env.DISCORD_OWNER_USER_ID!)
-      if (user) {
-        const msg = await user.send(formatServerPairing(pairing))
-        try {
-          const reactions = await msg.awaitReactions(() => true, {
-            max: 1,
-            time: 60000
+      const msg = await user.send(formatServerPairing(pairing))
+      try {
+        const reactions = await msg.awaitReactions(() => true, {
+          max: 1,
+          time: 60000
+        })
+        if (reactions.array().length) {
+          log.info('Got reaction, switching to server')
+          await rustplus.configure({
+            serverHost: pairing.body.ip,
+            serverPort: pairing.body.port,
+            playerToken: pairing.body.playerToken,
+            playerSteamId: pairing.body.playerId
           })
-          if (reactions.array().length) {
-            log.info('Got reaction, switching to server')
-            await rustplus.configure({
-              serverHost: pairing.body.ip,
-              serverPort: pairing.body.port,
-              playerToken: pairing.body.playerToken,
-              playerSteamId: pairing.body.playerId
-            })
-            await msg.react('✅')
-          }
-        } catch (err) {
-          log.error(err)
+          await msg.react('✅')
         }
-      } else {
-        log.error(
-          { userId: process.env.DISCORD_OWNER_USER_ID },
-          'Could not find discord user'
-        )
+      } catch (err) {
+        log.error(err)
       }
+    } else if (rustplus.isEntityPairingNotification(pairing)) {
+      await user.send(formatEntityPairing(pairing))
     }
   }
 
