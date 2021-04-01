@@ -9,8 +9,13 @@ import fakePushReceiver from './fake-push-receiver'
 import { saveMapIfNotExist } from './map'
 import { trackMapEvents } from './map-events'
 import * as socket from './rustplus-socket'
-import { createServerAndWipeIfNotExist } from './server'
-import { FcmNotification, RustPlusConfig, RustPlusEvents } from './types'
+import { createWipeIfNotExist, upsertServer } from './server'
+import {
+  FcmNotification,
+  isServerPairingNotification,
+  RustPlusConfig,
+  RustPlusEvents
+} from './types'
 export * from './rustplus-socket'
 export * from './types'
 
@@ -129,6 +134,14 @@ export async function init(): Promise<void> {
 
   events.on('pairing', async (pairing) => {
     log.info(pairing.body, `Got a request to pair ${pairing.body.type}`)
+
+    if (isServerPairingNotification(pairing)) {
+      await upsertServer({
+        host: pairing.body.ip,
+        port: pairing.body.port,
+        playerToken: pairing.body.playerToken
+      })
+    }
   })
 
   events.on('mapEvent', (mapEvent) => {
@@ -137,7 +150,7 @@ export async function init(): Promise<void> {
 
   events.on('connected', async (serverInfo) => {
     log.info(serverInfo, 'Connected to rust server')
-    await createServerAndWipeIfNotExist(serverInfo)
+    await createWipeIfNotExist(serverInfo)
     await saveMapIfNotExist(serverInfo)
     void trackMapEvents(serverInfo, events)
   })

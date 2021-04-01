@@ -87,6 +87,35 @@ const FAKE_EVENTS = {
       }
     },
     persistentId: uuid.v4()
+  },
+
+  serverPairing: {
+    notification: {
+      data: {
+        experienceId: '@facepunch/RustCompanion',
+        title: 'best test server eu',
+        message: 'Tap to pair with this server.',
+        body: JSON.stringify({
+          img: '',
+          port: '28083',
+          ip: '91.120.57.123',
+          name: 'best test server eu',
+          logo: '',
+          id: '9e9c7875-b315-44ed-ab20-f1310034448d',
+          type: 'server',
+          url: '',
+          desc: 'No server description has been provided.',
+          playerId: '76561199410440354',
+          playerToken: '-1039270142'
+        }),
+        channelId: 'pairing'
+      },
+      from: '976529667804',
+      priority: 'high',
+      collapse_key: 'do_not_collapse'
+    },
+    persistentId: uuid.v4(),
+    msg: 'FCM notification received'
   }
 }
 
@@ -102,7 +131,7 @@ class FakePushReceiver extends TypedEmitter<FakePushReceiverEvents> {
       this.emit('connect')
 
       setTimeout(() => {
-        onFcmNotification(ALARM)
+        onFcmNotification(FAKE_EVENTS.serverPairing)
       }, 1000)
     })
   }

@@ -1,27 +1,23 @@
-import { ServerInfo } from './types'
+import { ServerHostPort, ServerInfo } from './types'
 import db, { Db } from '../db'
 
-export function createServerAndWipeIfNotExist(
-  serverInfo: ServerInfo
-): Promise<void> {
+export function upsertServer(
+  server: ServerHostPort & { playerToken: number }
+): Promise<any> {
   return db.task(async (t) => {
-    const existingServer = await t.oneOrNone<{ serverId: number }>(
-      `select server_id
-         from servers
-        where server_host = $[host]
-          and server_port = $[port]`,
-      serverInfo
+    await t.none(
+      `insert into servers (server_host, server_port, player_token)
+       values ($[host], $[port], $[playerToken])
+       on conflict (server_host, server_port)
+       do update set player_token = excluded.player_token`,
+      server
     )
+  })
+}
 
-    const { serverId } =
-      existingServer ??
-      (await db.one<{ serverId: number }>(
-        `insert into servers (server_host, server_port)
-           values ($[host], $[port])
-           returning server_id`,
-        serverInfo
-      ))
-
+export function createWipeIfNotExist(serverInfo: ServerInfo): Promise<void> {
+  return db.task(async (t) => {
+    const serverId = await getServerId(serverInfo)
     const wipeExists = await t.oneOrNone<{ column: 1 }>(
       `select 1
          from wipes
@@ -55,4 +51,19 @@ export async function getWipeId(
   )
 
   return wipeId
+}
+
+export async function getServerId(
+  server: Pick<ServerInfo, 'host' | 'port'>,
+  tx: Db = db
+): Promise<number> {
+  const { serverId } = await tx.one<{ serverId: number }>(
+    `select server_id
+       from servers
+      where server_host = $[host]
+        and server_port = $[port]`,
+    server
+  )
+
+  return serverId
 }

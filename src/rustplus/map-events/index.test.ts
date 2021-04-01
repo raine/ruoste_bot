@@ -21,7 +21,7 @@ jest.mock('../rustplus-socket', () => ({
 }))
 
 import { getMapMarkers, getMap } from '../rustplus-socket'
-import { createServerAndWipeIfNotExist } from '../server'
+import { createWipeIfNotExist, upsertServer } from '../server'
 const mockedGetMapMarkers = mocked(getMapMarkers, true)
 const mockedGetMap = mocked(getMap, true)
 
@@ -142,7 +142,8 @@ describe('checkMapEvents()', () => {
 
   async function setupMap(serverInfo = SERVER_INFO, map = MAP) {
     mockedGetMap.mockResolvedValue(map)
-    await createServerAndWipeIfNotExist(serverInfo)
+    await upsertServer({ ...serverInfo, playerToken: 1234 })
+    await createWipeIfNotExist(serverInfo)
     await saveMapIfNotExist(serverInfo)
   }
 

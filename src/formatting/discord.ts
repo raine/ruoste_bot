@@ -213,10 +213,9 @@ export const formatServerEmbed = (
 
 export const formatServerPairing = (
   pairing: rustplus.ServerPairingNotificationData
-  // You need this intersect fuckery to have discord infer the return type for channel.send correctly
 ): Discord.MessageOptions & { split: false } => ({
   embed: {
-    title: 'Request to pair with server',
+    title: 'Request to pair with a server',
     description: pairing.body.name,
     color: RUST_COLOR,
     footer: {
