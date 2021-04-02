@@ -20,7 +20,7 @@ A telegram/discord bot for [Rust](https://rust.facepunch.com/)
 - `/wipes [maxgroup=x-y|x]` - List of recently wiped servers.
 - `/nextwipes` - List servers that will be wiped in future.
 - `/rustplus configure <option> <value>`
-    - Where `<option>` is one of `fcm`, `server`, `steamid`, `playertoken`, `alerts_channel` or `events_channel`
+    - Where `<option>` is one of `fcm`, `alerts_channel` or `events_channel`
 
 ## deployment
 
