@@ -8,7 +8,6 @@ if (process.env.SENTRY_DSN) {
   })
 }
 import log from './logger'
-import startTelegramBot from './telegram'
 import startDiscordBot from './discord'
 import * as rustplus from './rustplus'
 import { pgp } from './db'
@@ -19,7 +18,6 @@ async function main() {
       log.error(err, 'Failed to initialize rustplus')
     })
 
-    startTelegramBot()
     startDiscordBot()
   } catch (err) {
     Sentry.captureException(err)

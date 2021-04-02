@@ -1,6 +1,6 @@
 # ruoste_bot
 
-A telegram/discord bot for [Rust](https://rust.facepunch.com/)
+A discord bot for [Rust](https://rust.facepunch.com/)
 
 ## features
 
@@ -24,6 +24,6 @@ A telegram/discord bot for [Rust](https://rust.facepunch.com/)
 
 ## deployment
 
-1. Create a bot on Telegram and/or Discord
+1. Create a bot on Discord
 2. Build the docker image
-3. Run docker image with `TELEGRAM_BOT_TOKEN` and/or `DISCORD_BOT_TOKEN` set.
+3. Run docker image with `DISCORD_BOT_TOKEN` set

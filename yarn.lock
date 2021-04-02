@@ -5646,13 +5646,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"module-alias@npm:^2.2.2":
-  version: 2.2.2
-  resolution: "module-alias@npm:2.2.2"
-  checksum: 1b37943df4fbe56799688eb3496f5113f7f1e18ff7a53bd3543e93fd4ee6c4b04e1548fc0cb49ae73e086b18ee712ab3321f6d7f5444cf413c638914decb8918
-  languageName: node
-  linkType: hard
-
 "mri@npm:1.1.4":
   version: 1.1.4
   resolution: "mri@npm:1.1.4"
@@ -5747,7 +5740,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-fetch@npm:^2.2.0, node-fetch@npm:^2.6.1":
+"node-fetch@npm:^2.6.1":
   version: 2.6.1
   resolution: "node-fetch@npm:2.6.1"
   checksum: cbb171635e538162b977eac5dfe7a1e07a9a02e991924377a6435502291e2f823d306b95aabc455caebf4a118ccf836868462bc70ccc3095af02bb9da61fda37
@@ -7166,7 +7159,6 @@ __metadata:
     protobufjs: ^6.10.2
     push-receiver: ^2.1.1
     ramda: ^0.27.1
-    telegraf: ^3.38.0
     tiny-typed-emitter: ^2.0.3
     ts-jest: ^26.5.4
     ts-node: ^9.1.1
@@ -7203,13 +7195,6 @@ __metadata:
   version: 2.1.2
   resolution: "safer-buffer@npm:2.1.2"
   checksum: 549ba83f5b314b59898efe3422120ce1ca7987a6eae5925a5fa5db930dc414d4a9dde0a5594f89638cd6ea60b6840ea961872908933ac2428d1726489db46fa5
-  languageName: node
-  linkType: hard
-
-"sandwich-stream@npm:^2.0.1":
-  version: 2.0.2
-  resolution: "sandwich-stream@npm:2.0.2"
-  checksum: f88483282e71e6d887119d8726fdaee56914fcab9df99d4777de650188fb823df314237eb6d2938b3e93d04054a047e2f774c8667014e8f4582b086d0c060ce9
   languageName: node
   linkType: hard
 
@@ -7869,29 +7854,6 @@ __metadata:
     mkdirp: ^1.0.3
     yallist: ^4.0.0
   checksum: d1d988eceb1ad2ecfaaf6fc5ecfe0c46fa005d04fe4c283355ccc52d3ffb4b6bf459a62f9ac7e36fd35251ab020399bdf527ab48b968120e06b4f61906a87d62
-  languageName: node
-  linkType: hard
-
-"telegraf@npm:^3.38.0":
-  version: 3.38.0
-  resolution: "telegraf@npm:3.38.0"
-  dependencies:
-    debug: ^4.0.1
-    minimist: ^1.2.0
-    module-alias: ^2.2.2
-    node-fetch: ^2.2.0
-    sandwich-stream: ^2.0.1
-    telegram-typings: ^3.6.0
-  bin:
-    telegraf: ./bin/telegraf
-  checksum: 468e16ba3124b333363ce6019d64a35c1c75caa777df8b2466e018089bbcd2926888ef87abdf232bdd1c15d14b9e568259fdf1749fdff8cf4a9ed22cae707082
-  languageName: node
-  linkType: hard
-
-"telegram-typings@npm:^3.6.0":
-  version: 3.6.1
-  resolution: "telegram-typings@npm:3.6.1"
-  checksum: a2aa1190f826e45228a3b08c7d51718abd7c374b8ad0f79f5ebc6bd0fe4e0da7f8e7f1432b52e351df89d31d6d7384a71636c98432b5458b36b8f3fa0ea76721
   languageName: node
   linkType: hard
 
