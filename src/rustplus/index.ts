@@ -2,6 +2,7 @@ import { TypedEmitter } from 'tiny-typed-emitter'
 import db from '../db'
 import log from '../logger'
 import { configure, getConfig, initEmptyConfig } from './config'
+import { createEntityFromPairing } from './entity'
 import { fcmListen } from './fcm'
 import { saveMapIfNotExist } from './map'
 import { trackMapEvents } from './map-events'
@@ -39,6 +40,8 @@ export async function init(): Promise<void> {
         playerToken: pairing.body.playerToken,
         playerSteamId: pairing.body.playerId
       })
+    } else {
+      await createEntityFromPairing(pairing.body)
     }
   })
 

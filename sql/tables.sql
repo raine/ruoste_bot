@@ -44,9 +44,10 @@ create table map_markers (
 create table entities (
   wipe_id       integer references wipes (wipe_id) on delete cascade,
   entity_id     integer not null,
-  entity_type   text not null,
+  entity_type   integer not null,
   handle        text,
   created_at    timestamptz default now() not null,
+  unique(wipe_id, entity_type, entity_id),
   unique(wipe_id, entity_type, handle)
 );
 

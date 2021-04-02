@@ -50,9 +50,9 @@ export const EntityPairingData = t.type({
     t.intersection([
       NotificationBodyServer,
       t.type({
-        entityId: t.string,
+        entityId: t.string.pipe(NumberFromString),
         entityName: t.string,
-        entityType: t.string,
+        entityType: t.string.pipe(NumberFromString),
         type: t.literal('entity')
       })
     ])

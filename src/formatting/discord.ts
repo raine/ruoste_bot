@@ -230,11 +230,11 @@ export const formatEntityPairing = (
 ): Discord.MessageOptions & { split: false } => {
   const entityIconFile = (() => {
     switch (pairing.body.entityType) {
-      case '1':
+      case 1:
         return 'smart_switch.png'
-      case '2':
+      case 2:
         return 'smart_alarm.png'
-      case '3':
+      case 3:
         return 'storage_monitor.png'
     }
   })()

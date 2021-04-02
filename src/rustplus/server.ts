@@ -67,6 +67,24 @@ export async function getWipeId(
   return wipeId
 }
 
+export async function getCurrentWipeIdForServer(
+  server: Pick<ServerInfo, 'host' | 'port'>,
+  tx: Db = db
+) {
+  const { wipeId } = await tx.one<{ wipeId: number }>(
+    `select wipe_id
+       from servers
+       join wipes using (server_id)
+      where host = $[host]
+        and port = $[port]
+      order by wipe_id desc
+      limit 1`,
+    server
+  )
+
+  return wipeId
+}
+
 export async function getServerId(
   server: Pick<ServerInfo, 'host' | 'port'>,
   tx: Db = db
