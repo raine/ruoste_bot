@@ -142,7 +142,11 @@ describe('checkMapEvents()', () => {
 
   async function setupMap(serverInfo = SERVER_INFO, map = MAP) {
     mockedGetMap.mockResolvedValue(map)
-    await upsertServer({ ...serverInfo, playerToken: 1234 })
+    await upsertServer({
+      ...serverInfo,
+      playerToken: 1234,
+      playerSteamId: 'foobar'
+    })
     await createWipeIfNotExist(serverInfo)
     await saveMapIfNotExist(serverInfo)
   }

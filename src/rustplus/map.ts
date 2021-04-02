@@ -31,6 +31,7 @@ export async function saveMapIfNotExist(serverInfo: ServerInfo): Promise<void> {
 export function getMonuments(
   serverInfo: Pick<ServerInfo, 'host' | 'port' | 'wipeTime'>
 ): Promise<Monument[]> {
+  // TODO: This should fail if there is no map
   return validateP(
     t.array(Monument),
     db
@@ -40,8 +41,8 @@ export function getMonuments(
              from servers
              join wipes using (server_id)
              join maps using (wipe_id)
-            where server_host = $[host]
-              and server_port = $[port]
+            where host = $[host]
+              and port = $[port]
               and wiped_at = $[wipeTime]
          )
          select monument.*

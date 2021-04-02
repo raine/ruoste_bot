@@ -8,6 +8,7 @@ import { SmartAlarm } from './smart-alarm'
 import { StorageMonitor } from './storage-monitor'
 import { makeTeamMembersP } from './team-members-p'
 import { makeTimeP } from './time-p'
+import { Server } from './server'
 
 export type RustPlus = {
   SmartSwitch: typeof SmartSwitch
@@ -17,7 +18,7 @@ export type RustPlus = {
   timeP: ReturnType<typeof makeTimeP>
 }
 
-const Server = t.type({
+const NotificationBodyServer = t.type({
   ip: t.string,
   port: t.string.pipe(NumberFromString)
 })
@@ -31,7 +32,7 @@ export const TeamNotificationData = t.intersection([
   BaseNotificationData,
   t.type({
     channelId: t.literal('team'),
-    body: t.string.pipe(JsonFromString).pipe(Server)
+    body: t.string.pipe(JsonFromString).pipe(NotificationBodyServer)
   })
 ])
 
@@ -39,7 +40,7 @@ export const SmartAlarmNotificationData = t.intersection([
   BaseNotificationData,
   t.type({
     channelId: t.literal('alarm'),
-    body: t.string.pipe(JsonFromString).pipe(Server)
+    body: t.string.pipe(JsonFromString).pipe(NotificationBodyServer)
   })
 ])
 
@@ -47,7 +48,7 @@ export const EntityPairingData = t.type({
   channelId: t.literal('pairing'),
   body: t.string.pipe(JsonFromString).pipe(
     t.intersection([
-      Server,
+      NotificationBodyServer,
       t.type({
         entityId: t.string,
         entityName: t.string,
@@ -62,7 +63,7 @@ export const ServerPairingData = t.type({
   channelId: t.literal('pairing'),
   body: t.string.pipe(JsonFromString).pipe(
     t.intersection([
-      Server,
+      NotificationBodyServer,
       t.strict({
         name: t.string,
         type: t.literal('server'),
@@ -126,10 +127,7 @@ export const RustPlusConfig = t.strict({
   fcmCredentials: t.union([t.unknown, t.null]),
   discordAlertsChannelId: t.union([t.string, t.null]),
   discordEventsChannelId: t.union([t.string, t.null]),
-  serverHost: t.union([t.string, t.null]),
-  serverPort: t.union([t.number, t.null]),
-  playerSteamId: t.union([t.string, t.null]),
-  playerToken: t.union([t.number, t.null])
+  currentServerId: t.union([t.number, t.null])
 })
 
 export type RustPlusConfig = t.TypeOf<typeof RustPlusConfig>
@@ -176,7 +174,7 @@ export interface RustPlusEvents {
   pairing: (data: PairingNotificationData) => void
   team: (data: TeamNotificationData) => void
   mapEvent: (data: MapEvent) => void
-  connected: (serverInfo: ServerInfo, config: RustPlusConfig) => void
+  connected: (serverInfo: ServerInfo, server: Server) => void
   entityChanged: (data: AppEntityChanged) => void
   teamChanged: (data: AppTeamChanged) => void
 }

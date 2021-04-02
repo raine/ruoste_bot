@@ -1,5 +1,16 @@
+import * as t from 'io-ts'
 import { ServerHostPort, ServerInfo } from './types'
 import db, { Db } from '../db'
+import { validateP } from '../validate'
+
+export const Server = t.type({
+  host: t.string,
+  port: t.number,
+  playerToken: t.number,
+  playerSteamId: t.string
+})
+
+export type Server = t.TypeOf<typeof Server>
 
 export function upsertServer(
   server: ServerHostPort & {
@@ -9,9 +20,9 @@ export function upsertServer(
 ): Promise<any> {
   return db.task(async (t) => {
     await t.none(
-      `insert into servers (server_host, server_port, player_token, player_steam_id)
+      `insert into servers (host, port, player_token, player_steam_id)
        values ($[host], $[port], $[playerToken], $[playerSteamId])
-       on conflict (server_host, server_port)
+       on conflict (host, port)
        do update set player_token = excluded.player_token, player_steam_id = excluded.player_steam_id`,
       server
     )
@@ -47,8 +58,8 @@ export async function getWipeId(
     `select wipe_id
        from servers
        join wipes using (server_id)
-      where server_host = $[host]
-        and server_port = $[port]
+      where host = $[host]
+        and port = $[port]
         and wiped_at = $[wipeTime]`,
     serverInfo
   )
@@ -63,10 +74,24 @@ export async function getServerId(
   const { serverId } = await tx.one<{ serverId: number }>(
     `select server_id
        from servers
-      where server_host = $[host]
-        and server_port = $[port]`,
+      where host = $[host]
+        and port = $[port]`,
     server
   )
 
   return serverId
+}
+
+export async function getCurrentServer(tx: Db = db): Promise<Server | null> {
+  return validateP(
+    t.union([Server, t.null]),
+    tx.oneOrNone(
+      `select *
+         from servers
+        where server_id = (
+          select current_server_id
+            from rustplus_config
+          )`
+    )
+  )
 }

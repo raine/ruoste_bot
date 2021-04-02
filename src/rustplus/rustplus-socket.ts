@@ -11,13 +11,13 @@ import {
   AppMarker,
   AppTeamInfo,
   AppTime,
-  RustPlusConfig,
   ServerHostPort,
   ServerInfo,
   isMessageBroadcast
 } from './types'
 import protobuf, { Message } from 'protobufjs'
 import { events, isEntityChangedBroadcast } from './'
+import { Server } from './server'
 
 export let socket: any
 export let socketConnectedP: Promise<void>
@@ -143,7 +143,7 @@ let onSocketDisconnected: (() => void) | undefined
 
 // NOTE: The websocket will connect with incorrect player token and steam id,
 // you have to request some data to check if the credentials work
-export async function listen(config: RustPlusConfig) {
+export async function listen(server: Server) {
   if (socket) {
     log.info('Disconnecting existing socket')
     clearTimeout(backOffDelayTimeout)
@@ -152,23 +152,11 @@ export async function listen(config: RustPlusConfig) {
   }
 
   socket = new RustPlus(
-    config.serverHost,
-    config.serverPort,
-    config.playerSteamId,
-    config.playerToken
+    server.host,
+    server.port,
+    server.playerSteamId,
+    server.playerToken
   )
-
-  if (
-    !(
-      config.serverHost &&
-      config.serverPort &&
-      config.playerSteamId &&
-      config.playerToken
-    )
-  ) {
-    log.error('Missing configuration for rustplus, not connecting')
-    return
-  }
 
   socket.on('error', (err: Error) => {
     log.error(err, 'Rust websocket error')
@@ -184,7 +172,7 @@ export async function listen(config: RustPlusConfig) {
     const backOffDelay = Math.min(10000, 10 ** connectAttempts)
     log.error(`Rust websocket disconnected, reconnecting in ${backOffDelay}ms`)
     backOffDelayTimeout = global.setTimeout(() => {
-      void listen(config)
+      void listen(server)
     }, backOffDelay)
   }
 
@@ -205,13 +193,13 @@ export async function listen(config: RustPlusConfig) {
 
   socketConnectedP = new Promise<void>((resolve) => {
     socket.once('connected', async () => {
-      connectedServer = { host: config.serverHost!, port: config.serverPort! }
+      connectedServer = server
       socketConnected = true
       connectAttempts = 0
       resolve() // sendRequestAsync pends on this promise
       try {
         const info = await getServerInfo()
-        events.emit('connected', info, config)
+        events.emit('connected', info, server)
       } catch (err) {
         log.error(err)
       }

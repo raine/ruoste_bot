@@ -107,25 +107,6 @@ const commands: (client: Discord.Client) => Commands = () => ({
             await msg.reply('Credentials updated!')
             return
           }
-          case 'server': {
-            const [server, port] = value.split(':')
-            await rustplus.configure({
-              serverHost: server,
-              serverPort: parseInt(port)
-            })
-            await msg.reply('Server updated!')
-            return
-          }
-          case 'steamid': {
-            await rustplus.configure({ playerSteamId: value })
-            await msg.reply('Player steam id updated!')
-            return
-          }
-          case 'playertoken': {
-            await rustplus.configure({ playerToken: parseInt(value) })
-            await msg.reply('Player token updated!')
-            return
-          }
           case 'alerts_channel': {
             await rustplus.configure({ discordAlertsChannelId: value })
             await msg.reply('Alerts channel updated!')
@@ -253,11 +234,9 @@ export default function start() {
         })
         if (reactions.array().length) {
           log.info('Got reaction, switching to server')
-          await rustplus.configure({
-            serverHost: pairing.body.ip,
-            serverPort: pairing.body.port,
-            playerToken: pairing.body.playerToken,
-            playerSteamId: pairing.body.playerId
+          await rustplus.connectToServer({
+            host: pairing.body.ip,
+            port: pairing.body.port
           })
           await msg.react('✅')
         }

@@ -1,25 +1,15 @@
-create table rustplus_config (
-  fcm_credentials            json,
-  server_host                text,
-  server_port                integer,
-  player_steam_id            text,
-  player_token               integer,
-  discord_alerts_channel_id  text,
-  discord_events_channel_id  text
-);
-
 create table fcm_persistent_ids (
   persistent_id    text primary key
 );
 
 create table servers (
   server_id        serial primary key,
-  server_host      text not null,
-  server_port      integer not null,
+  host             text not null,
+  port             integer not null,
   player_token     integer not null,
   player_steam_id  text not null,
   created_at       timestamptz default now(),
-  unique (server_host, server_port)
+  unique (host, port)
 );
 
 create table wipes (
@@ -58,4 +48,11 @@ create table entities (
   handle        text,
   created_at    timestamptz default now() not null,
   unique(wipe_id, entity_type, handle)
+);
+
+create table rustplus_config (
+  fcm_credentials            json,
+  current_server_id          integer references servers (server_id),
+  discord_alerts_channel_id  text,
+  discord_events_channel_id  text
 );

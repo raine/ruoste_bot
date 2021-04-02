@@ -15,8 +15,8 @@ function getPreviousCargoSpawn(server: ServerInfo): Promise<string | null> {
          from servers
          join wipes using (server_id)
          join map_events using (wipe_id)
-        where server_host = $[host]
-          and server_port = $[port]
+        where host = $[host]
+          and port = $[port]
           and wipes.wiped_at = $[wipeTime]
           and map_events.type = 'CARGO_SHIP_ENTERED'
           and map_events.created_at > $[wipeTime]
