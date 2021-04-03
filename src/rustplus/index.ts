@@ -18,6 +18,8 @@ import {
   RustPlusEvents,
   ServerHostPort
 } from './types'
+import testScript from '../test-script'
+import { makeScriptApi } from './script-api'
 
 export * from './config'
 export * from './rustplus-socket'
@@ -54,6 +56,7 @@ export async function init(): Promise<void> {
     await createWipeIfNotExist(serverInfo)
     await saveMapIfNotExist(serverInfo)
     void trackMapEvents(serverInfo, events)
+    // await testScript(makeScriptApi())
   })
 
   await initEmptyConfig()

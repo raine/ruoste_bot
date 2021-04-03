@@ -3,20 +3,7 @@ import { NumberFromString } from 'io-ts-types/lib/NumberFromString'
 import { JsonFromString } from 'io-ts-types/lib/JsonFromString'
 import { DateTimeFromUnixTime } from '../types/DateTimeFromUnixTime'
 import { Message } from 'protobufjs'
-import { SmartSwitch } from './smart-switch'
-import { SmartAlarm } from './smart-alarm'
-import { StorageMonitor } from './storage-monitor'
-import { makeTeamMembersP } from './team-members-p'
-import { makeTimeP } from './time-p'
 import { Server } from './server'
-
-export type RustPlus = {
-  SmartSwitch: typeof SmartSwitch
-  StorageMonitor: typeof StorageMonitor
-  SmartAlarm: typeof SmartAlarm
-  teamMembersP: ReturnType<typeof makeTeamMembersP>
-  timeP: ReturnType<typeof makeTimeP>
-}
 
 const NotificationBodyServer = t.type({
   ip: t.string,
