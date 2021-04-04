@@ -131,7 +131,7 @@ class FakePushReceiver extends TypedEmitter<FakePushReceiverEvents> {
       this.emit('connect')
 
       setTimeout(() => {
-        onFcmNotification(FAKE_EVENTS.serverPairing)
+        onFcmNotification(FAKE_EVENTS.storageMonitor)
       }, 1000)
     })
   }

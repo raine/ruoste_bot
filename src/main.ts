@@ -14,11 +14,10 @@ import { pgp } from './db'
 
 async function main() {
   try {
-    await rustplus.init().catch((err) => {
+    const discord = startDiscordBot()
+    await rustplus.init(discord).catch((err) => {
       log.error(err, 'Failed to initialize rustplus')
     })
-
-    startDiscordBot()
   } catch (err) {
     Sentry.captureException(err)
     log.error(err)

@@ -1,25 +1,28 @@
 import { TypedEmitter } from 'tiny-typed-emitter'
 import db from '../db'
+import { DiscordAPI, isMessageReply } from '../discord'
 import log from '../logger'
 import { configure, getConfig, initEmptyConfig } from './config'
-import { createEntityFromPairing } from './entity'
+import {
+  createEntityFromPairing,
+  setDiscordMessageId,
+  updateEntityHandle
+} from './entity'
 import { fcmListen } from './fcm'
 import { saveMapIfNotExist } from './map'
 import { trackMapEvents } from './map-events'
 import * as socket from './rustplus-socket'
 import {
   createWipeIfNotExist,
+  getCurrentServer,
   getServerId,
-  upsertServer,
-  getCurrentServer
+  upsertServer
 } from './server'
 import {
   isServerPairingNotification,
   RustPlusEvents,
   ServerHostPort
 } from './types'
-import testScript from '../test-script'
-import { makeScriptApi } from './script-api'
 
 export * from './config'
 export * from './rustplus-socket'
@@ -27,7 +30,19 @@ export * from './types'
 
 export const events = new TypedEmitter<RustPlusEvents>()
 
-export async function init(): Promise<void> {
+export async function init(discord: DiscordAPI): Promise<void> {
+  // Still not sure if this should be in discord.ts or here
+  discord.client.on('message', async (msg) => {
+    try {
+      if (isMessageReply(msg)) {
+        await updateEntityHandle(msg.reference!.messageID!, msg.content)
+        await msg.react('✅')
+      }
+    } catch (err) {
+      log.error(err)
+    }
+  })
+
   events.on('alarm', (alert) => {
     log.info(alert, 'Got an alert')
   })
@@ -42,8 +57,11 @@ export async function init(): Promise<void> {
         playerToken: pairing.body.playerToken,
         playerSteamId: pairing.body.playerId
       })
+      await discord.sendServerPairingMessage(pairing)
     } else {
-      await createEntityFromPairing(pairing.body)
+      const entity = await createEntityFromPairing(pairing.body)
+      const msg = await discord.sendEntityPairingMessage(pairing)
+      await setDiscordMessageId(entity, msg.id)
     }
   })
 
@@ -56,7 +74,6 @@ export async function init(): Promise<void> {
     await createWipeIfNotExist(serverInfo)
     await saveMapIfNotExist(serverInfo)
     void trackMapEvents(serverInfo, events)
-    // await testScript(makeScriptApi())
   })
 
   await initEmptyConfig()

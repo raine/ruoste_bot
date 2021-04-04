@@ -243,6 +243,7 @@ export const formatEntityPairing = (
     embed: {
       title: `New pairing: ${pairing.body.entityName}`,
       color: RUST_COLOR,
+      description: 'Reply to name this entity',
       footer: {
         text: `ID: ${pairing.body.entityId}`,
         iconURL: `https://ruoste-bot.netlify.app/${entityIconFile}`

@@ -1,6 +1,20 @@
 const Sentry = require('@sentry/node')
 
 import * as Discord from 'discord.js'
+import { DateTime, Interval } from 'luxon'
+import {
+  formatBotActivityText,
+  formatEntityPairing,
+  formatMapEvent,
+  formatServerEmbed,
+  formatServerListReply,
+  formatServerListReplyWithUpdatedAt,
+  formatServerPairing,
+  formatSmartAlarmAlert,
+  formatUpcomingWipeList
+} from './formatting/discord'
+import { getNextWipes } from './get-next-wipes'
+import { parseMaxGroupOption } from './input'
 import {
   formatSearchParams,
   formatServerListUrl,
@@ -12,22 +26,12 @@ import {
   SERVER_SEARCH_PARAMS
 } from './just-wiped'
 import log from './logger'
-import {
-  formatServerEmbed,
-  formatServerListReply,
-  formatServerListReplyWithUpdatedAt,
-  formatUpcomingWipeList,
-  formatSmartAlarmAlert,
-  formatServerPairing,
-  formatMapEvent,
-  formatBotActivityText,
-  formatEntityPairing
-} from './formatting/discord'
-import { initUpdateLoop, ServerListReply } from './update-loop'
-import { getNextWipes } from './get-next-wipes'
-import { parseMaxGroupOption } from './input'
-import { Interval, DateTime } from 'luxon'
 import * as rustplus from './rustplus'
+import {
+  EntityPairingNotificationData,
+  ServerPairingNotificationData
+} from './rustplus'
+import { initUpdateLoop, ServerListReply } from './update-loop'
 
 type DiscordServerListReply = ServerListReply<Discord.Message>
 let updatedServerListReplies: DiscordServerListReply[] = []
@@ -183,12 +187,69 @@ function updateBotActivityLoop(client: Discord.Client): void {
   )
 }
 
-export default function start() {
+async function getBotOwnerDiscordUser(
+  client: Discord.Client
+): Promise<Discord.User> {
+  const user = await client.users.fetch(process.env.DISCORD_OWNER_USER_ID!)
+  if (!user) {
+    log.error({ userId: process.env.DISCORD_OWNER_USER_ID })
+    throw new Error('Could not find discord bot owner user')
+  } else {
+    return user
+  }
+}
+
+const sendServerPairingMessage = (
+  client: Discord.Client,
+  isReadyP: Promise<void>
+) => async (pairing: ServerPairingNotificationData) => {
+  await isReadyP
+  const user = await getBotOwnerDiscordUser(client)
+  const msg = await user.send(formatServerPairing(pairing))
+  try {
+    const reactions = await msg.awaitReactions(() => true, {
+      max: 1,
+      time: 60000
+    })
+    if (reactions.array().length) {
+      log.info('Got reaction, switching to server')
+      // TODO: This could just now use id by getting server from the caller
+      await rustplus.connectToServer({
+        host: pairing.body.ip,
+        port: pairing.body.port
+      })
+      await msg.react('✅')
+    }
+  } catch (err) {
+    log.error(err)
+  }
+}
+
+const sendEntityPairingMessage = (
+  client: Discord.Client,
+  isReadyP: Promise<void>
+) => async (
+  pairing: EntityPairingNotificationData
+): Promise<Discord.Message> => {
+  await isReadyP
+  const user = await getBotOwnerDiscordUser(client)
+  return user.send(formatEntityPairing(pairing))
+}
+
+export type DiscordAPI = {
+  client: Discord.Client
+  sendServerPairingMessage: ReturnType<typeof sendServerPairingMessage>
+  sendEntityPairingMessage: ReturnType<typeof sendEntityPairingMessage>
+}
+
+export const isMessageReply = (msg: Discord.Message): boolean =>
+  Boolean(msg.reference?.messageID)
+
+export default function start(): DiscordAPI {
   const client = new Discord.Client()
   const token = process.env.DISCORD_BOT_TOKEN!
   if (!token) {
-    log.error('Discord bot token not set, aborting...')
-    return
+    throw new Error('Discord bot token not set, aborting...')
   }
 
   async function onSmartAlarmAlert(alert: rustplus.SmartAlarmNotificationData) {
@@ -214,62 +275,30 @@ export default function start() {
     if (channel?.isText()) return channel.send(formatMapEvent(mapEvent))
   }
 
-  async function onPairing(pairing: rustplus.PairingNotificationData) {
-    const user = await client.users.fetch(process.env.DISCORD_OWNER_USER_ID!)
-    if (!user) {
-      log.error(
-        { userId: process.env.DISCORD_OWNER_USER_ID },
-        'Could not find discord user'
-      )
-
-      return
-    }
-
-    if (rustplus.isServerPairingNotification(pairing)) {
-      const msg = await user.send(formatServerPairing(pairing))
-      try {
-        const reactions = await msg.awaitReactions(() => true, {
-          max: 1,
-          time: 60000
-        })
-        if (reactions.array().length) {
-          log.info('Got reaction, switching to server')
-          await rustplus.connectToServer({
-            host: pairing.body.ip,
-            port: pairing.body.port
-          })
-          await msg.react('✅')
-        }
-      } catch (err) {
-        log.error(err)
-      }
-    } else if (rustplus.isEntityPairingNotification(pairing)) {
-      await user.send(formatEntityPairing(pairing))
-    }
-  }
-
   function onRustSocketConnected() {
     updateBotActivityLoop(client)
   }
 
-  client.on('ready', () => {
-    log.info(`Logged in as ${client.user?.tag}!`)
+  const isReadyP = new Promise<void>((resolve) => {
+    client.on('ready', async () => {
+      resolve()
+      log.info(`Logged in as ${client.user?.tag}!`)
 
-    rustplus.events.removeListener('alarm', onSmartAlarmAlert)
-    rustplus.events.on('alarm', onSmartAlarmAlert)
+      rustplus.events.removeListener('alarm', onSmartAlarmAlert)
+      rustplus.events.on('alarm', onSmartAlarmAlert)
 
-    rustplus.events.removeListener('mapEvent', onMapEvent)
-    rustplus.events.on('mapEvent', onMapEvent)
+      rustplus.events.removeListener('mapEvent', onMapEvent)
+      rustplus.events.on('mapEvent', onMapEvent)
 
-    rustplus.events.removeListener('pairing', onPairing)
-    rustplus.events.on('pairing', onPairing)
+      rustplus.events.removeListener('connected', onRustSocketConnected)
+      rustplus.events.on('connected', onRustSocketConnected)
 
-    rustplus.events.removeListener('connected', onRustSocketConnected)
-    rustplus.events.on('connected', onRustSocketConnected)
-
-    // The promise may not exist if there's configuration missing at start
-    // We need this because rust server is connected to before event above is bound
-    void rustplus.socketConnectedP?.then(onRustSocketConnected).catch(log.error)
+      // The promise may not exist if there's configuration missing at start
+      // We need this because rust server is connected to before event above is bound
+      void rustplus.socketConnectedP
+        ?.then(onRustSocketConnected)
+        .catch(log.error)
+    })
   })
 
   client.on('message', (msg) => {
@@ -296,4 +325,10 @@ export default function start() {
     updateServerListMessage,
     (msg) => msg.channel.id
   )
+
+  return {
+    client,
+    sendServerPairingMessage: sendServerPairingMessage(client, isReadyP),
+    sendEntityPairingMessage: sendEntityPairingMessage(client, isReadyP)
+  }
 }

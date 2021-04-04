@@ -47,6 +47,7 @@ create table entities (
   entity_type   integer not null,
   handle        text,
   created_at    timestamptz default now() not null,
+  discord_pairing_message_id text,
   unique(wipe_id, entity_type, entity_id),
   unique(wipe_id, entity_type, handle)
 );

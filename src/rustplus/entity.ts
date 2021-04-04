@@ -1,6 +1,7 @@
 import * as t from 'io-ts'
+import db, { Db } from '../db'
 import log from '../logger'
-import db from '../db'
+import { validateP } from '../validate'
 import { getCurrentWipeIdForServer } from './server'
 import { EntityPairingNotificationData } from './types'
 
@@ -18,20 +19,67 @@ export async function createEntityFromPairing({
   port,
   entityId,
   entityType
-}: EntityPairingNotificationData['body']): Promise<void> {
-  await db.task(async (t) => {
-    const wipeId = await getCurrentWipeIdForServer({ host: ip, port }, t)
-    const created = await t.oneOrNone(
-      `insert into entities (wipe_id, entity_id, entity_type)
-       values ($[wipeId], $[entityId], $[entityType])
-       on conflict do nothing
-       returning *
+}: EntityPairingNotificationData['body']): Promise<Entity> {
+  return db.task(async (tx) => {
+    const wipeId = await getCurrentWipeIdForServer({ host: ip, port }, tx)
+    const created = await validateP(
+      t.union([Entity, t.null]),
+      tx.oneOrNone(
+        `insert into entities (wipe_id, entity_id, entity_type)
+         values ($[wipeId], $[entityId], $[entityType])
+         on conflict do nothing
+         returning *
        `,
-      { wipeId, entityId, entityType }
+        { wipeId, entityId, entityType }
+      )
     )
 
     if (created) {
       log.info(created, 'Entity created')
+      return created
+    } else {
+      return getEntityWithWipeAndEntityId(wipeId, entityId, tx)
     }
   })
+}
+
+export async function getEntityWithWipeAndEntityId(
+  wipeId: number,
+  entityId: number,
+  tx: Db = db
+): Promise<Entity> {
+  return validateP(
+    Entity,
+    tx.one(
+      `select *
+         from entities
+        where wipe_id = $[wipeId]
+          and entity_id = $[entityId]`,
+      { wipeId, entityId }
+    )
+  )
+}
+
+export async function setDiscordMessageId(
+  entity: Entity,
+  messageId: string
+): Promise<void> {
+  await db.none(
+    `update entities
+        set discord_pairing_message_id = $[messageId]
+      where wipe_id = $[wipeId] and entity_id = $[entityId]`,
+    { ...entity, messageId }
+  )
+}
+
+export async function updateEntityHandle(
+  messageId: string,
+  messageText: string
+): Promise<void> {
+  await db.none(
+    `update entities
+        set handle = $[handle]
+      where discord_pairing_message_id = $[messageId]`,
+    { handle: messageText, messageId }
+  )
 }
