@@ -52,6 +52,12 @@ create table entities (
   unique(wipe_id, entity_type, handle)
 );
 
+create table upkeep_discord_messages (
+  wipe_id             integer references wipes (wipe_id) on delete cascade not null,
+  discord_message_id  text
+  -- last_updated_at     timestamptz
+);
+
 create table rustplus_config (
   fcm_credentials            json,
   current_server_id          integer references servers (server_id),

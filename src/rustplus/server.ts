@@ -29,23 +29,28 @@ export function upsertServer(
   })
 }
 
-export function createWipeIfNotExist(serverInfo: ServerInfo): Promise<void> {
+export function createWipeIfNotExist(serverInfo: ServerInfo): Promise<number> {
   return db.task(async (t) => {
     const serverId = await getServerId(serverInfo)
-    const wipeExists = await t.oneOrNone<{ column: 1 }>(
-      `select 1
+    const existing = await t.oneOrNone<{ wipeId: number }>(
+      `select wipe_id
          from wipes
         where server_id = $[serverId]
           and wiped_at = $[wipeTime]`,
       { serverId, ...serverInfo }
     )
 
-    if (!wipeExists) {
-      await t.none(
-        `insert into wipes (wiped_at, server_id, map_size, seed)
-         values ($[wipeTime], $[serverId], $[mapSize], $[seed])`,
-        { serverId, ...serverInfo }
-      )
+    if (!existing) {
+      return (
+        await t.one<{ wipeId: number }>(
+          `insert into wipes (wiped_at, server_id, map_size, seed)
+           values ($[wipeTime], $[serverId], $[mapSize], $[seed])
+           returning wipe_id`,
+          { serverId, ...serverInfo }
+        )
+      ).wipeId
+    } else {
+      return existing.wipeId
     }
   })
 }

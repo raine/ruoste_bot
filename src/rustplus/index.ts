@@ -11,6 +11,7 @@ import {
 import { fcmListen } from './fcm'
 import { saveMapIfNotExist } from './map'
 import { trackMapEvents } from './map-events'
+import { trackUpkeep } from './upkeep'
 import * as socket from './rustplus-socket'
 import {
   createWipeIfNotExist,
@@ -71,9 +72,11 @@ export async function init(discord: DiscordAPI): Promise<void> {
 
   events.on('connected', async (serverInfo) => {
     log.info(serverInfo, 'Connected to rust server')
-    await createWipeIfNotExist(serverInfo)
-    await saveMapIfNotExist(serverInfo)
+    const wipeId = await createWipeIfNotExist(serverInfo)
+    await saveMapIfNotExist(serverInfo, wipeId)
     void trackMapEvents(serverInfo, events)
+    void trackUpkeep(serverInfo, wipeId)
+    console.log(await socket.getTeamInfo())
   })
 
   await initEmptyConfig()

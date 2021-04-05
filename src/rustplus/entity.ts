@@ -5,10 +5,16 @@ import { validateP } from '../validate'
 import { getCurrentWipeIdForServer } from './server'
 import { EntityPairingNotificationData } from './types'
 
+export enum EntityType {
+  Switch = 1,
+  Alarm = 2,
+  StorageMonitor = 3
+}
+
 export const Entity = t.type({
   wipeId: t.number,
   entityId: t.number,
-  entityType: t.number,
+  entityType: t.union([t.literal(1), t.literal(2), t.literal(3)]),
   handle: t.union([t.string, t.null])
 })
 
@@ -81,5 +87,21 @@ export async function updateEntityHandle(
         set handle = $[handle]
       where discord_pairing_message_id = $[messageId]`,
     { handle: messageText, messageId }
+  )
+}
+
+export async function getEntities(
+  wipeId: number,
+  entityType: EntityType
+): Promise<Entity[]> {
+  return validateP(
+    t.array(Entity),
+    db.any(
+      `select *
+         from entities
+        where wipe_id = $[wipeId]
+          and entity_type = $[entityType]`,
+      { wipeId, entityType }
+    )
   )
 }

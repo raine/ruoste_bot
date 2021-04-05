@@ -4,12 +4,13 @@ import db from '../db'
 import log from '../logger'
 import _ from 'lodash'
 import { validateP } from '../validate'
-import { getWipeId } from './server'
 import * as t from 'io-ts'
 
-export async function saveMapIfNotExist(serverInfo: ServerInfo): Promise<void> {
+export async function saveMapIfNotExist(
+  serverInfo: ServerInfo,
+  wipeId: number
+): Promise<void> {
   return db.tx(async (t) => {
-    const wipeId = await getWipeId(serverInfo, t)
     const existing = await t.oneOrNone<{ column: 1 }>(
       `select 1 from maps where wipe_id = $[wipeId]`,
       { wipeId }
