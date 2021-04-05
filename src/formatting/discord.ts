@@ -262,7 +262,7 @@ export const formatSmartAlarmAlert = (
   teamInfo: AppTeamInfo,
   baseLocation?: XY
 ): string => {
-  const title = Discord.Util.escapeMarkdown(alert.title)
+  const title = Discord.Util.escapeMarkdown(alert.title.replace(/^!/, ''))
   const message = Discord.Util.escapeMarkdown(alert.message)
   const groupTotalCount = teamInfo.members.length
   const groupOnlineCount = teamInfo.members.filter((m) => m.isOnline).length

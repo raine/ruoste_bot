@@ -158,4 +158,10 @@ describe('formatSmartAlarmAlert()', () => {
       '🚨 **Alarm** — Your base is under attack! (0/1 of group online, 0 at base)'
     )
   })
+
+  test('removes ! from start of title', () => {
+    expect(
+      formatSmartAlarmAlert({ ...alert, title: '!Alarm' }, soloTeamInfo)
+    ).toBe('🚨 **Alarm** — Your base is under attack! (1/1 of group online)')
+  })
 })

@@ -3,7 +3,6 @@ import _ from 'lodash'
 import { TypedEmitter } from 'tiny-typed-emitter'
 import db from '../db'
 import { DiscordAPI, isMessageReply } from '../discord'
-import { formatSmartAlarmAlert } from '../formatting/discord'
 import log from '../logger'
 import { configure, getConfig, initEmptyConfig } from './config'
 import {
@@ -18,7 +17,6 @@ import * as socket from './rustplus-socket'
 import {
   createWipeIfNotExist,
   getCurrentServer,
-  getCurrentWipeForServer,
   getServerId,
   getWipeById,
   updateWipeBaseLocation,
@@ -58,6 +56,10 @@ export async function init(discord: DiscordAPI): Promise<void> {
 
   events.on('alarm', async (alert) => {
     log.info(alert, 'Got an alert')
+    // There's no way to connect an alert from FCM notification to a specific
+    // smart alarm entity, so to make alert send a message to discord, the
+    // title should contain ! at start of title
+    if (!alert.title.startsWith('!')) return
     if (!state.wipeId) return
     const [config, teamInfo, wipe] = await Promise.all([
       getConfig(),
