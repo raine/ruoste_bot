@@ -2,6 +2,7 @@ import * as t from 'io-ts'
 import { ServerHostPort, ServerInfo } from './types'
 import db, { Db } from '../db'
 import { validateP } from '../validate'
+import { XY } from '../math'
 
 export const Server = t.type({
   host: t.string,
@@ -11,6 +12,18 @@ export const Server = t.type({
 })
 
 export type Server = t.TypeOf<typeof Server>
+
+export const Wipe = t.type({
+  wipeId: t.number,
+  wipedAt: t.string,
+  serverId: t.number,
+  mapSize: t.number,
+  seed: t.number,
+  createdAt: t.string,
+  baseLocation: t.union([XY, t.null])
+})
+
+export type Wipe = t.TypeOf<typeof Wipe>
 
 export function upsertServer(
   server: ServerHostPort & {
@@ -29,29 +42,32 @@ export function upsertServer(
   })
 }
 
-export function createWipeIfNotExist(serverInfo: ServerInfo): Promise<number> {
-  return db.task(async (t) => {
+export function createWipeIfNotExist(serverInfo: ServerInfo): Promise<Wipe> {
+  return db.task(async (tx) => {
     const serverId = await getServerId(serverInfo)
-    const existing = await t.oneOrNone<{ wipeId: number }>(
-      `select wipe_id
-         from wipes
-        where server_id = $[serverId]
-          and wiped_at = $[wipeTime]`,
-      { serverId, ...serverInfo }
+    const existing = await validateP(
+      t.union([Wipe, t.null]),
+      tx.oneOrNone(
+        `select *
+           from wipes
+          where server_id = $[serverId]
+            and wiped_at = $[wipeTime]`,
+        { serverId, ...serverInfo }
+      )
     )
 
-    if (!existing) {
-      return (
-        await t.one<{ wipeId: number }>(
+    return (
+      existing ??
+      validateP(
+        Wipe,
+        tx.one(
           `insert into wipes (wiped_at, server_id, map_size, seed)
            values ($[wipeTime], $[serverId], $[mapSize], $[seed])
-           returning wipe_id`,
+           returning *`,
           { serverId, ...serverInfo }
         )
-      ).wipeId
-    } else {
-      return existing.wipeId
-    }
+      )
+    )
   })
 }
 
@@ -116,5 +132,17 @@ export async function getCurrentServer(tx: Db = db): Promise<Server | null> {
             from rustplus_config
           )`
     )
+  )
+}
+
+export async function updateWipeBaseLocation(
+  wipeId: number,
+  coords: XY
+): Promise<void> {
+  await db.none(
+    `update wipes
+        set base_location = $[coords]
+      where wipe_id = $[wipeId]`,
+    { wipeId, coords }
   )
 }

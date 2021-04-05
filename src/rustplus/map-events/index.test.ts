@@ -147,8 +147,8 @@ describe('checkMapEvents()', () => {
       playerToken: 1234,
       playerSteamId: 'foobar'
     })
-    await createWipeIfNotExist(serverInfo)
-    await saveMapIfNotExist(serverInfo)
+    const wipe = await createWipeIfNotExist(serverInfo)
+    await saveMapIfNotExist(serverInfo, wipe.wipeId)
   }
 
   beforeEach(async () => {

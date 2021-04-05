@@ -1,3 +1,5 @@
+import Discord from 'discord.js'
+import _ from 'lodash'
 import { TypedEmitter } from 'tiny-typed-emitter'
 import db from '../db'
 import { DiscordAPI, isMessageReply } from '../discord'
@@ -11,23 +13,32 @@ import {
 import { fcmListen } from './fcm'
 import { saveMapIfNotExist } from './map'
 import { trackMapEvents } from './map-events'
-import { trackUpkeep } from './upkeep'
 import * as socket from './rustplus-socket'
 import {
   createWipeIfNotExist,
   getCurrentServer,
   getServerId,
-  upsertServer
+  updateWipeBaseLocation,
+  upsertServer,
+  Wipe
 } from './server'
 import {
   isServerPairingNotification,
   RustPlusEvents,
-  ServerHostPort
+  ServerHostPort,
+  ServerInfo
 } from './types'
 
 export * from './config'
 export * from './rustplus-socket'
 export * from './types'
+
+type State = {
+  serverInfo?: ServerInfo
+  wipe?: Wipe
+}
+
+const state: State = {}
 
 export const events = new TypedEmitter<RustPlusEvents>()
 
@@ -72,11 +83,10 @@ export async function init(discord: DiscordAPI): Promise<void> {
 
   events.on('connected', async (serverInfo) => {
     log.info(serverInfo, 'Connected to rust server')
-    const wipeId = await createWipeIfNotExist(serverInfo)
-    await saveMapIfNotExist(serverInfo, wipeId)
+    state.wipe = await createWipeIfNotExist(serverInfo)
+    state.serverInfo = serverInfo
+    await saveMapIfNotExist(serverInfo, state.wipe.wipeId)
     void trackMapEvents(serverInfo, events)
-    void trackUpkeep(serverInfo, wipeId)
-    console.log(await socket.getTeamInfo())
   })
 
   await initEmptyConfig()
@@ -102,4 +112,23 @@ export async function connectToServer(server: ServerHostPort) {
     const currentServer = await getCurrentServer(t)
     if (currentServer) void socket.listen(currentServer)
   })
+}
+
+export async function setBaseLocation(
+  reply: typeof Discord.Message.prototype.reply
+) {
+  const wipeId = state.wipe?.wipeId
+  const server = await getCurrentServer()
+  if (wipeId && server) {
+    const teamInfo = await socket.getTeamInfo()
+    const botOwnerMember = teamInfo.members.find(
+      (m) => m.steamId === server.playerSteamId
+    )!
+    await updateWipeBaseLocation(wipeId, _.pick(botOwnerMember, ['x', 'y']))
+    await reply(
+      `Base location updated to current location of ${botOwnerMember.name}`
+    )
+  } else {
+    await reply('Not connected to a server')
+  }
 }

@@ -203,7 +203,7 @@ export const AppTime = t.type({
 export type AppTime = t.TypeOf<typeof AppTime>
 
 export const Member = t.type({
-  steamId: t.unknown,
+  steamId: t.string,
   name: t.string,
   x: t.number,
   y: t.number,

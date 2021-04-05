@@ -19,6 +19,7 @@ create table wipes (
   map_size      integer not null,
   seed          integer not null,
   created_at    timestamptz default now(),
+  base_location jsonb,
   unique (server_id, wiped_at)
 );
 
