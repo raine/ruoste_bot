@@ -16,6 +16,8 @@ import {
 } from '../date'
 import * as rustplus from '../rustplus'
 import { monumentNameFromToken } from '../rustplus/map'
+import { AppTeamInfo, Member } from '../rustplus'
+import { distance, XY } from '../math'
 
 const RUST_COLOR = 0xce422a
 const DESCRIPTION_MAX_LENGTH = 2048
@@ -253,12 +255,36 @@ export const formatEntityPairing = (
   }
 }
 
+const BASE_DISTANCE_THRESHOLD = 50
+
 export const formatSmartAlarmAlert = (
-  alert: rustplus.SmartAlarmNotificationData
+  alert: rustplus.SmartAlarmNotificationData,
+  teamInfo: AppTeamInfo,
+  baseLocation?: XY
 ): string => {
   const title = Discord.Util.escapeMarkdown(alert.title)
   const message = Discord.Util.escapeMarkdown(alert.message)
-  return `🚨 **${title}** — ${message}`
+  const groupTotalCount = teamInfo.members.length
+  const groupOnlineCount = teamInfo.members.filter((m) => m.isOnline).length
+  const howManyAtBaseCount = baseLocation
+    ? (() => {
+        const isMemberAtBase = (member: Member) =>
+          distance(member, baseLocation) < BASE_DISTANCE_THRESHOLD &&
+          member.isOnline
+
+        return teamInfo.members.reduce(
+          (sum, m) => sum + Number(isMemberAtBase(m)),
+          0
+        )
+      })()
+    : undefined
+  const extra = [
+    `${groupOnlineCount}/${groupTotalCount} of group online`,
+    ...(howManyAtBaseCount !== undefined
+      ? [`${howManyAtBaseCount} at base`]
+      : [])
+  ].join(', ')
+  return `🚨 **${title}** — ${message} (${extra})`
 }
 
 export const formatMapEvent = (event: rustplus.MapEvent) => {

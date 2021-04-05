@@ -88,22 +88,32 @@ export async function getWipeId(
   return wipeId
 }
 
-export async function getCurrentWipeIdForServer(
+export async function getWipeById(wipeId: number, tx: Db = db): Promise<Wipe> {
+  return validateP(
+    Wipe,
+    tx.one(`select * from wipes where wipe_id = $[wipeId]`, { wipeId })
+  )
+}
+
+export async function getCurrentWipeForServer(
   server: Pick<ServerInfo, 'host' | 'port'>,
   tx: Db = db
 ) {
-  const { wipeId } = await tx.one<{ wipeId: number }>(
-    `select wipe_id
-       from servers
-       join wipes using (server_id)
-      where host = $[host]
-        and port = $[port]
-      order by wipe_id desc
-      limit 1`,
-    server
+  const wipe = await validateP(
+    Wipe,
+    tx.one(
+      `select *
+         from servers
+         join wipes using (server_id)
+        where host = $[host]
+          and port = $[port]
+        order by wipe_id desc
+        limit 1`,
+      server
+    )
   )
 
-  return wipeId
+  return wipe
 }
 
 export async function getServerId(

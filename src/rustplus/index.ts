@@ -3,6 +3,7 @@ import _ from 'lodash'
 import { TypedEmitter } from 'tiny-typed-emitter'
 import db from '../db'
 import { DiscordAPI, isMessageReply } from '../discord'
+import { formatSmartAlarmAlert } from '../formatting/discord'
 import log from '../logger'
 import { configure, getConfig, initEmptyConfig } from './config'
 import {
@@ -17,10 +18,11 @@ import * as socket from './rustplus-socket'
 import {
   createWipeIfNotExist,
   getCurrentServer,
+  getCurrentWipeForServer,
   getServerId,
+  getWipeById,
   updateWipeBaseLocation,
-  upsertServer,
-  Wipe
+  upsertServer
 } from './server'
 import {
   isServerPairingNotification,
@@ -35,11 +37,10 @@ export * from './types'
 
 type State = {
   serverInfo?: ServerInfo
-  wipe?: Wipe
+  wipeId?: number
 }
 
-const state: State = {}
-
+export const state: State = {}
 export const events = new TypedEmitter<RustPlusEvents>()
 
 export async function init(discord: DiscordAPI): Promise<void> {
@@ -55,8 +56,22 @@ export async function init(discord: DiscordAPI): Promise<void> {
     }
   })
 
-  events.on('alarm', (alert) => {
+  events.on('alarm', async (alert) => {
     log.info(alert, 'Got an alert')
+    if (!state.wipeId) return
+    const [config, teamInfo, wipe] = await Promise.all([
+      getConfig(),
+      socket.getTeamInfo(),
+      getWipeById(state.wipeId)
+    ])
+    const { discordAlertsChannelId } = config
+    if (!discordAlertsChannelId) return
+    await discord.sendAlarmMessage(
+      discordAlertsChannelId,
+      alert,
+      teamInfo,
+      wipe.baseLocation ?? undefined
+    )
   })
 
   events.on('pairing', async (pairing) => {
@@ -83,9 +98,10 @@ export async function init(discord: DiscordAPI): Promise<void> {
 
   events.on('connected', async (serverInfo) => {
     log.info(serverInfo, 'Connected to rust server')
-    state.wipe = await createWipeIfNotExist(serverInfo)
+    const wipe = await createWipeIfNotExist(serverInfo)
+    state.wipeId = wipe.wipeId
     state.serverInfo = serverInfo
-    await saveMapIfNotExist(serverInfo, state.wipe.wipeId)
+    await saveMapIfNotExist(serverInfo, state.wipeId)
     void trackMapEvents(serverInfo, events)
   })
 
@@ -117,14 +133,16 @@ export async function connectToServer(server: ServerHostPort) {
 export async function setBaseLocation(
   reply: typeof Discord.Message.prototype.reply
 ) {
-  const wipeId = state.wipe?.wipeId
   const server = await getCurrentServer()
-  if (wipeId && server) {
+  if (state.wipeId && server) {
     const teamInfo = await socket.getTeamInfo()
     const botOwnerMember = teamInfo.members.find(
       (m) => m.steamId === server.playerSteamId
     )!
-    await updateWipeBaseLocation(wipeId, _.pick(botOwnerMember, ['x', 'y']))
+    await updateWipeBaseLocation(
+      state.wipeId,
+      _.pick(botOwnerMember, ['x', 'y'])
+    )
     await reply(
       `Base location updated to current location of ${botOwnerMember.name}`
     )

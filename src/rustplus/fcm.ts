@@ -1,11 +1,10 @@
 import * as Sentry from '@sentry/node'
 import pushReceiver from 'push-receiver'
-import { events } from '.'
+import { events, state } from '.'
 import db from '../db'
 import log from '../logger'
 import { validate } from '../validate'
 import fakePushReceiver from './fake-push-receiver'
-import { getCurrentServer } from './server'
 import { FcmNotification } from './types'
 
 let fcmSocket: any
@@ -18,11 +17,11 @@ async function onFcmNotification(raw: any) {
 
   try {
     const data = validate(FcmNotification, raw)
-    const currentServer = await getCurrentServer()
+    const currentServerInfo = state.serverInfo
     await addPersistentId(data.persistentId)
     const { ip, port } = data.notification.data.body
     const isNotificationFromCurrentServer =
-      ip === currentServer?.host && port === currentServer?.port
+      ip === currentServerInfo?.host && port === currentServerInfo?.port
     const isServerPairingNotification =
       data.notification.data.channelId === 'pairing' &&
       data.notification.data.body.type === 'server'

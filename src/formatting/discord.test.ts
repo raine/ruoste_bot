@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon'
-import { formatMapEvent } from './discord'
+import { formatMapEvent, formatSmartAlarmAlert } from './discord'
 
 describe('formatMapEvent()', () => {
   test('cargo ship entered', () => {
@@ -87,5 +87,75 @@ describe('formatMapEvent()', () => {
         })
       ).toBe('📦 Locked Crate gone')
     })
+  })
+})
+
+describe('formatSmartAlarmAlert()', () => {
+  const BASE_ALERT = {
+    channelId: 'alarm' as const,
+    body: {
+      img:
+        'https:\\/\\/files.facepunch.com\\/Alistair\\/02\\/05\\/0T35W1\\/server-header.png',
+      port: 28083,
+      ip: '51.77.57.19',
+      name: '[RU] Facepunch 4',
+      logo:
+        'https:\\/\\/files.facepunch.com\\/Alistair\\/02\\/05\\/1Z61F1\\/04_07-48-MagnificentLadybug.png',
+      id: 'cdfeccce-7c2f-4d02-8a99-b94a183f3ada',
+      url: 'http:\\/\\/www.playrust.com\\/',
+      desc:
+        "This is an official server owned and operated by Facepunch. \\\\n \\\\n People are free to speak whatever language they like. Don't be surprised if you get banned for being abusive."
+    }
+  }
+
+  const alert = {
+    ...BASE_ALERT,
+    title: 'Alarm',
+    message: 'Your base is under attack!'
+  }
+
+  const soloTeamInfo = {
+    leaderSteamId: '0',
+    members: [
+      {
+        steamId: '123',
+        name: 'player',
+        x: 2181.736083984375,
+        y: 454.231689453125,
+        isOnline: true,
+        spawnTime: 1617450791,
+        isAlive: true,
+        deathTime: 1616110390
+      }
+    ]
+  }
+
+  test('shows how many are online', () => {
+    expect(formatSmartAlarmAlert(alert, soloTeamInfo)).toBe(
+      '🚨 **Alarm** — Your base is under attack! (1/1 of group online)'
+    )
+  })
+
+  test('shows how many are at base', () => {
+    expect(
+      formatSmartAlarmAlert(alert, soloTeamInfo, { x: 2181, y: 454 })
+    ).toBe(
+      '🚨 **Alarm** — Your base is under attack! (1/1 of group online, 1 at base)'
+    )
+
+    expect(formatSmartAlarmAlert(alert, soloTeamInfo, { x: 2181, y: 1 })).toBe(
+      '🚨 **Alarm** — Your base is under attack! (1/1 of group online, 0 at base)'
+    )
+  })
+
+  test('offline players dont count as being at base', () => {
+    const teamInfo = {
+      leaderSteamId: '0',
+      members: [{ ...soloTeamInfo.members[0], isOnline: false }]
+    }
+
+    expect(formatSmartAlarmAlert(alert, teamInfo, { x: 2181, y: 454 })).toBe(
+      '🚨 **Alarm** — Your base is under attack! (0/1 of group online, 0 at base)'
+    )
   })
 })

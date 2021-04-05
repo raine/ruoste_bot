@@ -26,8 +26,10 @@ import {
   SERVER_SEARCH_PARAMS
 } from './just-wiped'
 import log from './logger'
+import { XY } from './math'
 import * as rustplus from './rustplus'
 import {
+  AppTeamInfo,
   EntityPairingNotificationData,
   ServerPairingNotificationData
 } from './rustplus'
@@ -241,10 +243,27 @@ const sendEntityPairingMessage = (
   return user.send(formatEntityPairing(pairing))
 }
 
+const sendAlarmMessage = (
+  client: Discord.Client,
+  isReadyP: Promise<void>
+) => async (
+  channelId: string,
+  alert: rustplus.SmartAlarmNotificationData,
+  teamInfo: AppTeamInfo,
+  baseLocation?: XY
+): Promise<void> => {
+  await isReadyP
+  const channel = client.channels.cache.get(channelId)
+  if (channel?.isText()) {
+    await channel.send(formatSmartAlarmAlert(alert, teamInfo, baseLocation))
+  }
+}
+
 export type DiscordAPI = {
   client: Discord.Client
   sendServerPairingMessage: ReturnType<typeof sendServerPairingMessage>
   sendEntityPairingMessage: ReturnType<typeof sendEntityPairingMessage>
+  sendAlarmMessage: ReturnType<typeof sendAlarmMessage>
 }
 
 export const isMessageReply = (msg: Discord.Message): boolean =>
@@ -255,14 +274,6 @@ export default function start(): DiscordAPI {
   const token = process.env.DISCORD_BOT_TOKEN!
   if (!token) {
     throw new Error('Discord bot token not set, aborting...')
-  }
-
-  async function onSmartAlarmAlert(alert: rustplus.SmartAlarmNotificationData) {
-    const { discordAlertsChannelId } = await rustplus.getConfig()
-    if (!discordAlertsChannelId) return
-
-    const channel = client.channels.cache.get(discordAlertsChannelId)
-    if (channel?.isText()) return channel.send(formatSmartAlarmAlert(alert))
   }
 
   async function onMapEvent(mapEvent: rustplus.MapEvent) {
@@ -288,9 +299,6 @@ export default function start(): DiscordAPI {
     client.on('ready', async () => {
       resolve()
       log.info(`Logged in as ${client.user?.tag}!`)
-
-      rustplus.events.removeListener('alarm', onSmartAlarmAlert)
-      rustplus.events.on('alarm', onSmartAlarmAlert)
 
       rustplus.events.removeListener('mapEvent', onMapEvent)
       rustplus.events.on('mapEvent', onMapEvent)
@@ -334,6 +342,7 @@ export default function start(): DiscordAPI {
   return {
     client,
     sendServerPairingMessage: sendServerPairingMessage(client, isReadyP),
-    sendEntityPairingMessage: sendEntityPairingMessage(client, isReadyP)
+    sendEntityPairingMessage: sendEntityPairingMessage(client, isReadyP),
+    sendAlarmMessage: sendAlarmMessage(client, isReadyP)
   }
 }

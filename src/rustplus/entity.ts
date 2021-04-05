@@ -2,7 +2,7 @@ import * as t from 'io-ts'
 import db, { Db } from '../db'
 import log from '../logger'
 import { validateP } from '../validate'
-import { getCurrentWipeIdForServer } from './server'
+import { getCurrentWipeForServer } from './server'
 import { EntityPairingNotificationData } from './types'
 
 export enum EntityType {
@@ -27,7 +27,7 @@ export async function createEntityFromPairing({
   entityType
 }: EntityPairingNotificationData['body']): Promise<Entity> {
   return db.task(async (tx) => {
-    const wipeId = await getCurrentWipeIdForServer({ host: ip, port }, tx)
+    const { wipeId } = await getCurrentWipeForServer({ host: ip, port }, tx)
     const created = await validateP(
       t.union([Entity, t.null]),
       tx.oneOrNone(
