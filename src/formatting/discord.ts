@@ -284,7 +284,7 @@ export const formatSmartAlarmAlert = (
       ? [`${howManyAtBaseCount} at base`]
       : [])
   ].join(', ')
-  return `🚨 **${title}** — ${message} (${extra})`
+  return `🚨 ${bold(title)} — ${message} (${extra})`
 }
 
 export const formatMapEvent = (event: rustplus.MapEvent) => {
