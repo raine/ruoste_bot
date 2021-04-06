@@ -46,8 +46,13 @@ export async function init(discord: DiscordAPI): Promise<void> {
   discord.client.on('message', async (msg) => {
     try {
       if (isMessageReply(msg)) {
-        await updateEntityHandle(msg.reference!.messageID!, msg.content)
-        await msg.react('✅')
+        const updated = await updateEntityHandle(
+          msg.reference!.messageID!,
+          msg.content
+        )
+        if (updated) {
+          await msg.react('✅')
+        }
       }
     } catch (err) {
       log.error(err)

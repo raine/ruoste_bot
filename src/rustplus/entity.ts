@@ -81,13 +81,15 @@ export async function setDiscordMessageId(
 export async function updateEntityHandle(
   messageId: string,
   messageText: string
-): Promise<void> {
-  await db.none(
+): Promise<boolean> {
+  const { rowCount } = await db.result(
     `update entities
         set handle = $[handle]
       where discord_pairing_message_id = $[messageId]`,
     { handle: messageText, messageId }
   )
+
+  return rowCount > 0
 }
 
 export async function getEntities(
