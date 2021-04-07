@@ -1,23 +1,29 @@
 import * as Discord from 'discord.js'
+import _ from 'lodash'
 import { DateTime, Interval } from 'luxon'
 import * as R from 'ramda'
+import {
+  formatDurationShort,
+  formatRelativeDate,
+  formatShortDateWithWeekday,
+  formatTime
+} from '../date'
 import { FullServer, ListServer } from '../just-wiped'
+import { distance, XY } from '../math'
+import * as rustplus from '../rustplus'
+import { AppTeamInfo, Member, ServerInfo } from '../rustplus'
+import { EntityWithInfo } from '../rustplus/entity'
+import { monumentNameFromToken } from '../rustplus/map'
+import {
+  isStorageMonitorDecaying,
+  isStorageMonitorUnpowered
+} from '../rustplus/upkeep'
 import {
   filterServerNoise,
   formatMaxGroup,
   formatPlayerCount,
   lastUpdatedAt
 } from './general'
-import {
-  formatShortDateWithWeekday,
-  formatTime,
-  formatTimeAgo,
-  formatRelativeDate
-} from '../date'
-import * as rustplus from '../rustplus'
-import { monumentNameFromToken } from '../rustplus/map'
-import { AppTeamInfo, Member } from '../rustplus'
-import { distance, XY } from '../math'
 
 const RUST_COLOR = 0xce422a
 const DESCRIPTION_MAX_LENGTH = 2048
@@ -295,7 +301,9 @@ export const formatMapEvent = (event: rustplus.MapEvent) => {
             const previousSpawnDateTime = DateTime.fromISO(
               event.data.previousSpawn
             )
-            const previousSpawnTimeAgo = formatTimeAgo(previousSpawnDateTime)
+            const previousSpawnTimeAgo = formatDurationShort(
+              +DateTime.local() - +previousSpawnDateTime
+            )
             return `previous spawn was ${previousSpawnTimeAgo} ago`
           })()
         : ''
@@ -342,4 +350,33 @@ export function formatBotActivityText(
     : ''
   const serverPlayersText = `${players}/${serverInfo.maxPlayers} players ${queueText}`.trim()
   return `${teamOnlineText} (${serverPlayersText})`
+}
+
+export function formatEntitiesUpkeep(
+  serverInfo: ServerInfo,
+  entities: EntityWithInfo[]
+): Discord.MessageEmbedOptions {
+  return {
+    title: 'Upkeep',
+    description: serverInfo.name,
+    color: RUST_COLOR,
+    fields: _.orderBy(entities, ['entityId', 'asc']).map((entity) => {
+      const { protectionExpiry } = entity.entityInfo.payload
+
+      return {
+        name: entity.handle ?? entity.entityId,
+        value: isStorageMonitorUnpowered(entity.entityInfo)
+          ? 'Not powered'
+          : isStorageMonitorDecaying(entity.entityInfo)
+          ? 'Decaying'
+          : protectionExpiry > 0
+          ? formatDurationShort(protectionExpiry * 1000 - Date.now())
+          : 'Decaying',
+        inline: true
+      }
+    }),
+    footer: {
+      text: `Last updated at ${DateTime.local().setLocale('de').toFormat('F')}`
+    }
+  }
 }

@@ -25,7 +25,8 @@ export async function configure(
       { name: 'fcm_credentials', cast: 'json' },
       { name: 'current_server_id' },
       { name: 'discord_alerts_channel_id' },
-      { name: 'discord_events_channel_id' }
+      { name: 'discord_events_channel_id' },
+      { name: 'discord_general_channel_id' }
     ].filter((key) => key.name in cfgSnakeCase),
     { table: 'rustplus_config' }
   )

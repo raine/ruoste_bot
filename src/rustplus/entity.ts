@@ -3,7 +3,7 @@ import db, { Db } from '../db'
 import log from '../logger'
 import { validateP } from '../validate'
 import { getCurrentWipeForServer } from './server'
-import { EntityPairingNotificationData } from './types'
+import { AppEntityInfo, EntityPairingNotificationData } from './types'
 
 export enum EntityType {
   Switch = 1,
@@ -19,6 +19,7 @@ export const Entity = t.type({
 })
 
 export type Entity = t.TypeOf<typeof Entity>
+export type EntityWithInfo = Entity & { entityInfo: AppEntityInfo }
 
 export async function createEntityFromPairing({
   ip,

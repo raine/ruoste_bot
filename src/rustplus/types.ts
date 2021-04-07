@@ -114,6 +114,7 @@ export const RustPlusConfig = t.strict({
   fcmCredentials: t.union([t.unknown, t.null]),
   discordAlertsChannelId: t.union([t.string, t.null]),
   discordEventsChannelId: t.union([t.string, t.null]),
+  discordGeneralChannelId: t.union([t.string, t.null]),
   currentServerId: t.union([t.number, t.null])
 })
 
@@ -304,12 +305,23 @@ export const AppMap = t.type({
 
 export type AppMap = t.TypeOf<typeof AppMap>
 
-export const AppEntityPayload = t.type({
-  value: t.boolean,
-  capacity: t.number,
-  hasProtection: t.boolean,
-  protectionExpiry: t.number
+export const StorageMonitorPayloadItem = t.type({
+  itemId: t.number,
+  quantity: t.number,
+  itemIsBlueprint: t.boolean
 })
+
+export const AppEntityPayload = t.intersection([
+  t.type({
+    value: t.boolean,
+    capacity: t.number,
+    hasProtection: t.boolean,
+    protectionExpiry: t.number
+  }),
+  t.partial({
+    items: t.array(StorageMonitorPayloadItem)
+  })
+])
 
 export const AppEntityInfo = t.type({
   type: t.keyof({

@@ -28,6 +28,7 @@ import {
   ServerHostPort,
   ServerInfo
 } from './types'
+import { trackUpkeepLoop } from './upkeep'
 
 export * from './config'
 export * from './rustplus-socket'
@@ -110,6 +111,7 @@ export async function init(discord: DiscordAPI): Promise<void> {
     state.serverInfo = serverInfo
     await saveMapIfNotExist(serverInfo, state.wipeId)
     void trackMapEvents(serverInfo, events)
+    void trackUpkeepLoop(discord, serverInfo, state.wipeId)
   })
 
   await initEmptyConfig()

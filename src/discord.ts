@@ -4,6 +4,7 @@ import * as Discord from 'discord.js'
 import { DateTime, Interval } from 'luxon'
 import {
   formatBotActivityText,
+  formatEntitiesUpkeep,
   formatEntityPairing,
   formatMapEvent,
   formatServerEmbed,
@@ -31,8 +32,10 @@ import * as rustplus from './rustplus'
 import {
   AppTeamInfo,
   EntityPairingNotificationData,
+  ServerInfo,
   ServerPairingNotificationData
 } from './rustplus'
+import { EntityWithInfo } from './rustplus/entity'
 import { initUpdateLoop, ServerListReply } from './update-loop'
 
 type DiscordServerListReply = ServerListReply<Discord.Message>
@@ -121,6 +124,11 @@ const commands: (client: Discord.Client) => Commands = () => ({
           case 'events_channel': {
             await rustplus.configure({ discordEventsChannelId: value })
             await msg.reply('Events channel updated!')
+            return
+          }
+          case 'general_channel': {
+            await rustplus.configure({ discordGeneralChannelId: value })
+            await msg.reply('General channel updated!')
             return
           }
           default: {
@@ -259,11 +267,47 @@ const sendAlarmMessage = (
   }
 }
 
+async function sendOrEditMessage(
+  client: Discord.Client,
+  embed: Discord.MessageEmbedOptions,
+  channelId: string,
+  messageId?: string
+): Promise<Discord.Message | undefined> {
+  const channel = client.channels.cache.get(channelId)
+  if (channel?.isText()) {
+    if (messageId) {
+      const message = await channel.messages.fetch(messageId)
+      return message.edit({ embed })
+    } else {
+      return channel.send({ embed })
+    }
+  }
+}
+
+const sendOrEditUpkeepMessage = (
+  client: Discord.Client,
+  isReadyP: Promise<void>
+) => async (
+  serverInfo: ServerInfo,
+  entities: EntityWithInfo[],
+  channelId: string,
+  messageId?: string
+): Promise<Discord.Message | undefined> => {
+  await isReadyP
+  return await sendOrEditMessage(
+    client,
+    formatEntitiesUpkeep(serverInfo, entities),
+    channelId,
+    messageId
+  )
+}
+
 export type DiscordAPI = {
   client: Discord.Client
   sendServerPairingMessage: ReturnType<typeof sendServerPairingMessage>
   sendEntityPairingMessage: ReturnType<typeof sendEntityPairingMessage>
   sendAlarmMessage: ReturnType<typeof sendAlarmMessage>
+  sendOrEditUpkeepMessage: ReturnType<typeof sendOrEditUpkeepMessage>
 }
 
 export const isMessageReply = (msg: Discord.Message): boolean =>
@@ -343,6 +387,7 @@ export default function start(): DiscordAPI {
     client,
     sendServerPairingMessage: sendServerPairingMessage(client, isReadyP),
     sendEntityPairingMessage: sendEntityPairingMessage(client, isReadyP),
+    sendOrEditUpkeepMessage: sendOrEditUpkeepMessage(client, isReadyP),
     sendAlarmMessage: sendAlarmMessage(client, isReadyP)
   }
 }

@@ -1,5 +1,10 @@
 import { DateTime } from 'luxon'
-import { formatMapEvent, formatSmartAlarmAlert } from './discord'
+import { ServerInfo } from '../rustplus'
+import {
+  formatEntitiesUpkeep,
+  formatMapEvent,
+  formatSmartAlarmAlert
+} from './discord'
 
 describe('formatMapEvent()', () => {
   test('cargo ship entered', () => {
@@ -163,5 +168,149 @@ describe('formatSmartAlarmAlert()', () => {
     expect(
       formatSmartAlarmAlert({ ...alert, title: '!Alarm' }, soloTeamInfo)
     ).toBe('🚨 **Alarm** — Your base is under attack! (1/1 of group online)')
+  })
+})
+
+describe('formatEntitiesUpkeep()', () => {
+  const serverInfo: ServerInfo = {
+    name: 'best server eu',
+    headerImage: '',
+    url: 'https://www.google.com',
+    map: 'Procedural Map',
+    mapSize: 3650,
+    wipeTime: DateTime.fromSeconds(1616237757),
+    players: 225,
+    maxPlayers: 250,
+    queuedPlayers: 0,
+    seed: 1628075253,
+    salt: 1035734960,
+    host: '127.0.0.1',
+    port: 28083
+  }
+
+  const entityInfo = (obj: any) => ({
+    type: 'StorageMonitor' as const,
+    payload: {
+      value: false,
+      items: [
+        { itemId: -151838493, quantity: 23403, itemIsBlueprint: false },
+        { itemId: 317398316, quantity: 14878, itemIsBlueprint: false },
+        {
+          itemId: -2099697608,
+          quantity: 14507,
+          itemIsBlueprint: false
+        },
+        { itemId: 69511070, quantity: 6633, itemIsBlueprint: false }
+      ],
+      ...obj
+    }
+  })
+
+  const entity = {
+    wipeId: 1,
+    entityId: 1,
+    entityType: 3 as const,
+    handle: 'Kaappi'
+  }
+
+  test('description has server name', () => {
+    const embed = formatEntitiesUpkeep(serverInfo, [
+      {
+        ...entity,
+        entityInfo: entityInfo({
+          capacity: 24,
+          hasProtection: true,
+          protectionExpiry: DateTime.local()
+            .plus({ hours: 1, minutes: 29 })
+            .toSeconds()
+        })
+      }
+    ])
+    expect(embed).toMatchObject({
+      description: 'best server eu'
+    })
+  })
+
+  test('expiry in future', () => {
+    const embed = formatEntitiesUpkeep(serverInfo, [
+      {
+        ...entity,
+        entityInfo: entityInfo({
+          capacity: 24,
+          hasProtection: true,
+          protectionExpiry: DateTime.local()
+            .plus({ hours: 1, minutes: 29 })
+            .toSeconds()
+        })
+      }
+    ])
+    expect(embed).toMatchObject({
+      fields: [{ inline: true, name: 'Kaappi', value: '1h 29m' }]
+    })
+  })
+
+  test('decaying', () => {
+    const embed = formatEntitiesUpkeep(serverInfo, [
+      {
+        ...entity,
+        entityInfo: entityInfo({
+          capacity: 24,
+          hasProtection: true,
+          protectionExpiry: 0
+        })
+      }
+    ])
+    expect(embed).toMatchObject({
+      fields: [{ inline: true, name: 'Kaappi', value: 'Decaying' }]
+    })
+  })
+
+  test('not connected', () => {
+    const embed = formatEntitiesUpkeep(serverInfo, [
+      {
+        ...entity,
+        entityInfo: entityInfo({
+          hasProtection: false,
+          protectionExpiry: 0,
+          capacity: 0
+        })
+      }
+    ])
+    expect(embed).toMatchObject({
+      fields: [{ inline: true, name: 'Kaappi', value: 'Not powered' }]
+    })
+  })
+
+  test('ordered by entity id', () => {
+    const embed = formatEntitiesUpkeep(serverInfo, [
+      {
+        wipeId: 1,
+        entityId: 2,
+        entityType: 3,
+        handle: 'foo',
+        entityInfo: entityInfo({
+          hasProtection: false,
+          protectionExpiry: 0,
+          capacity: 0
+        })
+      },
+      {
+        wipeId: 1,
+        entityId: 1,
+        entityType: 3,
+        handle: 'bar',
+        entityInfo: entityInfo({
+          hasProtection: false,
+          protectionExpiry: 0,
+          capacity: 0
+        })
+      }
+    ])
+    expect(embed).toMatchObject({
+      fields: [
+        expect.objectContaining({ name: 'bar' }),
+        expect.objectContaining({ name: 'foo' })
+      ]
+    })
   })
 })

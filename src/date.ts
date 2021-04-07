@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
 import * as R from 'ramda'
-import prettyMs from 'pretty-ms'
+import humanizeDuration from 'humanize-duration'
 import TimeAgo from 'javascript-time-ago'
 TimeAgo.addLocale(require('javascript-time-ago/locale/en'))
 const timeAgo = new TimeAgo('en-US')
@@ -51,5 +51,29 @@ export const formatTime = (date: DateTime): string => {
 export const formatRelativeDate = (date: DateTime, style: string): string =>
   timeAgo.format(date.toMillis(), style) || '1m'
 
-export const formatTimeAgo = (date: DateTime): string =>
-  prettyMs(+DateTime.local() - +date, { unitCount: 2 })
+const shortEnglishHumanizer = humanizeDuration.humanizer({
+  language: 'shortEn',
+  languages: {
+    shortEn: {
+      y: () => 'y',
+      mo: () => 'mo',
+      w: () => 'w',
+      d: () => 'd',
+      h: () => 'h',
+      m: () => 'm',
+      s: () => 's',
+      ms: () => 'ms'
+    }
+  }
+})
+
+export const formatDurationShort = (
+  ms: number,
+  opts: humanizeDuration.Options = {
+    round: true,
+    units: ['y', 'mo', 'w', 'd', 'h', 'm'],
+    largest: 2,
+    spacer: '',
+    delimiter: ' '
+  }
+): string => shortEnglishHumanizer(ms, opts)
