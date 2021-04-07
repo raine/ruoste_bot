@@ -25,7 +25,6 @@ export async function trackUpkeep(
   wipeId: number
 ) {
   const storageMonitors = await getEntities(wipeId, EntityType.StorageMonitor)
-  if (!storageMonitors.length) return
   const storageMonitorsWithEntityInfo = await Promise.all(
     storageMonitors.map(async (entity) => ({
       ...entity,
@@ -42,7 +41,7 @@ export async function trackUpkeep(
   )
   log.info(errored, 'Failed to get entity info for entities')
   const { discordGeneralChannelId } = await getConfig()
-  if (!discordGeneralChannelId) return
+  if (!discordGeneralChannelId || !ok.length) return
   const messageId = (await getUpkeepDiscordMessageId(wipeId))?.discordMessageId
   const message = await discord.sendOrEditUpkeepMessage(
     serverInfo,
