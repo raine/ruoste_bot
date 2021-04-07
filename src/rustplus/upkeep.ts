@@ -3,9 +3,9 @@ import { AppEntityInfo, ServerInfo } from '.'
 import db from '../db'
 import { DiscordAPI } from '../discord'
 import log from '../logger'
-import { validateP } from '../validate'
+import { validate, validateP } from '../validate'
 import { getConfig } from './config'
-import { EntityType, getEntities } from './entity'
+import { EntityType, EntityWithInfo, getEntities } from './entity'
 import { getEntityInfo } from './rustplus-socket'
 
 const UPKEEP_UPDATE_INTERVAL = 300 * 1000
@@ -17,6 +17,8 @@ const UpkeepDiscordMessage = t.type({
 
 export type UpkeepDiscordMessage = t.TypeOf<typeof UpkeepDiscordMessage>
 
+const NotFoundError = t.type({ error: t.literal('not_found') })
+
 export async function trackUpkeep(
   serverInfo: ServerInfo,
   discord: DiscordAPI,
@@ -27,16 +29,24 @@ export async function trackUpkeep(
   const storageMonitorsWithEntityInfo = await Promise.all(
     storageMonitors.map(async (entity) => ({
       ...entity,
-      entityInfo: await getEntityInfo(entity.entityId)
+      entityInfo: await getEntityInfo(entity.entityId).catch((err) =>
+        validate(NotFoundError, err)
+      )
     }))
   )
-
+  const ok = storageMonitorsWithEntityInfo.filter(
+    (entity): entity is EntityWithInfo => !('error' in entity.entityInfo)
+  )
+  const errored = storageMonitorsWithEntityInfo.filter(
+    (entity) => 'error' in entity.entityInfo
+  )
+  log.info(errored, 'Failed to get entity info for entities')
   const { discordGeneralChannelId } = await getConfig()
   if (!discordGeneralChannelId) return
   const messageId = (await getUpkeepDiscordMessageId(wipeId))?.discordMessageId
   const message = await discord.sendOrEditUpkeepMessage(
     serverInfo,
-    storageMonitorsWithEntityInfo,
+    ok,
     discordGeneralChannelId,
     messageId
   )

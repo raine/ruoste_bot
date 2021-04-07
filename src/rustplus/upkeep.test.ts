@@ -102,4 +102,10 @@ describe('upkeep tracking', () => {
       'asdf'
     )
   })
+
+  test('does not fail if storage monitor cant be found', async () => {
+    mockedGetEntityInfo.mockClear()
+    mockedGetEntityInfo.mockRejectedValue({ error: 'not_found' })
+    await trackUpkeep(SERVER_INFO, discord, wipeId)
+  })
 })
