@@ -376,7 +376,10 @@ export function formatEntitiesUpkeep(
       }
     }),
     footer: {
-      text: `Last updated at ${DateTime.local().setLocale('de').toFormat('F')}`
+      text: `Last updated at ${DateTime.local()
+        .setLocale('de')
+        .setZone('Europe/Helsinki')
+        .toFormat('D T')}`
     }
   }
 }
