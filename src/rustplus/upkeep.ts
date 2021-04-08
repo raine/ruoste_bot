@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/node'
 import * as t from 'io-ts'
 import { AppEntityInfo, ServerInfo } from '.'
 import db from '../db'
@@ -71,9 +72,10 @@ export function trackUpkeepLoop(
   if (timeoutId) clearTimeout(timeoutId)
 
   return (async function loop(): Promise<void> {
-    await trackUpkeep(serverInfo, discord, wipeId).catch((err) =>
+    await trackUpkeep(serverInfo, discord, wipeId).catch((err) => {
+      Sentry.captureException(err)
       log.error(err)
-    )
+    })
     timeoutId = global.setTimeout(loop, UPKEEP_UPDATE_INTERVAL)
   })()
 }
