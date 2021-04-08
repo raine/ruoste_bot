@@ -64,5 +64,5 @@ create table rustplus_config (
   current_server_id          integer references servers (server_id),
   discord_alerts_channel_id  text,
   discord_events_channel_id  text,
-  discord_general_channel_id text
+  discord_upkeep_channel_id  text
 );

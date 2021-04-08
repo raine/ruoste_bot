@@ -126,9 +126,9 @@ const commands: (client: Discord.Client) => Commands = () => ({
             await msg.reply('Events channel updated!')
             return
           }
-          case 'general_channel': {
-            await rustplus.configure({ discordGeneralChannelId: value })
-            await msg.reply('General channel updated!')
+          case 'upkeep_channel': {
+            await rustplus.configure({ discordUpkeepChannelId: value })
+            await msg.reply('Upkeep channel updated!')
             return
           }
           default: {

@@ -62,7 +62,7 @@ describe('upkeep tracking', () => {
     await resetDb()
     await upsertServer(SERVER)
     await initEmptyConfig()
-    await configure({ discordGeneralChannelId: '123' })
+    await configure({ discordUpkeepChannelId: '123' })
     wipeId = (await createWipeIfNotExist(SERVER_INFO)).wipeId
     mockedGetEntityInfo.mockResolvedValue(STORAGE_MONITOR_ENTITY_INFO)
     await db.none(

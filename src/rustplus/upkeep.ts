@@ -40,13 +40,13 @@ export async function trackUpkeep(
     (entity) => 'error' in entity.entityInfo
   )
   log.info(errored, 'Failed to get entity info for entities')
-  const { discordGeneralChannelId } = await getConfig()
-  if (!discordGeneralChannelId || !ok.length) return
+  const { discordUpkeepChannelId } = await getConfig()
+  if (!discordUpkeepChannelId || !ok.length) return
   const messageId = (await getUpkeepDiscordMessageId(wipeId))?.discordMessageId
   const message = await discord.sendOrEditUpkeepMessage(
     serverInfo,
     ok,
-    discordGeneralChannelId,
+    discordUpkeepChannelId,
     messageId
   )
 

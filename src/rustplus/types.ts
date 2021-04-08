@@ -114,7 +114,7 @@ export const RustPlusConfig = t.strict({
   fcmCredentials: t.union([t.unknown, t.null]),
   discordAlertsChannelId: t.union([t.string, t.null]),
   discordEventsChannelId: t.union([t.string, t.null]),
-  discordGeneralChannelId: t.union([t.string, t.null]),
+  discordUpkeepChannelId: t.union([t.string, t.null]),
   currentServerId: t.union([t.number, t.null])
 })
 
