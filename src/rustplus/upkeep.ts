@@ -28,9 +28,10 @@ export async function trackUpkeep(
   const storageMonitorsWithEntityInfo = await Promise.all(
     storageMonitors.map(async (entity) => ({
       ...entity,
-      entityInfo: await getEntityInfo(entity.entityId).catch((err) =>
-        validate(NotFoundError, err)
-      )
+      entityInfo: await getEntityInfo(entity.entityId).catch((err) => {
+        log.error(err)
+        return validate(NotFoundError, err)
+      })
     }))
   )
   const ok = storageMonitorsWithEntityInfo.filter(
@@ -70,7 +71,9 @@ export function trackUpkeepLoop(
   if (timeoutId) clearTimeout(timeoutId)
 
   return (async function loop(): Promise<void> {
-    await trackUpkeep(serverInfo, discord, wipeId)
+    await trackUpkeep(serverInfo, discord, wipeId).catch((err) =>
+      log.error(err)
+    )
     timeoutId = global.setTimeout(loop, UPKEEP_UPDATE_INTERVAL)
   })()
 }
