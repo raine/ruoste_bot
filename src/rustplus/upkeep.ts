@@ -39,7 +39,8 @@ export async function trackUpkeep(
   const errored = storageMonitorsWithEntityInfo.filter(
     (entity) => 'error' in entity.entityInfo
   )
-  log.info(errored, 'Failed to get entity info for entities')
+  if (errored.length)
+    log.info(errored, 'Failed to get entity info for entities')
   const { discordUpkeepChannelId } = await getConfig()
   if (!discordUpkeepChannelId || !ok.length) return
   const messageId = (await getUpkeepDiscordMessageId(wipeId))?.discordMessageId
