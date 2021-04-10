@@ -57,8 +57,16 @@ export async function initSwitchesChannel(
   )
   await Promise.all(
     switchesWithMessageToBeDeleted.map(async (s) => {
-      await deleteDiscordMessage(channel, s.discordSwitchMessageId!)
-      await setDiscordSwitchMessageId(s, s.discordSwitchMessageId!)
+      await deleteDiscordMessage(
+        channel,
+        s.discordSwitchMessageId!
+      ).catch((err) =>
+        log.info(
+          err,
+          'Failed to delete discord message, probably does not exist'
+        )
+      )
+      await setDiscordSwitchMessageId(s, null)
     })
   )
 
@@ -159,11 +167,29 @@ async function upsertSwitchMessage(
   channel: DiscordTextChannel,
   entity: EntityWithInfo
 ): Promise<void> {
-  const msg = await discord.sendOrEditMessage(
-    formatSwitch(discord.client, entity, entity.entityInfo.payload.value),
-    channel.id,
-    entity.discordSwitchMessageId ?? undefined
-  )
+  let msg
+  try {
+    msg = await discord.sendOrEditMessage(
+      formatSwitch(discord.client, entity, entity.entityInfo.payload.value),
+      channel.id,
+      entity.discordSwitchMessageId ?? undefined
+    )
+  } catch (err) {
+    // Unknown Message
+    // ---
+    // Message id from db does not exist in discord, consider it deleted,
+    // update db and try again
+    if (err.code === 10008) {
+      await setDiscordSwitchMessageId(entity, null)
+      await upsertSwitchMessage(discord, channel, {
+        ...entity,
+        discordSwitchMessageId: null
+      })
+    } else {
+      throw new Error(err)
+    }
+  }
+
   if (msg) {
     if (!msg.reactions.cache.get(TOGGLE_SWITCH_EMOJI))
       await msg.react(TOGGLE_SWITCH_EMOJI)

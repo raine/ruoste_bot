@@ -86,7 +86,7 @@ export async function setDiscordPairingMessageId(
 
 export async function setDiscordSwitchMessageId(
   entity: Entity,
-  messageId: string
+  messageId: string | null
 ): Promise<void> {
   await db.none(
     `update entities
