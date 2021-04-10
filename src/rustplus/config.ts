@@ -26,7 +26,8 @@ export async function configure(
       { name: 'current_server_id' },
       { name: 'discord_alerts_channel_id' },
       { name: 'discord_events_channel_id' },
-      { name: 'discord_upkeep_channel_id' }
+      { name: 'discord_upkeep_channel_id' },
+      { name: 'discord_switches_channel_id' }
     ].filter((key) => key.name in cfgSnakeCase),
     { table: 'rustplus_config' }
   )

@@ -8,11 +8,12 @@ import {
   formatShortDateWithWeekday,
   formatTime
 } from '../date'
+import { findEmojiIdByName } from '../discord'
 import { FullServer, ListServer } from '../just-wiped'
 import { distance, XY } from '../math'
 import * as rustplus from '../rustplus'
 import { AppTeamInfo, Member, ServerInfo } from '../rustplus'
-import { EntityWithInfo } from '../rustplus/entity'
+import { Entity, EntityWithInfo } from '../rustplus/entity'
 import { monumentNameFromToken } from '../rustplus/map'
 import {
   isStorageMonitorDecaying,
@@ -233,19 +234,21 @@ export const formatServerPairing = (
   split: false
 })
 
+function getEntityFileName(entityType: number) {
+  switch (entityType) {
+    case 1:
+      return 'smart_switch.png'
+    case 2:
+      return 'smart_alarm.png'
+    case 3:
+      return 'storage_monitor.png'
+  }
+}
+
 export const formatEntityPairing = (
   pairing: rustplus.EntityPairingNotificationData
 ): Discord.MessageOptions & { split: false } => {
-  const entityIconFile = (() => {
-    switch (pairing.body.entityType) {
-      case 1:
-        return 'smart_switch.png'
-      case 2:
-        return 'smart_alarm.png'
-      case 3:
-        return 'storage_monitor.png'
-    }
-  })()
+  const entityIconFile = getEntityFileName(pairing.body.entityType)
 
   return {
     embed: {
@@ -355,31 +358,50 @@ export function formatBotActivityText(
 export function formatEntitiesUpkeep(
   serverInfo: ServerInfo,
   entities: EntityWithInfo[]
-): Discord.MessageEmbedOptions {
+): Discord.MessageOptions {
   return {
-    title: 'Upkeep',
-    description: serverInfo.name,
-    color: RUST_COLOR,
-    fields: _.orderBy(entities, ['entityId', 'asc']).map((entity) => {
-      const { protectionExpiry } = entity.entityInfo.payload
+    embed: {
+      title: 'Upkeep',
+      description: serverInfo.name,
+      color: RUST_COLOR,
+      fields: _.orderBy(entities, ['entityId', 'asc']).map((entity) => {
+        const { protectionExpiry } = entity.entityInfo.payload
 
-      return {
-        name: entity.handle ?? entity.entityId,
-        value: isStorageMonitorUnpowered(entity.entityInfo)
-          ? 'Not powered'
-          : isStorageMonitorDecaying(entity.entityInfo)
-          ? 'Decaying'
-          : protectionExpiry > 0
-          ? formatDurationShort(protectionExpiry * 1000 - Date.now())
-          : 'Decaying',
-        inline: true
+        return {
+          name: entity.handle ?? entity.entityId,
+          value: isStorageMonitorUnpowered(entity.entityInfo)
+            ? 'Not powered'
+            : isStorageMonitorDecaying(entity.entityInfo)
+            ? 'Decaying'
+            : protectionExpiry > 0
+            ? formatDurationShort(protectionExpiry * 1000 - Date.now())
+            : 'Decaying',
+          inline: true
+        }
+      }),
+      footer: {
+        text: `Last updated at ${DateTime.local()
+          .setLocale('de')
+          .setZone('Europe/Helsinki')
+          .toFormat('D T')}`
       }
-    }),
-    footer: {
-      text: `Last updated at ${DateTime.local()
-        .setLocale('de')
-        .setZone('Europe/Helsinki')
-        .toFormat('D T')}`
+    }
+  }
+}
+
+const SMART_SWITCH_GREEN = 0x8efd60
+const SMART_SWITCH_RED = 0xf77d56
+
+export function formatSwitch(
+  client: Discord.Client,
+  entity: Entity,
+  value: boolean
+): Discord.MessageOptions {
+  const emojiId = findEmojiIdByName(client, 'smartswitch') ?? ''
+  return {
+    embed: {
+      title: `<:smartswitch:${emojiId}> ${entity.handle ?? entity.entityId}`,
+      color: value ? SMART_SWITCH_GREEN : SMART_SWITCH_RED
     }
   }
 }

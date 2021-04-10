@@ -131,6 +131,11 @@ const commands: (client: Discord.Client) => Commands = () => ({
             await msg.reply('Upkeep channel updated!')
             return
           }
+          case 'switches_channel': {
+            await rustplus.configure({ discordSwitchesChannelId: value })
+            await msg.reply('Switches channel updated!')
+            return
+          }
           default: {
             await msg.reply(`I don't know how to configure that`)
           }
@@ -267,20 +272,26 @@ const sendAlarmMessage = (
   }
 }
 
-async function sendOrEditMessage(
+const sendOrEditMessage = (
   client: Discord.Client,
-  embed: Discord.MessageEmbedOptions,
+  isReadyP: Promise<void>
+) => async (
+  messageOpts: Discord.MessageOptions,
   channelId: string,
   messageId?: string
-): Promise<Discord.Message | undefined> {
+): Promise<Discord.Message | undefined> => {
+  await isReadyP
   const channel = client.channels.cache.get(channelId)
-  if (channel?.isText()) {
-    if (messageId) {
-      const message = await channel.messages.fetch(messageId)
-      return message.edit({ embed })
-    } else {
-      return channel.send({ embed })
-    }
+  if (!channel) {
+    log.info({ channelId }, 'Could not find channel')
+    return
+  }
+  if (!channel?.isText()) throw new Error('Expected a text channel')
+  if (messageId) {
+    const message = await channel.messages.fetch(messageId)
+    return message.edit(messageOpts)
+  } else {
+    return channel.send({ ...messageOpts, split: false })
   }
 }
 
@@ -293,9 +304,7 @@ const sendOrEditUpkeepMessage = (
   channelId: string,
   messageId?: string
 ): Promise<Discord.Message | undefined> => {
-  await isReadyP
-  return await sendOrEditMessage(
-    client,
+  return await sendOrEditMessage(client, isReadyP)(
     formatEntitiesUpkeep(serverInfo, entities),
     channelId,
     messageId
@@ -308,13 +317,16 @@ export type DiscordAPI = {
   sendEntityPairingMessage: ReturnType<typeof sendEntityPairingMessage>
   sendAlarmMessage: ReturnType<typeof sendAlarmMessage>
   sendOrEditUpkeepMessage: ReturnType<typeof sendOrEditUpkeepMessage>
+  sendOrEditMessage: ReturnType<typeof sendOrEditMessage>
+  isReadyP: Promise<void>
 }
 
 export const isMessageReply = (msg: Discord.Message): boolean =>
   Boolean(msg.reference?.messageID)
 
 export default function start(): DiscordAPI {
-  const client = new Discord.Client()
+  // partials are needed for listening to emoji reactions on old messages
+  const client = new Discord.Client({ partials: ['MESSAGE', 'REACTION'] })
   const token = process.env.DISCORD_BOT_TOKEN!
   if (!token) {
     throw new Error('Discord bot token not set, aborting...')
@@ -388,6 +400,16 @@ export default function start(): DiscordAPI {
     sendServerPairingMessage: sendServerPairingMessage(client, isReadyP),
     sendEntityPairingMessage: sendEntityPairingMessage(client, isReadyP),
     sendOrEditUpkeepMessage: sendOrEditUpkeepMessage(client, isReadyP),
-    sendAlarmMessage: sendAlarmMessage(client, isReadyP)
+    sendAlarmMessage: sendAlarmMessage(client, isReadyP),
+    sendOrEditMessage: sendOrEditMessage(client, isReadyP),
+    isReadyP
   }
+}
+
+export function findEmojiIdByName(
+  client: Discord.Client,
+  name: string
+): string | undefined {
+  const emoji = client.emojis.cache.find((emoji) => emoji.name === name)
+  return emoji?.id
 }

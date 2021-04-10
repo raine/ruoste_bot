@@ -15,11 +15,16 @@ export const Entity = t.type({
   wipeId: t.number,
   entityId: t.number,
   entityType: t.union([t.literal(1), t.literal(2), t.literal(3)]),
-  handle: t.union([t.string, t.null])
+  handle: t.union([t.string, t.null]),
+  discordSwitchMessageId: t.union([t.string, t.null])
 })
+
+const NotFoundError = t.type({ error: t.literal('not_found') })
+export type NotFoundError = t.TypeOf<typeof NotFoundError>
 
 export type Entity = t.TypeOf<typeof Entity>
 export type EntityWithInfo = Entity & { entityInfo: AppEntityInfo }
+export type EntityWithError = Entity & { entityInfo: NotFoundError }
 
 export async function createEntityFromPairing({
   ip,
@@ -67,7 +72,7 @@ export async function getEntityWithWipeAndEntityId(
   )
 }
 
-export async function setDiscordMessageId(
+export async function setDiscordPairingMessageId(
   entity: Entity,
   messageId: string
 ): Promise<void> {
@@ -79,18 +84,57 @@ export async function setDiscordMessageId(
   )
 }
 
+export async function setDiscordSwitchMessageId(
+  entity: Entity,
+  messageId: string
+): Promise<void> {
+  await db.none(
+    `update entities
+        set discord_switch_message_id = $[messageId]
+      where wipe_id = $[wipeId] and entity_id = $[entityId]`,
+    { ...entity, messageId }
+  )
+}
+
+export async function getEntityByDiscordPairingMessageId(
+  discordPairingMessageId: string
+): Promise<Entity | null> {
+  return validateP(
+    t.union([Entity, t.null]),
+    db.oneOrNone(
+      `select *
+         from entities
+        where discord_pairing_message_id = $[discordPairingMessageId]`,
+      { discordPairingMessageId }
+    )
+  )
+}
+
+export async function getEntityByDiscordSwitchMessageId(
+  discordSwitchMessageId: string
+): Promise<Entity | null> {
+  return validateP(
+    t.union([Entity, t.null]),
+    db.oneOrNone(
+      `select *
+         from entities
+        where discord_switch_message_id = $[discordSwitchMessageId]`,
+      { discordSwitchMessageId }
+    )
+  )
+}
+
 export async function updateEntityHandle(
-  messageId: string,
-  messageText: string
-): Promise<boolean> {
-  const { rowCount } = await db.result(
+  entity: Entity,
+  handle: string
+): Promise<void> {
+  await db.none(
     `update entities
         set handle = $[handle]
-      where discord_pairing_message_id = $[messageId]`,
-    { handle: messageText, messageId }
+      where entity_id = $[entityId]
+        and wipe_id = $[wipeId]`,
+    { ...entity, handle }
   )
-
-  return rowCount > 0
 }
 
 export async function getEntities(
@@ -105,6 +149,32 @@ export async function getEntities(
         where wipe_id = $[wipeId]
           and entity_type = $[entityType]`,
       { wipeId, entityType }
+    )
+  )
+}
+
+export async function deleteEntities(
+  wipeId: number,
+  entityIds: number[]
+): Promise<void> {
+  await db.none(
+    `delete from entities
+      where wipe_id = $[wipeId]
+        and entity_id IN ($[entityIds:list])`,
+    { entityIds, wipeId }
+  )
+}
+
+export async function getAllEntities(
+  entityType: EntityType
+): Promise<Entity[]> {
+  return validateP(
+    t.array(Entity),
+    db.any(
+      `select *
+         from entities
+        where entity_type = $[entityType]`,
+      { entityType }
     )
   )
 }

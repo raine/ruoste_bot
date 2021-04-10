@@ -44,10 +44,12 @@ create table map_markers (
 
 create table entities (
   wipe_id       integer references wipes (wipe_id) on delete cascade,
+  -- TODO: rename to rustplus_entity_id?
   entity_id     integer not null,
   entity_type   integer not null,
   handle        text,
   created_at    timestamptz default now() not null,
+  discord_switch_message_id  text,
   discord_pairing_message_id text,
   unique(wipe_id, entity_type, entity_id),
   unique(wipe_id, entity_type, handle)
@@ -60,9 +62,10 @@ create table upkeep_discord_messages (
 );
 
 create table rustplus_config (
-  fcm_credentials            json,
-  current_server_id          integer references servers (server_id),
-  discord_alerts_channel_id  text,
-  discord_events_channel_id  text,
-  discord_upkeep_channel_id  text
+  fcm_credentials              json,
+  current_server_id            integer references servers (server_id),
+  discord_alerts_channel_id    text,
+  discord_events_channel_id    text,
+  discord_upkeep_channel_id    text,
+  discord_switches_channel_id  text
 );

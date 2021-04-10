@@ -7,7 +7,8 @@ import log from '../logger'
 import { configure, getConfig, initEmptyConfig } from './config'
 import {
   createEntityFromPairing,
-  setDiscordMessageId,
+  getEntityByDiscordPairingMessageId,
+  setDiscordPairingMessageId,
   updateEntityHandle
 } from './entity'
 import { fcmListen } from './fcm'
@@ -22,6 +23,7 @@ import {
   updateWipeBaseLocation,
   upsertServer
 } from './server'
+import { initSwitchesChannel } from './switch-channel'
 import {
   isServerPairingNotification,
   RustPlusEvents,
@@ -43,16 +45,22 @@ export const state: State = {}
 export const events = new TypedEmitter<RustPlusEvents>()
 
 export async function init(discord: DiscordAPI): Promise<void> {
+  // If pairing message is replied to, update entity handle to message text
   // Still not sure if this should be in discord.ts or here
   discord.client.on('message', async (msg) => {
     try {
       if (isMessageReply(msg)) {
-        const updated = await updateEntityHandle(
-          msg.reference!.messageID!,
-          msg.content
+        const entity = await getEntityByDiscordPairingMessageId(
+          msg.reference!.messageID!
         )
-        if (updated) {
+        if (entity) {
+          log.info(
+            { entity, handle: msg.content },
+            'Updating handle for entity'
+          )
+          await updateEntityHandle(entity, msg.content)
           await msg.react('✅')
+          events.emit('entityHandleUpdated', entity)
         }
       }
     } catch (err) {
@@ -96,7 +104,8 @@ export async function init(discord: DiscordAPI): Promise<void> {
     } else {
       const entity = await createEntityFromPairing(pairing.body)
       const msg = await discord.sendEntityPairingMessage(pairing)
-      await setDiscordMessageId(entity, msg.id)
+      await setDiscordPairingMessageId(entity, msg.id)
+      events.emit('entityPaired', entity)
     }
   })
 
@@ -112,6 +121,7 @@ export async function init(discord: DiscordAPI): Promise<void> {
     await saveMapIfNotExist(serverInfo, state.wipeId)
     void trackMapEvents(serverInfo, events)
     void trackUpkeepLoop(discord, serverInfo, state.wipeId)
+    void initSwitchesChannel(discord, events, state.wipeId)
   })
 
   await initEmptyConfig()

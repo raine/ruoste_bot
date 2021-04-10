@@ -4,6 +4,7 @@ import { JsonFromString } from 'io-ts-types/lib/JsonFromString'
 import { DateTimeFromUnixTime } from '../types/DateTimeFromUnixTime'
 import { Message } from 'protobufjs'
 import { Server } from './server'
+import { Entity } from './entity'
 
 const NotificationBodyServer = t.type({
   ip: t.string,
@@ -115,6 +116,7 @@ export const RustPlusConfig = t.strict({
   discordAlertsChannelId: t.union([t.string, t.null]),
   discordEventsChannelId: t.union([t.string, t.null]),
   discordUpkeepChannelId: t.union([t.string, t.null]),
+  discordSwitchesChannelId: t.union([t.string, t.null]),
   currentServerId: t.union([t.number, t.null])
 })
 
@@ -160,10 +162,12 @@ export type DbMapEvent = { createdAt?: string; wipeId: number } & MapEvent
 export interface RustPlusEvents {
   alarm: (data: SmartAlarmNotificationData) => void
   pairing: (data: PairingNotificationData) => void
+  entityPaired: (data: Entity) => void
   team: (data: TeamNotificationData) => void
   mapEvent: (data: MapEvent) => void
   connected: (serverInfo: ServerInfo, server: Server) => void
   entityChanged: (data: AppEntityChanged) => void
+  entityHandleUpdated: (data: Entity) => void
   teamChanged: (data: AppTeamChanged) => void
 }
 
