@@ -58,9 +58,9 @@ export async function init(discord: DiscordAPI): Promise<void> {
             { entity, handle: msg.content },
             'Updating handle for entity'
           )
-          await updateEntityHandle(entity, msg.content)
+          const updated = await updateEntityHandle(entity, msg.content)
           await msg.react('✅')
-          events.emit('entityHandleUpdated', entity)
+          events.emit('entityHandleUpdated', updated)
         }
       }
     } catch (err) {

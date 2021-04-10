@@ -127,13 +127,17 @@ export async function getEntityByDiscordSwitchMessageId(
 export async function updateEntityHandle(
   entity: Entity,
   handle: string
-): Promise<void> {
-  await db.none(
-    `update entities
+): Promise<Entity> {
+  return validateP(
+    Entity,
+    db.one(
+      `update entities
         set handle = $[handle]
       where entity_id = $[entityId]
-        and wipe_id = $[wipeId]`,
-    { ...entity, handle }
+        and wipe_id = $[wipeId]
+      returning *`,
+      { ...entity, handle }
+    )
   )
 }
 
