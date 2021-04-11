@@ -178,9 +178,9 @@ export async function listen(server: Server) {
       log.debug(message.broadcast, 'Got broadcast')
       try {
         const broadcast = await parseBroadcast(AppBroadcast, message.broadcast)
-        if (isEntityChangedBroadcast(broadcast)) {
+        if ('entityChanged' in broadcast) {
           events.emit('entityChanged', broadcast.entityChanged)
-        } else {
+        } else if ('teamChanged' in broadcast) {
           events.emit('teamChanged', broadcast.teamChanged)
         }
       } catch (err) {

@@ -359,9 +359,16 @@ export const AppTeamChangedBroadcast = t.type({
   teamChanged: AppTeamChanged
 })
 
+export const AppTeamMessageBroadcast = t.type({
+  teamMessage: t.type({
+    message: t.unknown
+  })
+})
+
 export const AppBroadcast = t.union([
   AppEntityChangedBroadcast,
-  AppTeamChangedBroadcast
+  AppTeamChangedBroadcast,
+  AppTeamMessageBroadcast
 ])
 
 export type AppEntityChangedBroadcast = t.TypeOf<
