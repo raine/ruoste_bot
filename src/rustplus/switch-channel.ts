@@ -133,7 +133,12 @@ export async function initSwitchesChannel(
     const entity = await getEntityByDiscordSwitchMessageId(messageId)
     if (entity) {
       const entityInfo = await getEntityInfo(entity.entityId)
-      await setEntityValueAsync(entity.entityId, !entityInfo.payload.value)
+      const newValue = !entityInfo.payload.value
+      log.info(
+        { entity, entityInfo, newValue },
+        'Got reaction, changing switch state'
+      )
+      await setEntityValueAsync(entity.entityId, newValue)
       await reaction.users.remove(user.id)
     }
   }
