@@ -1,4 +1,5 @@
 import RustPlus from '@liamcottle/rustplus.js'
+import * as Sentry from '@sentry/node'
 import * as t from 'io-ts'
 import { validate } from '../validate'
 import log from '../logger'
@@ -55,19 +56,14 @@ async function parseBroadcast<T>(
 ): Promise<T> {
   const proto = await protobuf.load(RUSTPLUS_PROTO_PATH)
   const AppBroadcast = proto.lookupType('rustplus.AppBroadcast')
-  try {
-    return validate(
-      type,
-      AppBroadcast.toObject(broadcast, {
-        longs: String,
-        enums: String,
-        bytes: String
-      })
-    )
-  } catch (err) {
-    log.error(broadcast, 'Failed to validate broadcast message')
-    throw new Error(err)
-  }
+  return validate(
+    type,
+    AppBroadcast.toObject(broadcast, {
+      longs: String,
+      enums: String,
+      bytes: String
+    })
+  )
 }
 
 export async function sendRequestAsync(...args: any[]): Promise<any> {
@@ -180,11 +176,16 @@ export async function listen(server: Server) {
   socket.on('message', async (message: unknown) => {
     if (isMessageBroadcast(message)) {
       log.debug(message.broadcast, 'Got broadcast')
-      const broadcast = await parseBroadcast(AppBroadcast, message.broadcast)
-      if (isEntityChangedBroadcast(broadcast)) {
-        events.emit('entityChanged', broadcast.entityChanged)
-      } else {
-        events.emit('teamChanged', broadcast.teamChanged)
+      try {
+        const broadcast = await parseBroadcast(AppBroadcast, message.broadcast)
+        if (isEntityChangedBroadcast(broadcast)) {
+          events.emit('entityChanged', broadcast.entityChanged)
+        } else {
+          events.emit('teamChanged', broadcast.teamChanged)
+        }
+      } catch (err) {
+        log.error(err)
+        Sentry.captureException(err)
       }
     }
   })
