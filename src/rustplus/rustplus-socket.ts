@@ -1,5 +1,4 @@
 import RustPlus from '@liamcottle/rustplus.js'
-import * as Sentry from '@sentry/node'
 import * as t from 'io-ts'
 import { validate } from '../validate'
 import log from '../logger'
@@ -17,8 +16,9 @@ import {
   isMessageBroadcast
 } from './types'
 import protobuf, { Message } from 'protobufjs'
-import { events, isEntityChangedBroadcast } from './'
+import { events } from './'
 import { Server } from './server'
+import { logAndCapture } from '../errors'
 
 export let socket: any
 export let socketConnectedP: Promise<void>
@@ -184,8 +184,7 @@ export async function listen(server: Server) {
           events.emit('teamChanged', broadcast.teamChanged)
         }
       } catch (err) {
-        log.error(err)
-        Sentry.captureException(err)
+        logAndCapture(err)
       }
     }
   })

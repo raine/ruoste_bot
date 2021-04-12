@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon'
-import { ListServer } from '../just-wiped'
+import { ListServer } from './just-wiped'
 
 // prettier-ignore
 export const formatMaxGroup = (count: number | null) => 

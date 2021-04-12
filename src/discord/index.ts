@@ -1,21 +1,8 @@
-const Sentry = require('@sentry/node')
-
 import * as Discord from 'discord.js'
 import { DateTime, Interval } from 'luxon'
-import {
-  formatBotActivityText,
-  formatEntitiesUpkeep,
-  formatEntityPairing,
-  formatMapEvent,
-  formatServerEmbed,
-  formatServerListReply,
-  formatServerListReplyWithUpdatedAt,
-  formatServerPairing,
-  formatSmartAlarmAlert,
-  formatUpcomingWipeList
-} from './formatting/discord'
-import { getNextWipes } from './get-next-wipes'
-import { parseMaxGroupOption } from './input'
+import { logAndCapture } from '../errors'
+import { getNextWipes } from '../get-next-wipes'
+import { parseMaxGroupOption } from '../input'
 import {
   formatSearchParams,
   formatServerListUrl,
@@ -25,18 +12,17 @@ import {
   getWipedServersCached1m,
   ListServer,
   SERVER_SEARCH_PARAMS
-} from './just-wiped'
-import log from './logger'
-import { XY } from './math'
-import * as rustplus from './rustplus'
+} from '../just-wiped'
+import log from '../logger'
+import * as rustplus from '../rustplus'
+import { initUpdateLoop, ServerListReply } from '../update-loop'
 import {
-  AppTeamInfo,
-  EntityPairingNotificationData,
-  ServerInfo,
-  ServerPairingNotificationData
-} from './rustplus'
-import { EntityWithInfo } from './rustplus/entity'
-import { initUpdateLoop, ServerListReply } from './update-loop'
+  formatBotActivityText,
+  formatServerEmbed,
+  formatServerListReply,
+  formatServerListReplyWithUpdatedAt,
+  formatUpcomingWipeList
+} from './formatting'
 
 type DiscordServerListReply = ServerListReply<Discord.Message>
 let updatedServerListReplies: DiscordServerListReply[] = []
@@ -72,8 +58,7 @@ const commands: (client: Discord.Client) => Commands = () => ({
           })
       )
       .catch((err) => {
-        Sentry.captureException(err)
-        log.error(err, 'failed to reply with servers')
+        logAndCapture(err, 'failed to reply with servers')
         return msg.reply('something went wrong 😳')
       })
   },
@@ -219,105 +204,63 @@ async function getBotOwnerDiscordUser(
   }
 }
 
-const sendServerPairingMessage = (
-  client: Discord.Client,
-  isReadyP: Promise<void>
-) => async (pairing: ServerPairingNotificationData) => {
-  await isReadyP
-  const user = await getBotOwnerDiscordUser(client)
-  const msg = await user.send(formatServerPairing(pairing))
-  try {
-    const reactions = await msg.awaitReactions(() => true, {
-      max: 1,
-      time: 60000
-    })
-    if (reactions.array().length) {
-      log.info('Got reaction, switching to server')
-      // TODO: This could just now use id by getting server from the caller
-      await rustplus.connectToServer({
-        host: pairing.body.ip,
-        port: pairing.body.port
-      })
-      await msg.react('✅')
-    }
-  } catch (err) {
-    log.error(err)
-  }
-}
-
-const sendEntityPairingMessage = (
+const sendMessageToBotOwner = (
   client: Discord.Client,
   isReadyP: Promise<void>
 ) => async (
-  pairing: EntityPairingNotificationData
+  messageOpts: Discord.MessageOptions | Discord.StringResolvable
 ): Promise<Discord.Message> => {
   await isReadyP
   const user = await getBotOwnerDiscordUser(client)
-  return user.send(formatEntityPairing(pairing))
+  return user.send(messageOpts)
 }
 
-const sendAlarmMessage = (
-  client: Discord.Client,
-  isReadyP: Promise<void>
-) => async (
+const sendMessage = (client: Discord.Client, isReadyP: Promise<void>) => async (
   channelId: string,
-  alert: rustplus.SmartAlarmNotificationData,
-  teamInfo: AppTeamInfo,
-  baseLocation?: XY
+  messageOpts: Discord.MessageOptions | Discord.StringResolvable
 ): Promise<void> => {
   await isReadyP
   const channel = client.channels.cache.get(channelId)
-  if (channel?.isText()) {
-    await channel.send(formatSmartAlarmAlert(alert, teamInfo, baseLocation))
+  if (!channel) {
+    log.error({ channelId }, 'Could not find channel')
+    throw new Error('Could not find a channel')
   }
+  if (!channel?.isText()) throw new Error('Expected a text channel')
+  await channel.send(messageOpts)
 }
 
 const sendOrEditMessage = (
   client: Discord.Client,
   isReadyP: Promise<void>
 ) => async (
-  messageOpts: Discord.MessageOptions,
   channelId: string,
+  messageOpts: Discord.MessageOptions,
   messageId?: string
 ): Promise<Discord.Message | undefined> => {
   await isReadyP
   const channel = client.channels.cache.get(channelId)
   if (!channel) {
     log.info({ channelId }, 'Could not find channel')
-    return
+    throw new Error('Could not find channel')
   }
   if (!channel?.isText()) throw new Error('Expected a text channel')
   if (messageId) {
     const message = await channel.messages.fetch(messageId)
     return message.edit(messageOpts)
   } else {
-    return channel.send({ ...messageOpts, split: false })
+    if (typeof messageOpts === 'string') {
+      return channel.send(messageOpts)
+    } else {
+      return channel.send({ ...messageOpts, split: false })
+    }
   }
-}
-
-const sendOrEditUpkeepMessage = (
-  client: Discord.Client,
-  isReadyP: Promise<void>
-) => async (
-  serverInfo: ServerInfo,
-  entities: EntityWithInfo[],
-  channelId: string,
-  messageId?: string
-): Promise<Discord.Message | undefined> => {
-  return await sendOrEditMessage(client, isReadyP)(
-    formatEntitiesUpkeep(serverInfo, entities),
-    channelId,
-    messageId
-  )
 }
 
 export type DiscordAPI = {
   client: Discord.Client
-  sendServerPairingMessage: ReturnType<typeof sendServerPairingMessage>
-  sendEntityPairingMessage: ReturnType<typeof sendEntityPairingMessage>
-  sendAlarmMessage: ReturnType<typeof sendAlarmMessage>
-  sendOrEditUpkeepMessage: ReturnType<typeof sendOrEditUpkeepMessage>
+  sendMessage: ReturnType<typeof sendMessage>
   sendOrEditMessage: ReturnType<typeof sendOrEditMessage>
+  sendMessageToBotOwner: ReturnType<typeof sendMessageToBotOwner>
   isReadyP: Promise<void>
 }
 
@@ -332,21 +275,6 @@ export default function start(): DiscordAPI {
     throw new Error('Discord bot token not set, aborting...')
   }
 
-  async function onMapEvent(mapEvent: rustplus.MapEvent) {
-    const { discordEventsChannelId } = await rustplus.getConfig()
-    if (!discordEventsChannelId) return
-
-    if (
-      ((mapEvent.type === 'CRATE_SPAWNED' || mapEvent.type === 'CRATE_GONE') &&
-        mapEvent.data.onCargoShip) ||
-      mapEvent.type === 'CARGO_SHIP_LEFT'
-    )
-      return
-
-    const channel = client.channels.cache.get(discordEventsChannelId)
-    if (channel?.isText()) return channel.send(formatMapEvent(mapEvent))
-  }
-
   function onRustSocketConnected() {
     updateBotActivityLoop(client)
   }
@@ -355,9 +283,6 @@ export default function start(): DiscordAPI {
     client.on('ready', async () => {
       resolve()
       log.info(`Logged in as ${client.user?.tag}!`)
-
-      rustplus.events.removeListener('mapEvent', onMapEvent)
-      rustplus.events.on('mapEvent', onMapEvent)
 
       rustplus.events.removeListener('connected', onRustSocketConnected)
       rustplus.events.on('connected', onRustSocketConnected)
@@ -379,9 +304,7 @@ export default function start(): DiscordAPI {
       const commandHandler = command && commands(client)[command]
       if (commandHandler) return commandHandler(text, msg, updateRepliesList)
       await handleServerEmbedReply(msg)
-    })().catch((err) => {
-      log.error(err)
-    })
+    })().catch(logAndCapture)
   })
 
   void client.login(token)
@@ -397,11 +320,9 @@ export default function start(): DiscordAPI {
 
   return {
     client,
-    sendServerPairingMessage: sendServerPairingMessage(client, isReadyP),
-    sendEntityPairingMessage: sendEntityPairingMessage(client, isReadyP),
-    sendOrEditUpkeepMessage: sendOrEditUpkeepMessage(client, isReadyP),
-    sendAlarmMessage: sendAlarmMessage(client, isReadyP),
+    sendMessage: sendMessage(client, isReadyP),
     sendOrEditMessage: sendOrEditMessage(client, isReadyP),
+    sendMessageToBotOwner: sendMessageToBotOwner(client, isReadyP),
     isReadyP
   }
 }

@@ -1,8 +1,9 @@
-import * as Sentry from '@sentry/node'
 import * as t from 'io-ts'
 import { AppEntityInfo, ServerInfo } from '.'
 import db from '../db'
 import { DiscordAPI } from '../discord'
+import { formatEntitiesUpkeep } from '../discord/formatting'
+import { logAndCapture } from '../errors'
 import log from '../logger'
 import { validate, validateP } from '../validate'
 import { getConfig } from './config'
@@ -46,10 +47,9 @@ export async function trackUpkeep(
   const { discordUpkeepChannelId } = await getConfig()
   if (!discordUpkeepChannelId || !ok.length) return
   const messageId = (await getUpkeepDiscordMessageId(wipeId))?.discordMessageId
-  const message = await discord.sendOrEditUpkeepMessage(
-    serverInfo,
-    ok,
+  const message = await discord.sendOrEditMessage(
     discordUpkeepChannelId,
+    formatEntitiesUpkeep(serverInfo, ok),
     messageId
   )
 
@@ -72,10 +72,7 @@ export function trackUpkeepLoop(
   if (timeoutId) clearTimeout(timeoutId)
 
   return (async function loop(): Promise<void> {
-    await trackUpkeep(serverInfo, discord, wipeId).catch((err) => {
-      Sentry.captureException(err)
-      log.error(err)
-    })
+    await trackUpkeep(serverInfo, discord, wipeId).catch(logAndCapture)
     timeoutId = global.setTimeout(loop, UPKEEP_UPDATE_INTERVAL)
   })()
 }

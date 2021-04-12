@@ -69,16 +69,15 @@ describe('upkeep tracking', () => {
       `insert into entities (wipe_id, entity_id, entity_type) values ($[wipeId], 1, 3)`,
       { wipeId }
     )
-    discord = { sendOrEditUpkeepMessage: jest.fn() }
+    discord = { sendOrEditMessage: jest.fn() }
   })
 
   test('sends message to channel if there is a working storage monitor', async () => {
-    discord.sendOrEditUpkeepMessage.mockResolvedValue({ id: 'asdf' })
+    discord.sendOrEditMessage.mockResolvedValue({ id: 'asdf' })
     await trackUpkeep(SERVER_INFO, discord, wipeId)
-    expect(discord.sendOrEditUpkeepMessage).toHaveBeenCalledWith(
-      SERVER_INFO,
-      expect.any(Array),
+    expect(discord.sendOrEditMessage).toHaveBeenCalledWith(
       '123',
+      expect.objectContaining({ embed: expect.anything() }),
       undefined
     )
 
@@ -89,16 +88,15 @@ describe('upkeep tracking', () => {
   })
 
   test('updates an existing message if found', async () => {
-    discord.sendOrEditUpkeepMessage.mockResolvedValue({ id: 'asdf' })
+    discord.sendOrEditMessage.mockResolvedValue({ id: 'asdf' })
     await db.none(
       `insert into upkeep_discord_messages (wipe_id, discord_message_id) values ($[wipeId], 'asdf')`,
       { wipeId }
     )
     await trackUpkeep(SERVER_INFO, discord, wipeId)
-    expect(discord.sendOrEditUpkeepMessage).toHaveBeenCalledWith(
-      SERVER_INFO,
-      expect.any(Array),
+    expect(discord.sendOrEditMessage).toHaveBeenCalledWith(
       '123',
+      expect.objectContaining({ embed: expect.anything() }),
       'asdf'
     )
   })

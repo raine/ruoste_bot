@@ -2,14 +2,20 @@ import Discord from 'discord.js'
 import _ from 'lodash'
 import { TypedEmitter } from 'tiny-typed-emitter'
 import db from '../db'
-import { DiscordAPI, isMessageReply } from '../discord'
+import { DiscordAPI } from '../discord'
+import {
+  formatEntityPairing,
+  formatMapEvent,
+  formatServerPairing,
+  formatSmartAlarmAlert
+} from '../discord/formatting'
+import { logAndCapture } from '../errors'
 import log from '../logger'
 import { configure, getConfig, initEmptyConfig } from './config'
 import {
   createEntityFromPairing,
-  getEntityByDiscordPairingMessageId,
-  setDiscordPairingMessageId,
-  updateEntityHandle
+  handleEntityHandleUpdateReply,
+  setDiscordPairingMessageId
 } from './entity'
 import { fcmListen } from './fcm'
 import { saveMapIfNotExist } from './map'
@@ -28,7 +34,8 @@ import {
   isServerPairingNotification,
   RustPlusEvents,
   ServerHostPort,
-  ServerInfo
+  ServerInfo,
+  ServerPairingNotificationData
 } from './types'
 import { trackUpkeepLoop } from './upkeep'
 
@@ -45,26 +52,11 @@ export const state: State = {}
 export const events = new TypedEmitter<RustPlusEvents>()
 
 export async function init(discord: DiscordAPI): Promise<void> {
-  // If pairing message is replied to, update entity handle to message text
-  // Still not sure if this should be in discord.ts or here
   discord.client.on('message', async (msg) => {
     try {
-      if (isMessageReply(msg)) {
-        const entity = await getEntityByDiscordPairingMessageId(
-          msg.reference!.messageID!
-        )
-        if (entity) {
-          log.info(
-            { entity, handle: msg.content },
-            'Updating handle for entity'
-          )
-          const updated = await updateEntityHandle(entity, msg.content)
-          await msg.react('✅')
-          events.emit('entityHandleUpdated', updated)
-        }
-      }
+      await handleEntityHandleUpdateReply(events, msg)
     } catch (err) {
-      log.error(err)
+      logAndCapture(err)
     }
   })
 
@@ -82,11 +74,9 @@ export async function init(discord: DiscordAPI): Promise<void> {
     ])
     const { discordAlertsChannelId } = config
     if (!discordAlertsChannelId) return
-    await discord.sendAlarmMessage(
+    await discord.sendMessage(
       discordAlertsChannelId,
-      alert,
-      teamInfo,
-      wipe.baseLocation ?? undefined
+      formatSmartAlarmAlert(alert, teamInfo, wipe.baseLocation ?? undefined)
     )
   })
 
@@ -100,17 +90,32 @@ export async function init(discord: DiscordAPI): Promise<void> {
         playerToken: pairing.body.playerToken,
         playerSteamId: pairing.body.playerId
       })
-      await discord.sendServerPairingMessage(pairing)
+      await sendServerPairingMessage(discord, pairing).catch(logAndCapture)
     } else {
       const entity = await createEntityFromPairing(pairing.body)
-      const msg = await discord.sendEntityPairingMessage(pairing)
+      const msg = await discord.sendMessageToBotOwner(
+        formatEntityPairing(pairing)
+      )
       await setDiscordPairingMessageId(entity, msg.id)
       events.emit('entityPaired', entity)
     }
   })
 
-  events.on('mapEvent', (mapEvent) => {
+  events.on('mapEvent', async (mapEvent) => {
     log.info(mapEvent, 'Map event')
+
+    const { discordEventsChannelId } = await getConfig()
+    if (!discordEventsChannelId) return
+
+    if (
+      ((mapEvent.type === 'CRATE_SPAWNED' || mapEvent.type === 'CRATE_GONE') &&
+        mapEvent.data.onCargoShip) ||
+      mapEvent.type === 'CARGO_SHIP_LEFT'
+    )
+      return
+
+    const channel = discord.client.channels.cache.get(discordEventsChannelId)
+    if (channel?.isText()) return channel.send(formatMapEvent(mapEvent))
   })
 
   events.on('connected', async (serverInfo) => {
@@ -167,5 +172,24 @@ export async function setBaseLocation(
     )
   } else {
     await reply('Not connected to a server')
+  }
+}
+
+async function sendServerPairingMessage(
+  discord: DiscordAPI,
+  pairing: ServerPairingNotificationData
+) {
+  const msg = await discord.sendMessageToBotOwner(formatServerPairing(pairing))
+  const reactions = await msg.awaitReactions(() => true, {
+    max: 1,
+    time: 60000
+  })
+  if (reactions.array().length) {
+    log.info('Got reaction, switching to server')
+    await connectToServer({
+      host: pairing.body.ip,
+      port: pairing.body.port
+    })
+    await msg.react('✅')
   }
 }

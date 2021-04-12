@@ -4,7 +4,7 @@ import {
   formatEntitiesUpkeep,
   formatMapEvent,
   formatSmartAlarmAlert
-} from './discord'
+} from './formatting'
 
 describe('formatMapEvent()', () => {
   test('cargo ship entered', () => {

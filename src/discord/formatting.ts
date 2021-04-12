@@ -2,13 +2,19 @@ import * as Discord from 'discord.js'
 import _ from 'lodash'
 import { DateTime, Interval } from 'luxon'
 import * as R from 'ramda'
+import { findEmojiIdByName } from '.'
 import {
   formatDurationShort,
   formatRelativeDate,
   formatShortDateWithWeekday,
   formatTime
 } from '../date'
-import { findEmojiIdByName } from '../discord'
+import {
+  filterServerNoise,
+  formatMaxGroup,
+  formatPlayerCount,
+  lastUpdatedAt
+} from '../formatting'
 import { FullServer, ListServer } from '../just-wiped'
 import { distance, XY } from '../math'
 import * as rustplus from '../rustplus'
@@ -19,12 +25,6 @@ import {
   isStorageMonitorDecaying,
   isStorageMonitorUnpowered
 } from '../rustplus/upkeep'
-import {
-  filterServerNoise,
-  formatMaxGroup,
-  formatPlayerCount,
-  lastUpdatedAt
-} from './general'
 
 const RUST_COLOR = 0xce422a
 const DESCRIPTION_MAX_LENGTH = 2048

@@ -1,9 +1,16 @@
+import * as Discord from 'discord.js'
 import * as t from 'io-ts'
+import { TypedEmitter } from 'tiny-typed-emitter'
 import db, { Db } from '../db'
+import { isMessageReply } from '../discord'
 import log from '../logger'
 import { validateP } from '../validate'
 import { getCurrentWipeForServer } from './server'
-import { AppEntityInfo, EntityPairingNotificationData } from './types'
+import {
+  AppEntityInfo,
+  EntityPairingNotificationData,
+  RustPlusEvents
+} from './types'
 
 export enum EntityType {
   Switch = 1,
@@ -181,4 +188,21 @@ export async function getAllEntities(
       { entityType }
     )
   )
+}
+
+export async function handleEntityHandleUpdateReply(
+  events: TypedEmitter<RustPlusEvents>,
+  msg: Discord.Message
+) {
+  if (isMessageReply(msg)) {
+    const entity = await getEntityByDiscordPairingMessageId(
+      msg.reference!.messageID!
+    )
+    if (entity) {
+      log.info({ entity, handle: msg.content }, 'Updating handle for entity')
+      const updated = await updateEntityHandle(entity, msg.content)
+      await msg.react('✅')
+      events.emit('entityHandleUpdated', updated)
+    }
+  }
 }

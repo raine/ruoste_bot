@@ -3,7 +3,7 @@ import * as t from 'io-ts'
 import _ from 'lodash'
 import { TypedEmitter } from 'tiny-typed-emitter'
 import { DiscordAPI } from '../discord'
-import { formatSwitch } from '../formatting/discord'
+import { formatSwitch } from '../discord/formatting'
 import log from '../logger'
 import { validate } from '../validate'
 import { getConfig } from './config'
@@ -105,8 +105,8 @@ export async function initSwitchesChannel(
 
       if (entity.discordSwitchMessageId) {
         await discord.sendOrEditMessage(
-          formatSwitch(discord.client, entity, changedEntity.payload.value),
           channel.id,
+          formatSwitch(discord.client, entity, changedEntity.payload.value),
           entity.discordSwitchMessageId
         )
       }
@@ -175,8 +175,8 @@ async function upsertSwitchMessage(
   let msg
   try {
     msg = await discord.sendOrEditMessage(
-      formatSwitch(discord.client, entity, entity.entityInfo.payload.value),
       channel.id,
+      formatSwitch(discord.client, entity, entity.entityInfo.payload.value),
       entity.discordSwitchMessageId ?? undefined
     )
   } catch (err) {
