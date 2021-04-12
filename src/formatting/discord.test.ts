@@ -210,11 +210,12 @@ describe('formatEntitiesUpkeep()', () => {
     wipeId: 1,
     entityId: 1,
     entityType: 3 as const,
+    discordSwitchMessageId: null,
     handle: 'Kaappi'
   }
 
   test('description has server name', () => {
-    const embed = formatEntitiesUpkeep(serverInfo, [
+    const message = formatEntitiesUpkeep(serverInfo, [
       {
         ...entity,
         entityInfo: entityInfo({
@@ -226,13 +227,15 @@ describe('formatEntitiesUpkeep()', () => {
         })
       }
     ])
-    expect(embed).toMatchObject({
-      description: 'best server eu'
+    expect(message).toEqual({
+      embed: expect.objectContaining({
+        description: 'best server eu'
+      })
     })
   })
 
   test('expiry in future', () => {
-    const embed = formatEntitiesUpkeep(serverInfo, [
+    const message = formatEntitiesUpkeep(serverInfo, [
       {
         ...entity,
         entityInfo: entityInfo({
@@ -244,13 +247,15 @@ describe('formatEntitiesUpkeep()', () => {
         })
       }
     ])
-    expect(embed).toMatchObject({
-      fields: [{ inline: true, name: 'Kaappi', value: '1h 29m' }]
+    expect(message).toEqual({
+      embed: expect.objectContaining({
+        fields: [{ inline: true, name: 'Kaappi', value: '1h 29m' }]
+      })
     })
   })
 
   test('decaying', () => {
-    const embed = formatEntitiesUpkeep(serverInfo, [
+    const message = formatEntitiesUpkeep(serverInfo, [
       {
         ...entity,
         entityInfo: entityInfo({
@@ -260,13 +265,15 @@ describe('formatEntitiesUpkeep()', () => {
         })
       }
     ])
-    expect(embed).toMatchObject({
-      fields: [{ inline: true, name: 'Kaappi', value: 'Decaying' }]
+    expect(message).toEqual({
+      embed: expect.objectContaining({
+        fields: [{ inline: true, name: 'Kaappi', value: 'Decaying' }]
+      })
     })
   })
 
   test('not connected', () => {
-    const embed = formatEntitiesUpkeep(serverInfo, [
+    const message = formatEntitiesUpkeep(serverInfo, [
       {
         ...entity,
         entityInfo: entityInfo({
@@ -276,17 +283,21 @@ describe('formatEntitiesUpkeep()', () => {
         })
       }
     ])
-    expect(embed).toMatchObject({
-      fields: [{ inline: true, name: 'Kaappi', value: 'Not powered' }]
+
+    expect(message).toEqual({
+      embed: expect.objectContaining({
+        fields: [{ inline: true, name: 'Kaappi', value: 'Not powered' }]
+      })
     })
   })
 
   test('ordered by entity id', () => {
-    const embed = formatEntitiesUpkeep(serverInfo, [
+    const message = formatEntitiesUpkeep(serverInfo, [
       {
         wipeId: 1,
         entityId: 2,
         entityType: 3,
+        discordSwitchMessageId: null,
         handle: 'foo',
         entityInfo: entityInfo({
           hasProtection: false,
@@ -298,6 +309,7 @@ describe('formatEntitiesUpkeep()', () => {
         wipeId: 1,
         entityId: 1,
         entityType: 3,
+        discordSwitchMessageId: null,
         handle: 'bar',
         entityInfo: entityInfo({
           hasProtection: false,
@@ -306,11 +318,13 @@ describe('formatEntitiesUpkeep()', () => {
         })
       }
     ])
-    expect(embed).toMatchObject({
-      fields: [
-        expect.objectContaining({ name: 'bar' }),
-        expect.objectContaining({ name: 'foo' })
-      ]
+    expect(message).toEqual({
+      embed: expect.objectContaining({
+        fields: [
+          expect.objectContaining({ name: 'bar' }),
+          expect.objectContaining({ name: 'foo' })
+        ]
+      })
     })
   })
 })
