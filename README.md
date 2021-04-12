@@ -10,6 +10,8 @@ A discord bot for [Rust](https://rust.facepunch.com/)
   - Show group online status and server player count in the bot activity
   - Receive smart alarm notifications to a channel
   - Post map events to a channel (e.g. cargo ship spawned)
+  - Upkeep tracking on a channel through storage monitors
+  - Control smart switches with reactions
   - Some kind of support for controlling smart switches through script API (TBD)
 
 ![](https://raine.github.io/ruoste_bot/wipes.png?1)
