@@ -114,8 +114,7 @@ export async function init(discord: DiscordAPI): Promise<void> {
     )
       return
 
-    const channel = discord.client.channels.cache.get(discordEventsChannelId)
-    if (channel?.isText()) return channel.send(formatMapEvent(mapEvent))
+    await discord.sendMessage(discordEventsChannelId, formatMapEvent(mapEvent))
   })
 
   events.on('connected', async (serverInfo) => {
