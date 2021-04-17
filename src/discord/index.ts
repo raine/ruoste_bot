@@ -218,7 +218,7 @@ const sendMessageToBotOwner = (
 const sendMessage = (client: Discord.Client, isReadyP: Promise<void>) => async (
   channelId: string,
   messageOpts: Discord.MessageOptions | Discord.StringResolvable
-): Promise<void> => {
+): Promise<Discord.Message> => {
   await isReadyP
   const channel = client.channels.cache.get(channelId)
   if (!channel) {
@@ -226,7 +226,7 @@ const sendMessage = (client: Discord.Client, isReadyP: Promise<void>) => async (
     throw new Error('Could not find a channel')
   }
   if (!channel?.isText()) throw new Error('Expected a text channel')
-  await channel.send(messageOpts)
+  return channel.send(messageOpts)
 }
 
 const sendOrEditMessage = (
@@ -234,7 +234,7 @@ const sendOrEditMessage = (
   isReadyP: Promise<void>
 ) => async (
   channelId: string,
-  messageOpts: Discord.MessageOptions,
+  messageOpts: Discord.MessageOptions | Discord.StringResolvable,
   messageId?: string
 ): Promise<Discord.Message | undefined> => {
   await isReadyP

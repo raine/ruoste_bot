@@ -12,12 +12,12 @@ const isMarkerExplosion = (marker: AppMarker) => marker.type === 'Explosion'
 
 const createBradleyApcDestroyedEvent = (): BradleyApcDestroyedMapEvent => ({
   type: 'BRADLEY_APC_DESTROYED' as const,
-  data: undefined
+  data: null
 })
 
 const createPatrolHeliDownEvent = (): PatrolHeliDownMapEvent => ({
   type: 'PATROL_HELI_DOWN' as const,
-  data: undefined
+  data: null
 })
 
 const MAX_LAUNCH_SITE_DISTANCE = 250

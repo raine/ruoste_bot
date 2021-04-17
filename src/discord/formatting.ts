@@ -296,7 +296,7 @@ export const formatSmartAlarmAlert = (
   return `🚨 ${bold(title)} — ${message} (${extra})`
 }
 
-export const formatMapEvent = (event: rustplus.MapEvent) => {
+export const formatMapEvent = (event: rustplus.DbMapEvent): string => {
   switch (event.type) {
     case 'CARGO_SHIP_ENTERED': {
       const more = event.data.previousSpawn
@@ -316,10 +316,12 @@ export const formatMapEvent = (event: rustplus.MapEvent) => {
       return '🚢 Cargo Ship left the map'
     }
     case 'BRADLEY_APC_DESTROYED': {
-      return '💥 Bradley APC destroyed'
+      const timer = formatTimer(5, event.createdAt!)
+      return `💥 Bradley APC destroyed ${timer ?? ''}`.trim()
     }
     case 'PATROL_HELI_DOWN': {
-      return '💥 Patrol Helicopter taken down'
+      const timer = formatTimer(5, event.createdAt!)
+      return `💥 Patrol Helicopter taken down ${timer ?? ''}`.trim()
     }
     case 'CRATE_SPAWNED':
     case 'CRATE_GONE': {
@@ -333,8 +335,27 @@ export const formatMapEvent = (event: rustplus.MapEvent) => {
       return `📦 Locked Crate ${action} ${monumentName}`.trim()
     }
     case 'LARGE_OIL_RIG_CRATE_HACKED': {
-      return '💻 Large Oil Rig Crate hacked'
+      const timer = formatTimer(15, event.createdAt!)
+      return `💻 Large Oil Rig Crate hacked ${timer ?? ''}`.trim()
     }
+  }
+}
+
+function formatTimer(
+  expiresInMinutes: number,
+  start: string
+): string | undefined {
+  const expiresAt = DateTime.fromISO(start).plus({ minutes: expiresInMinutes })
+  const interval = Interval.fromDateTimes(DateTime.local(), expiresAt)
+  if (interval.isValid) {
+    const { minutes, seconds } = interval
+      .toDuration(['minutes', 'seconds'])
+      .toObject()
+    const mins = minutes!.toString()
+    const secs = seconds
+      ? Math.floor(seconds).toString().padStart(2, '0')
+      : '00'
+    return `(${mins}:${secs})`
   }
 }
 

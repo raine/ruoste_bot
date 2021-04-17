@@ -1,44 +1,57 @@
-import { getMapMarkers } from '../rustplus-socket'
-import * as _ from 'lodash'
-import {
-  MapEvent,
-  RustPlusEvents,
-  AppMarker,
-  DbMapEvent,
-  ServerInfo,
-  CrateEvent
-} from '../types'
-import { TypedEmitter } from 'tiny-typed-emitter'
-import log from '../../logger'
-import db, { pgp, DEFAULT } from '../../db'
-import { cargoShipLeft, cargoShipEntered } from './cargo-ship'
-import { bradleyDestroyedOrPatrolHeliDown } from './explosion'
-import { crate, isOilrigCrateEvent, removeCrateRefreshes } from './crate'
-import { ch47 } from './ch47'
 import * as B from 'baconjs'
 import delay from 'delay'
+import * as _ from 'lodash'
+import { TypedEmitter } from 'tiny-typed-emitter'
+import db, { DEFAULT, pgp } from '../../db'
+import log from '../../logger'
+import { getMapMarkers } from '../rustplus-socket'
 import { getWipeId } from '../server'
+import {
+  AppMarker,
+  CrateEvent,
+  DbMapEvent,
+  MapEvent,
+  RustPlusEvents,
+  ServerInfo
+} from '../types'
+import { cargoShipEntered, cargoShipLeft } from './cargo-ship'
+import { ch47 } from './ch47'
+import { crate, isOilrigCrateEvent, removeCrateRefreshes } from './crate'
+import { bradleyDestroyedOrPatrolHeliDown } from './explosion'
+
+const skip = ({ exists }: any) => !exists
 
 const mapEventsColumnSet = new pgp.helpers.ColumnSet(
   [
-    { name: 'created_at', prop: 'createdAt', def: DEFAULT },
-    { name: 'wipe_id', prop: 'wipeId' },
-    { name: 'type' },
-    { name: 'data', cast: 'json' }
+    { name: 'created_at', prop: 'createdAt', def: DEFAULT, skip },
+    { name: 'wipe_id', prop: 'wipeId', skip },
+    { name: 'type', skip },
+    { name: 'data', cast: 'json', skip },
+    { name: 'discord_message_id', prop: 'discordMessageId', def: null, skip },
+    {
+      name: 'discord_message_last_updated_at',
+      prop: 'discordMessageLastUpdatedAt',
+      def: null,
+      skip
+    }
   ],
   { table: 'map_events' }
 )
 
-export async function insertMapEvents(
-  serverInfo: ServerInfo,
-  events: Omit<DbMapEvent, 'wipeId'>[]
-): Promise<void> {
-  const wipeId = await getWipeId(serverInfo)
-  await db.none(
-    pgp.helpers.insert(
-      events.map((e) => ({ ...e, wipeId })),
-      mapEventsColumnSet
-    )
+export async function insertMapEvent(
+  event: Omit<DbMapEvent, 'mapEventId'>
+): Promise<DbMapEvent> {
+  return db.one(pgp.helpers.insert(event, mapEventsColumnSet) + ' returning *')
+}
+
+export async function updateMapEvent(
+  mapEventId: number,
+  newMapEvent: Partial<DbMapEvent>
+): Promise<DbMapEvent> {
+  return db.one(
+    pgp.helpers.update(newMapEvent, mapEventsColumnSet) +
+      ' where map_event_id = $[mapEventId] returning *',
+    { mapEventId }
   )
 }
 
@@ -116,6 +129,7 @@ export function resetLastMapMarkers() {
 
 export async function trackMapEvents(
   serverInfo: ServerInfo,
+  wipeId: number,
   emitter: TypedEmitter<RustPlusEvents>,
   loopInterval = 5000,
   maxLoopCount?: number,
@@ -142,9 +156,8 @@ export async function trackMapEvents(
 
   const merged = otherMapEvents
     .merge(oilrigCrateMapEventsWithoutRefreshes)
-    .flatMap((event) =>
-      B.fromPromise(insertMapEvents(serverInfo, [event])).map(() => event)
-    )
+    .map((event) => ({ ...event, wipeId }))
+    .flatMap((dbMapEvent) => B.fromPromise(insertMapEvent(dbMapEvent)))
 
   merged.onValue((event) => {
     emitter.emit('mapEvent', event)

@@ -120,51 +120,144 @@ export const RustPlusConfig = t.strict({
   currentServerId: t.union([t.number, t.null])
 })
 
+export const MonumentToken = t.keyof({
+  military_tunnels_display_name: null,
+  supermarket: null,
+  power_plant_display_name: null,
+  oil_rig_small: null,
+  sewer_display_name: null,
+  satellite_dish_display_name: null,
+  harbor_display_name: null,
+  harbor_2_display_name: null,
+  fishing_village_display_name: null,
+  mining_quarry_sulfur_display_name: null,
+  airfield_display_name: null,
+  mining_quarry_hqm_display_name: null,
+  mining_quarry_stone_display_name: null,
+  dome_monument_name: null,
+  junkyard_display_name: null,
+  train_tunnel_display_name: null,
+  mining_outpost_display_name: null,
+  train_yard_display_name: null,
+  gas_station: null,
+  outpost: null,
+  large_oil_rig: null,
+  bandit_camp: null,
+  stables_a: null,
+  stables_b: null,
+  excavator: null,
+  launchsite: null,
+  swamp_a: null,
+  swamp_b: null,
+  swamp_c: null,
+  lighthouse_display_name: null,
+  water_treatment_plant_display_name: null,
+  large_fishing_village_display_name: null
+})
+
+export type MonumentToken = t.TypeOf<typeof MonumentToken>
+
+export const Monument = t.type({
+  token: MonumentToken,
+  x: t.number,
+  y: t.number
+})
+
+export type Monument = t.TypeOf<typeof Monument>
+
 export type RustPlusConfig = t.TypeOf<typeof RustPlusConfig>
 
 export const RustPlusConfigField = t.keyof(RustPlusConfig.type.props)
 export type RustPlusConfigField = t.TypeOf<typeof RustPlusConfigField>
 
-export type MapEventK<Type, Data = undefined> = { type: Type; data: Data }
+const CargoShipEnteredMapEvent = t.type({
+  type: t.literal('CARGO_SHIP_ENTERED'),
+  data: t.type({ previousSpawn: t.union([t.string, t.null]) })
+})
 
-export type CargoShipEnteredMapEvent = MapEventK<
-  'CARGO_SHIP_ENTERED',
-  { previousSpawn: string | null }
+const CargoShipLeftMapEvent = t.type({
+  type: t.literal('CARGO_SHIP_LEFT'),
+  data: t.null
+})
+
+const BradleyApcDestroyedMapEvent = t.type({
+  type: t.literal('BRADLEY_APC_DESTROYED'),
+  data: t.null
+})
+
+const PatrolHeliDownMapEvent = t.type({
+  type: t.literal('PATROL_HELI_DOWN'),
+  data: t.null
+})
+
+const CrateEventData = t.type({
+  monument: t.union([MonumentToken, t.null]),
+  onCargoShip: t.boolean
+})
+
+const CrateSpawnedEvent = t.type({
+  type: t.literal('CRATE_SPAWNED'),
+  data: CrateEventData
+})
+
+const CrateGoneEvent = t.type({
+  type: t.literal('CRATE_GONE'),
+  data: CrateEventData
+})
+
+const CrateEvent = t.union([CrateSpawnedEvent, CrateGoneEvent])
+
+const LargeOilRigCrateHackedMapEvent = t.type({
+  type: t.literal('LARGE_OIL_RIG_CRATE_HACKED'),
+  data: t.null
+})
+
+export const MapEvent = t.union([
+  CargoShipEnteredMapEvent,
+  CargoShipLeftMapEvent,
+  BradleyApcDestroyedMapEvent,
+  PatrolHeliDownMapEvent,
+  CrateSpawnedEvent,
+  CrateGoneEvent,
+  LargeOilRigCrateHackedMapEvent
+])
+
+export const DbMapEvent = t.intersection([
+  t.type({
+    mapEventId: t.number,
+    wipeId: t.number
+  }),
+  t.partial({
+    createdAt: t.string,
+    discordMessageId: t.union([t.string, t.null]),
+    discordMessageLastUpdatedAt: t.union([t.string, t.null])
+  }),
+  MapEvent
+])
+
+export type CargoShipEnteredMapEvent = t.TypeOf<typeof CargoShipEnteredMapEvent>
+export type CargoShipLeftMapEvent = t.TypeOf<typeof CargoShipLeftMapEvent>
+export type LargeOilRigCrateHackedMapEvent = t.TypeOf<
+  typeof LargeOilRigCrateHackedMapEvent
 >
-
-export type CargoShipLeftMapEvent = MapEventK<'CARGO_SHIP_LEFT'>
-export type BradleyApcDestroyedMapEvent = MapEventK<'BRADLEY_APC_DESTROYED'>
-export type PatrolHeliDownMapEvent = MapEventK<'PATROL_HELI_DOWN'>
-
-type CrateEventData = {
-  monument: MonumentToken | null
-  onCargoShip: boolean
-}
-
-export type CrateSpawnedEvent = MapEventK<'CRATE_SPAWNED', CrateEventData>
-export type CrateGoneEvent = MapEventK<'CRATE_GONE', CrateEventData>
-export type CrateEvent = CrateSpawnedEvent | CrateGoneEvent
-
-export type LargeOilRigCrateHacked = MapEventK<'LARGE_OIL_RIG_CRATE_HACKED'>
-
-export type MapEvent =
-  | CargoShipEnteredMapEvent
-  | CargoShipLeftMapEvent
-  | BradleyApcDestroyedMapEvent
-  | PatrolHeliDownMapEvent
-  | CrateSpawnedEvent
-  | CrateGoneEvent
-  | LargeOilRigCrateHacked
+export type BradleyApcDestroyedMapEvent = t.TypeOf<
+  typeof BradleyApcDestroyedMapEvent
+>
+export type PatrolHeliDownMapEvent = t.TypeOf<typeof PatrolHeliDownMapEvent>
+export type CrateSpawnedEvent = t.TypeOf<typeof CrateSpawnedEvent>
+export type CrateGoneEvent = t.TypeOf<typeof CrateGoneEvent>
+export type CrateEvent = t.TypeOf<typeof CrateEvent>
+export type MapEvent = t.TypeOf<typeof MapEvent>
+export type DbMapEvent = t.TypeOf<typeof DbMapEvent>
 
 export type ServerHostPort = { host: string; port: number }
-export type DbMapEvent = { createdAt?: string; wipeId: number } & MapEvent
 
 export interface RustPlusEvents {
   alarm: (data: SmartAlarmNotificationData) => void
   pairing: (data: PairingNotificationData) => void
   entityPaired: (data: Entity) => void
   team: (data: TeamNotificationData) => void
-  mapEvent: (data: MapEvent) => void
+  mapEvent: (data: DbMapEvent) => void
   connected: (serverInfo: ServerInfo, server: Server) => void
   entityChanged: (data: AppEntityChanged) => void
   entityHandleUpdated: (data: Entity) => void
@@ -252,51 +345,6 @@ export const AppMapMarkers = t.type({
 })
 
 export type AppMapMarkers = t.TypeOf<typeof AppMapMarkers>
-
-export const MonumentToken = t.keyof({
-  military_tunnels_display_name: null,
-  supermarket: null,
-  power_plant_display_name: null,
-  oil_rig_small: null,
-  sewer_display_name: null,
-  satellite_dish_display_name: null,
-  harbor_display_name: null,
-  harbor_2_display_name: null,
-  fishing_village_display_name: null,
-  mining_quarry_sulfur_display_name: null,
-  airfield_display_name: null,
-  mining_quarry_hqm_display_name: null,
-  mining_quarry_stone_display_name: null,
-  dome_monument_name: null,
-  junkyard_display_name: null,
-  train_tunnel_display_name: null,
-  mining_outpost_display_name: null,
-  train_yard_display_name: null,
-  gas_station: null,
-  outpost: null,
-  large_oil_rig: null,
-  bandit_camp: null,
-  stables_a: null,
-  stables_b: null,
-  excavator: null,
-  launchsite: null,
-  swamp_a: null,
-  swamp_b: null,
-  swamp_c: null,
-  lighthouse_display_name: null,
-  water_treatment_plant_display_name: null,
-  large_fishing_village_display_name: null
-})
-
-export type MonumentToken = t.TypeOf<typeof MonumentToken>
-
-export const Monument = t.type({
-  token: MonumentToken,
-  x: t.number,
-  y: t.number
-})
-
-export type Monument = t.TypeOf<typeof Monument>
 
 export const AppMap = t.type({
   width: t.number,

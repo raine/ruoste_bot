@@ -39,7 +39,7 @@ const createCargoShipEnteredEvent = (
 
 const createCargoShipLeftEvent = (): CargoShipLeftMapEvent => ({
   type: 'CARGO_SHIP_LEFT' as const,
-  data: undefined
+  data: null
 })
 
 export function cargoShipEntered(

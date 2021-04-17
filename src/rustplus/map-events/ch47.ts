@@ -1,7 +1,7 @@
 import { getMonuments } from '../map'
 import {
   AppMarker,
-  LargeOilRigCrateHacked,
+  LargeOilRigCrateHackedMapEvent,
   Monument,
   ServerInfo
 } from '../types'
@@ -16,15 +16,15 @@ const isCrateHackedChinook = (
 ): boolean =>
   distance(spawnedChinook, largeOilRig) <= CHINOOK_LARGE_OILRIG_SPAWN_CUT_OFF
 
-const createLargeOilRigCrateHackedEvent = (): LargeOilRigCrateHacked => ({
+const createLargeOilRigCrateHackedEvent = (): LargeOilRigCrateHackedMapEvent => ({
   type: 'LARGE_OIL_RIG_CRATE_HACKED' as const,
-  data: undefined
+  data: null
 })
 
 export async function ch47(
   server: ServerInfo,
   newMarkers: AppMarker[]
-): Promise<LargeOilRigCrateHacked[]> {
+): Promise<LargeOilRigCrateHackedMapEvent[]> {
   const monuments = await getMonuments(server)
   const largeOilRig = monuments.find((m) => m.token === 'large_oil_rig')
   if (!largeOilRig) return []

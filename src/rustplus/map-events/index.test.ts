@@ -9,8 +9,9 @@ import { AppMarker, RustPlusEvents, ServerInfo } from '..'
 import {
   getNewMarkers,
   getRemovedMarkers,
-  insertMapEvents,
-  trackMapEvents
+  insertMapEvent,
+  trackMapEvents,
+  updateMapEvent
 } from '.'
 import { saveMapIfNotExist } from '../map'
 
@@ -21,7 +22,7 @@ jest.mock('../rustplus-socket', () => ({
 }))
 
 import { getMapMarkers, getMap } from '../rustplus-socket'
-import { createWipeIfNotExist, upsertServer } from '../server'
+import { createWipeIfNotExist, upsertServer, Wipe } from '../server'
 const mockedGetMapMarkers = mocked(getMapMarkers, true)
 const mockedGetMap = mocked(getMap, true)
 
@@ -118,9 +119,13 @@ describe('getRemovedMarkers()', () => {
 
 describe('checkMapEvents()', () => {
   let emitter: TypedEmitter<RustPlusEvents>
+  let wipe: Wipe
   const baseFields = {
     createdAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}/),
-    wipeId: 1
+    wipeId: 1,
+    mapEventId: 1,
+    discordMessageId: null,
+    discordMessageLastUpdatedAt: null
   }
 
   async function checkMapEventsWithMarkers(
@@ -131,7 +136,7 @@ describe('checkMapEvents()', () => {
     mockedGetMapMarkers
       .mockResolvedValueOnce(first)
       .mockResolvedValueOnce(second)
-    await trackMapEvents(serverInfo, emitter, 0, 2, 10)
+    await trackMapEvents(serverInfo, wipe.wipeId, emitter, 0, 2, 10)
   }
 
   async function getLastMapEvent() {
@@ -147,7 +152,7 @@ describe('checkMapEvents()', () => {
       playerToken: 1234,
       playerSteamId: 'foobar'
     })
-    const wipe = await createWipeIfNotExist(serverInfo)
+    wipe = await createWipeIfNotExist(serverInfo)
     await saveMapIfNotExist(serverInfo, wipe.wipeId)
   }
 
@@ -176,15 +181,14 @@ describe('checkMapEvents()', () => {
 
     test('previous spawn', async () => {
       const previousSpawnDate = DateTime.local().minus({ minutes: 80 }).toISO()
-      await insertMapEvents(SERVER_INFO, [
-        {
-          createdAt: previousSpawnDate,
-          type: 'CARGO_SHIP_ENTERED',
-          data: {
-            previousSpawn: null
-          }
+      await insertMapEvent({
+        wipeId: 1,
+        createdAt: previousSpawnDate,
+        type: 'CARGO_SHIP_ENTERED',
+        data: {
+          previousSpawn: null
         }
-      ])
+      })
 
       await spawnCargo()
 
@@ -193,7 +197,11 @@ describe('checkMapEvents()', () => {
         data: {
           previousSpawn: previousSpawnDate
         },
-        ...baseFields
+        discordMessageId: null,
+        discordMessageLastUpdatedAt: null,
+        mapEventId: 2,
+        wipeId: 1,
+        createdAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}/)
       })
     })
 
@@ -205,15 +213,14 @@ describe('checkMapEvents()', () => {
       // Setup the map again for this wipe (this test does not need it, but
       // would error because of other event)
       await setupMap(serverInfo)
-      await insertMapEvents(serverInfo, [
-        {
-          createdAt: previousSpawnDate,
-          type: 'CARGO_SHIP_ENTERED',
-          data: {
-            previousSpawn: null
-          }
+      await insertMapEvent({
+        wipeId: wipe.wipeId,
+        createdAt: previousSpawnDate,
+        type: 'CARGO_SHIP_ENTERED',
+        data: {
+          previousSpawn: null
         }
-      ])
+      })
 
       // Server wiped 10 minutes ago, last spawn 80 minutes ago
       await spawnCargo(serverInfo)
@@ -224,6 +231,8 @@ describe('checkMapEvents()', () => {
           previousSpawn: null
         },
         ...baseFields,
+        discordMessageId: null,
+        mapEventId: 2,
         // setupMap with different wipeTime creates a new wipe
         wipeId: 2
       })
@@ -402,5 +411,33 @@ describe('checkMapEvents()', () => {
       await checkMapEventsWithMarkers([], [ch47])
       expect(await getLastMapEvent()).toEqual(null)
     })
+  })
+})
+
+describe('updateMapEvent()', () => {
+  beforeEach(async () => {
+    await resetDb()
+    await upsertServer({
+      ...SERVER_INFO,
+      playerToken: 1234,
+      playerSteamId: 'foobar'
+    })
+    const wipe = await createWipeIfNotExist(SERVER_INFO)
+    await saveMapIfNotExist(SERVER_INFO, wipe.wipeId)
+  })
+
+  test('updates map event', async () => {
+    const mapEvent = await insertMapEvent({
+      wipeId: 1,
+      type: 'CARGO_SHIP_LEFT',
+      data: null
+    })
+
+    await updateMapEvent(mapEvent.mapEventId, {
+      discordMessageId: 'foo'
+    })
+
+    const obj = await db.one(`select * from map_events where map_event_id = 1`)
+    expect(obj.discordMessageId).toBe('foo')
   })
 })

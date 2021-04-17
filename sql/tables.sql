@@ -30,10 +30,13 @@ create table maps (
 );
 
 create table map_events (
+  map_event_id  serial primary key,
   created_at    timestamptz default now() not null,
   wipe_id       integer references wipes (wipe_id) on delete cascade,
   type          text not null,
-  data          jsonb
+  data          jsonb,
+  discord_message_id text,
+  discord_message_last_updated_at timestamptz
 );
 
 create table map_markers (
