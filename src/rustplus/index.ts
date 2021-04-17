@@ -1,5 +1,7 @@
 import Discord from 'discord.js'
+import { promises as fs } from 'fs'
 import _ from 'lodash'
+import * as path from 'path'
 import { TypedEmitter } from 'tiny-typed-emitter'
 import db from '../db'
 import { DiscordAPI } from '../discord'
@@ -22,6 +24,7 @@ import { trackMapEvents } from './map-events'
 import { onMapEvent } from './map-events/on-map-event'
 import { updateMapEventDiscordMessagesLoop } from './map-events/update-discord-messages'
 import * as socket from './rustplus-socket'
+import { makeScriptApi } from './script-api'
 import {
   createWipeIfNotExist,
   getCurrentServer,
@@ -133,6 +136,7 @@ export async function init(discord: DiscordAPI): Promise<void> {
 
   const currentServer = await getCurrentServer()
   if (currentServer) void socket.listen(currentServer)
+  await loadScripts()
 }
 
 export async function connectToServer(server: ServerHostPort) {
@@ -182,4 +186,18 @@ async function sendServerPairingMessage(
     })
     await msg.react('✅')
   }
+}
+
+async function loadScripts() {
+  const scriptApi = makeScriptApi()
+  const scriptsDir = path.join(__dirname, 'scripts')
+  const scripts = await fs.readdir(scriptsDir)
+  await Promise.all(
+    scripts.map((script) =>
+      import(path.join(scriptsDir, script)).then((module) => {
+        module.default(scriptApi)
+      })
+    )
+  )
+  log.info(scripts, 'Scripts loaded')
 }

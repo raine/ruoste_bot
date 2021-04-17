@@ -1,7 +1,6 @@
 import Discord from 'discord.js'
 import * as t from 'io-ts'
 import _ from 'lodash'
-import { TypedEmitter } from 'tiny-typed-emitter'
 import { DiscordAPI } from '../discord'
 import { formatSwitch } from '../discord/formatting'
 import log from '../logger'
@@ -20,7 +19,7 @@ import {
   updateEntity
 } from './entity'
 import { getEntityInfo, setEntityValueAsync } from './rustplus-socket'
-import { AppEntityChanged, RustPlusEvents } from './types'
+import { AppEntityChanged, RustPlusEventEmitter } from './types'
 
 const TOGGLE_SWITCH_EMOJI = '🔀'
 
@@ -35,7 +34,7 @@ let cleanUp: (() => void) | undefined
 
 export async function initSwitchesChannel(
   discord: DiscordAPI,
-  events: TypedEmitter<RustPlusEvents>,
+  events: RustPlusEventEmitter,
   wipeId: number
 ): Promise<void> {
   if (cleanUp) cleanUp()

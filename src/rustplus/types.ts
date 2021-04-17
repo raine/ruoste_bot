@@ -5,6 +5,7 @@ import { DateTimeFromUnixTime } from '../types/DateTimeFromUnixTime'
 import { Message } from 'protobufjs'
 import { Server } from './server'
 import { Entity } from './entity'
+import { TypedEmitter } from 'tiny-typed-emitter'
 
 const NotificationBodyServer = t.type({
   ip: t.string,
@@ -282,6 +283,8 @@ export interface RustPlusEvents {
   entityHandleUpdated: (data: Entity) => void
   teamChanged: (data: AppTeamChanged) => void
 }
+
+export type RustPlusEventEmitter = TypedEmitter<RustPlusEvents>
 
 export const AppInfo = t.type({
   name: t.string,
