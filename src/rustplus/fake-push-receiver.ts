@@ -114,8 +114,33 @@ const FAKE_EVENTS = {
       priority: 'high',
       collapse_key: 'do_not_collapse'
     },
-    persistentId: uuid.v4(),
-    msg: 'FCM notification received'
+    persistentId: uuid.v4()
+  },
+
+  death: {
+    notification: {
+      data: {
+        experienceId: '@facepunch/RustCompanion',
+        title: 'You were killed by \u0414\u0438\u043c\u0430^_^',
+        message: '[RU] Facepunch 1',
+        body: JSON.stringify({
+          img:
+            'https://files.facepunch.com/Alistair/02/05/0T35W1/server-header.png',
+          port: '28083',
+          ip: '145.239.133.139',
+          name: '[RU] Facepunch 1',
+          logo:
+            'https://files.facepunch.com/Alistair/02/05/1Z61F1/04_07-48-MagnificentLadybug.png',
+          id: 'b6c39c22-2c68-4282-8168-5cd187684dbb',
+          type: 'death',
+          url: 'http://www.playrust.com/',
+          desc:
+            "This is an official server owned and operated by Facepunch. n n People are free to speak whatever language they like. Don't be surprised if you get banned for being abusive."
+        }),
+        channelId: 'player'
+      }
+    },
+    persistentId: uuid.v4()
   }
 }
 

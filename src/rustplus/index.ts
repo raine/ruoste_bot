@@ -103,6 +103,9 @@ export async function init(discord: DiscordAPI): Promise<void> {
   })
 
   events.on('mapEvent', (mapEvent) => onMapEvent(discord, mapEvent))
+  events.on('player', (event) => {
+    log.info(event, 'Got player event')
+  })
 
   events.on('connected', async (serverInfo) => {
     log.info(serverInfo, 'Connected to rust server')

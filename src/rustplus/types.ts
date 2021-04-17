@@ -93,10 +93,28 @@ export const PairingNotificationData = t.intersection([
   t.union([EntityPairingData, ServerPairingData])
 ])
 
+export const PlayerNotificationData = t.intersection([
+  BaseNotificationData,
+  t.type({
+    channelId: t.literal('player'),
+    body: t.string
+      .pipe(JsonFromString)
+      .pipe(
+        t.intersection([
+          NotificationBodyServer,
+          t.type({ type: t.literal('death') })
+        ])
+      )
+  })
+])
+
+export type PlayerNotificationData = t.TypeOf<typeof PlayerNotificationData>
+
 export const NotificationData = t.union([
   SmartAlarmNotificationData,
   TeamNotificationData,
-  PairingNotificationData
+  PairingNotificationData,
+  PlayerNotificationData
 ])
 
 // prettier-ignore
@@ -255,6 +273,7 @@ export type ServerHostPort = { host: string; port: number }
 export interface RustPlusEvents {
   alarm: (data: SmartAlarmNotificationData) => void
   pairing: (data: PairingNotificationData) => void
+  player: (data: PlayerNotificationData) => void
   entityPaired: (data: Entity) => void
   team: (data: TeamNotificationData) => void
   mapEvent: (data: DbMapEvent) => void
