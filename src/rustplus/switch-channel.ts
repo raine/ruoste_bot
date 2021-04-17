@@ -10,6 +10,7 @@ import { getConfig } from './config'
 import {
   deleteEntities,
   Entity,
+  EntityType,
   EntityWithError,
   EntityWithInfo,
   getAllEntities,
@@ -117,7 +118,8 @@ export async function initSwitchesChannel(
 
   const updateEntity = async (entity: Entity) => {
     try {
-      await updateEntityMessage(discord, channel, entity)
+      if (entity.entityType === EntityType.Switch)
+        await upsertEntityMessage(discord, channel, entity)
     } catch (err) {
       log.error(err)
     }
@@ -156,7 +158,7 @@ export async function initSwitchesChannel(
   }
 }
 
-async function updateEntityMessage(
+async function upsertEntityMessage(
   discord: DiscordAPI,
   channel: DiscordTextChannel,
   entity: Entity
