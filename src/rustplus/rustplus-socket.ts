@@ -22,7 +22,6 @@ import { logAndCapture } from '../errors'
 
 export let socket: any
 export let socketConnectedP: Promise<void>
-export let socketConnected = false
 export let connectedServer: ServerHostPort | undefined
 
 const RUSTPLUS_PROTO_PATH = require.resolve(
@@ -164,7 +163,6 @@ export async function listen(server: Server) {
   })
 
   onSocketDisconnected = () => {
-    socketConnected = false
     const backOffDelay = Math.min(10000, 10 ** connectAttempts)
     log.error(`Rust websocket disconnected, reconnecting in ${backOffDelay}ms`)
     backOffDelayTimeout = global.setTimeout(() => {
@@ -194,7 +192,6 @@ export async function listen(server: Server) {
   socketConnectedP = new Promise<void>((resolve) => {
     socket.once('connected', async () => {
       connectedServer = server
-      socketConnected = true
       connectAttempts = 0
       resolve() // sendRequestAsync pends on this promise
       try {
