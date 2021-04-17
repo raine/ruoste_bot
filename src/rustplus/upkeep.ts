@@ -1,4 +1,5 @@
 import * as t from 'io-ts'
+import { DateTime } from 'luxon'
 import { AppEntityInfo, ServerInfo } from '.'
 import db from '../db'
 import { DiscordAPI } from '../discord'
@@ -7,7 +8,7 @@ import { logAndCapture } from '../errors'
 import log from '../logger'
 import { validate, validateP } from '../validate'
 import { getConfig } from './config'
-import { EntityType, EntityWithInfo, getEntities } from './entity'
+import { EntityType, EntityWithInfo, getEntities, updateEntity } from './entity'
 import { getEntityInfo } from './rustplus-socket'
 
 const UPKEEP_UPDATE_INTERVAL = 300 * 1000
@@ -39,11 +40,19 @@ export async function trackUpkeep(
   const ok = storageMonitorsWithEntityInfo.filter(
     (entity): entity is EntityWithInfo => !('error' in entity.entityInfo)
   )
-  const errored = storageMonitorsWithEntityInfo.filter(
+  const notFound = storageMonitorsWithEntityInfo.filter(
     (entity) => 'error' in entity.entityInfo
   )
-  if (errored.length)
-    log.info(errored, 'Failed to get entity info for entities')
+
+  if (notFound.length) {
+    log.info(notFound, 'Failed to get entity info for entities')
+    await Promise.all(
+      notFound.map((entity) =>
+        updateEntity({ ...entity, notFoundAt: DateTime.local().toSQL() })
+      )
+    )
+  }
+
   const { discordUpkeepChannelId } = await getConfig()
   if (!discordUpkeepChannelId || !ok.length) return
   const messageId = (await getUpkeepDiscordMessageId(wipeId))?.discordMessageId

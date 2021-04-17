@@ -1,7 +1,7 @@
 import * as Discord from 'discord.js'
 import * as t from 'io-ts'
 import { TypedEmitter } from 'tiny-typed-emitter'
-import db, { Db } from '../db'
+import db, { Db, DEFAULT, pgp, skip } from '../db'
 import { isMessageReply } from '../discord'
 import log from '../logger'
 import { validateP } from '../validate'
@@ -23,8 +23,34 @@ export const Entity = t.type({
   entityId: t.number,
   entityType: t.union([t.literal(1), t.literal(2), t.literal(3)]),
   handle: t.union([t.string, t.null]),
-  discordSwitchMessageId: t.union([t.string, t.null])
+  discordSwitchMessageId: t.union([t.string, t.null]),
+  discordPairingMessageId: t.union([t.string, t.null]),
+  notFoundAt: t.union([t.string, t.null])
 })
+
+const entitiesColumnSet = new pgp.helpers.ColumnSet(
+  [
+    { name: 'created_at', prop: 'createdAt', def: DEFAULT, skip },
+    { name: 'not_found_at', prop: 'notFoundAt', skip },
+    { name: 'wipe_id', prop: 'wipeId', skip },
+    { name: 'entity_id', prop: 'entityId', skip },
+    { name: 'entity_type', prop: 'entityType', skip },
+    { name: 'handle', skip },
+    {
+      name: 'discord_switch_message_id',
+      prop: 'discordSwitchMessageId',
+      def: null,
+      skip
+    },
+    {
+      name: 'discord_pairing_message_id',
+      prop: 'discordPairingMessageId',
+      def: null,
+      skip
+    }
+  ],
+  { table: 'entities' }
+)
 
 const NotFoundError = t.type({ error: t.literal('not_found') })
 export type NotFoundError = t.TypeOf<typeof NotFoundError>
@@ -78,28 +104,11 @@ export async function getEntityWithWipeAndEntityId(
     )
   )
 }
-
-export async function setDiscordPairingMessageId(
-  entity: Entity,
-  messageId: string
-): Promise<void> {
-  await db.none(
-    `update entities
-        set discord_pairing_message_id = $[messageId]
-      where wipe_id = $[wipeId] and entity_id = $[entityId]`,
-    { ...entity, messageId }
-  )
-}
-
-export async function setDiscordSwitchMessageId(
-  entity: Entity,
-  messageId: string | null
-): Promise<void> {
-  await db.none(
-    `update entities
-        set discord_switch_message_id = $[messageId]
-      where wipe_id = $[wipeId] and entity_id = $[entityId]`,
-    { ...entity, messageId }
+export async function updateEntity(entity: Partial<Entity>): Promise<Entity> {
+  return db.one(
+    pgp.helpers.update(entity, entitiesColumnSet) +
+      ' where wipe_id = $[wipeId] and entity_id = $[entityId] returning *',
+    { ...entity }
   )
 }
 
@@ -131,23 +140,6 @@ export async function getEntityByDiscordSwitchMessageId(
   )
 }
 
-export async function updateEntityHandle(
-  entity: Entity,
-  handle: string
-): Promise<Entity> {
-  return validateP(
-    Entity,
-    db.one(
-      `update entities
-        set handle = $[handle]
-      where entity_id = $[entityId]
-        and wipe_id = $[wipeId]
-      returning *`,
-      { ...entity, handle }
-    )
-  )
-}
-
 export async function getEntities(
   wipeId: number,
   entityType: EntityType
@@ -158,7 +150,8 @@ export async function getEntities(
       `select *
          from entities
         where wipe_id = $[wipeId]
-          and entity_type = $[entityType]`,
+          and entity_type = $[entityType]
+          and not_found_at is null`,
       { wipeId, entityType }
     )
   )
@@ -200,7 +193,7 @@ export async function handleEntityHandleUpdateReply(
     )
     if (entity) {
       log.info({ entity, handle: msg.content }, 'Updating handle for entity')
-      const updated = await updateEntityHandle(entity, msg.content)
+      const updated = await updateEntity({ ...entity, handle: msg.content })
       await msg.react('✅')
       events.emit('entityHandleUpdated', updated)
     }

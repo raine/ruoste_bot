@@ -14,7 +14,7 @@ import { configure, getConfig, initEmptyConfig } from './config'
 import {
   createEntityFromPairing,
   handleEntityHandleUpdateReply,
-  setDiscordPairingMessageId
+  updateEntity
 } from './entity'
 import { fcmListen } from './fcm'
 import { saveMapIfNotExist } from './map'
@@ -97,7 +97,7 @@ export async function init(discord: DiscordAPI): Promise<void> {
       const msg = await discord.sendMessageToBotOwner(
         formatEntityPairing(pairing)
       )
-      await setDiscordPairingMessageId(entity, msg.id)
+      await updateEntity({ ...entity, discordPairingMessageId: msg.id })
       events.emit('entityPaired', entity)
     }
   })

@@ -211,6 +211,8 @@ describe('formatEntitiesUpkeep()', () => {
     entityId: 1,
     entityType: 3 as const,
     discordSwitchMessageId: null,
+    discordPairingMessageId: null,
+    notFoundAt: null,
     handle: 'Kaappi'
   }
 
@@ -298,7 +300,9 @@ describe('formatEntitiesUpkeep()', () => {
         entityId: 2,
         entityType: 3,
         discordSwitchMessageId: null,
+        discordPairingMessageId: null,
         handle: 'foo',
+        notFoundAt: null,
         entityInfo: entityInfo({
           hasProtection: false,
           protectionExpiry: 0,
@@ -310,7 +314,9 @@ describe('formatEntitiesUpkeep()', () => {
         entityId: 1,
         entityType: 3,
         discordSwitchMessageId: null,
+        discordPairingMessageId: null,
         handle: 'bar',
+        notFoundAt: null,
         entityInfo: entityInfo({
           hasProtection: false,
           protectionExpiry: 0,

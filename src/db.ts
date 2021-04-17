@@ -52,4 +52,6 @@ export const DEFAULT = {
   rawType: true
 }
 
+export const skip = ({ exists }: any) => !exists
+
 export default db

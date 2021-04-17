@@ -17,7 +17,7 @@ import {
   getEntities,
   getEntityByDiscordSwitchMessageId,
   getEntityWithWipeAndEntityId,
-  setDiscordSwitchMessageId
+  updateEntity
 } from './entity'
 import { getEntityInfo, setEntityValueAsync } from './rustplus-socket'
 import { AppEntityChanged, RustPlusEvents } from './types'
@@ -67,7 +67,7 @@ export async function initSwitchesChannel(
           'Failed to delete discord message, probably does not exist'
         )
       )
-      await setDiscordSwitchMessageId(s, null)
+      await updateEntity({ ...s, discordSwitchMessageId: null })
     })
   )
 
@@ -116,7 +116,7 @@ export async function initSwitchesChannel(
     }
   }
 
-  const updateEntity = async (entity: Entity) => {
+  const upsertEntity = async (entity: Entity) => {
     try {
       if (entity.entityType === EntityType.Switch)
         await upsertEntityMessage(discord, channel, entity)
@@ -146,14 +146,14 @@ export async function initSwitchesChannel(
   }
 
   events.on('entityChanged', onEntityChanged)
-  events.on('entityPaired', updateEntity)
-  events.on('entityHandleUpdated', updateEntity)
+  events.on('entityPaired', upsertEntity)
+  events.on('entityHandleUpdated', upsertEntity)
   discord.client.on('messageReactionAdd', onMessageReactionAdd)
 
   cleanUp = () => {
     events.removeListener('entityChanged', onEntityChanged)
-    events.removeListener('entityPaired', updateEntity)
-    events.removeListener('entityHandleUpdated', updateEntity)
+    events.removeListener('entityPaired', upsertEntity)
+    events.removeListener('entityHandleUpdated', upsertEntity)
     discord.client.removeListener('messageReactionAdd', onMessageReactionAdd)
   }
 }
@@ -187,7 +187,7 @@ async function upsertSwitchMessage(
     // Message id from db does not exist in discord, consider it deleted,
     // update db and try again
     if (err.code === 10008) {
-      await setDiscordSwitchMessageId(entity, null)
+      await updateEntity({ ...entity, discordSwitchMessageId: null })
       await upsertSwitchMessage(discord, channel, {
         ...entity,
         discordSwitchMessageId: null
@@ -200,7 +200,7 @@ async function upsertSwitchMessage(
   if (msg) {
     if (!msg.reactions.cache.get(TOGGLE_SWITCH_EMOJI))
       await msg.react(TOGGLE_SWITCH_EMOJI)
-    await setDiscordSwitchMessageId(entity, msg.id)
+    await updateEntity({ ...entity, discordSwitchMessageId: msg.id })
   }
 }
 

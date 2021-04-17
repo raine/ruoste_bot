@@ -2,7 +2,7 @@ import * as B from 'baconjs'
 import delay from 'delay'
 import * as _ from 'lodash'
 import { TypedEmitter } from 'tiny-typed-emitter'
-import db, { DEFAULT, pgp } from '../../db'
+import db, { DEFAULT, pgp, skip } from '../../db'
 import log from '../../logger'
 import { getMapMarkers } from '../rustplus-socket'
 import { getWipeId } from '../server'
@@ -18,8 +18,6 @@ import { cargoShipEntered, cargoShipLeft } from './cargo-ship'
 import { ch47 } from './ch47'
 import { crate, isOilrigCrateEvent, removeCrateRefreshes } from './crate'
 import { bradleyDestroyedOrPatrolHeliDown } from './explosion'
-
-const skip = ({ exists }: any) => !exists
 
 const mapEventsColumnSet = new pgp.helpers.ColumnSet(
   [

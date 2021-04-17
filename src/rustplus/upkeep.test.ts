@@ -101,9 +101,19 @@ describe('upkeep tracking', () => {
     )
   })
 
-  test('does not fail if storage monitor cant be found', async () => {
+  test('sets not_found_at if storage monitor cant be found', async () => {
     mockedGetEntityInfo.mockClear()
     mockedGetEntityInfo.mockRejectedValue({ error: 'not_found' })
     await trackUpkeep(SERVER_INFO, discord, wipeId)
+    await expect(db.one(`select * from entities`)).resolves.toEqual({
+      handle: null,
+      wipeId: 1,
+      entityId: 1,
+      entityType: 3,
+      createdAt: expect.any(String),
+      notFoundAt: expect.any(String),
+      discordSwitchMessageId: null,
+      discordPairingMessageId: null
+    })
   })
 })
