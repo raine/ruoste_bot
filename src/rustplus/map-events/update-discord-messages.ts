@@ -3,7 +3,7 @@ import * as t from 'io-ts'
 import { DateTime } from 'luxon'
 import { updateMapEvent } from '.'
 import { getConfig } from '..'
-import db from '../../db'
+import db, { pgp } from '../../db'
 import { DiscordAPI } from '../../discord'
 import { formatMapEvent } from '../../discord/formatting'
 import log from '../../logger'
@@ -32,23 +32,34 @@ const MAP_EVENTS_WITH_TIMER: {
   { type: 'BRADLEY_APC_DESTROYED', timer: '5 min' }
 ]
 
-export async function getMapEventMessagesToBeUpdated(
+function formatMapEventMessageToBeUpdatedQuery(
   type: MapEventTypeWithTimer,
+  timer: string,
+  wipeId: number
+): string {
+  return pgp.as.format(
+    `select *
+       from map_events
+      where wipe_id = $[wipeId]
+        and type = $[type]
+        and discord_message_id is not null
+        and ((now() <= created_at + $[timer]::interval) or
+             (discord_message_last_updated_at is not null and
+               discord_message_last_updated_at < (created_at + ($[timer]::interval + '1 sec'::interval))))`,
+    { wipeId, timer, type }
+  )
+}
+
+export async function getMapEventMessagesToBeUpdated(
   wipeId: number
 ): Promise<DbMapEvent[]> {
-  const { timer } = MAP_EVENTS_WITH_TIMER.find((obj) => obj.type === type)!
   return validateP(
     t.array(DbMapEvent),
     db.any(
-      `select *
-         from map_events
-        where wipe_id = $[wipeId]
-          and type = $[type]
-          and discord_message_id is not null
-          and ((now() <= created_at + $[timer]::interval) or
-               (discord_message_last_updated_at is not null and
-                 discord_message_last_updated_at < (created_at + ($[timer]::interval + '1 sec'::interval))))`,
-      { wipeId, timer, type }
+      MAP_EVENTS_WITH_TIMER.map(
+        ({ type, timer }) =>
+          '(' + formatMapEventMessageToBeUpdatedQuery(type, timer, wipeId) + ')'
+      ).join(' union ')
     )
   )
 }
@@ -59,14 +70,7 @@ export async function updateMapEventMessages(
 ) {
   const { discordEventsChannelId } = await getConfig()
   if (!discordEventsChannelId) return
-  const mapEvents = (
-    await Promise.all(
-      MAP_EVENTS_WITH_TIMER.map(({ type }) =>
-        getMapEventMessagesToBeUpdated(type, wipeId)
-      )
-    )
-  ).flat()
-
+  const mapEvents = await getMapEventMessagesToBeUpdated(wipeId)
   if (mapEvents.length) log.debug({ mapEvents }, 'Got map events for updating')
 
   await Promise.all(

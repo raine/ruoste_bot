@@ -61,10 +61,7 @@ describe('getMapEventMessagesToBeUpdated()', () => {
         discordMessageLastUpdatedAt: null
       })
 
-      const mapEvents = await getMapEventMessagesToBeUpdated(
-        'LARGE_OIL_RIG_CRATE_HACKED',
-        wipe.wipeId
-      )
+      const mapEvents = await getMapEventMessagesToBeUpdated(wipe.wipeId)
       expect(mapEvents).toEqual([mapEvent])
     })
 
@@ -75,10 +72,7 @@ describe('getMapEventMessagesToBeUpdated()', () => {
         discordMessageLastUpdatedAt: null
       })
 
-      const mapEvents = await getMapEventMessagesToBeUpdated(
-        'LARGE_OIL_RIG_CRATE_HACKED',
-        wipe.wipeId
-      )
+      const mapEvents = await getMapEventMessagesToBeUpdated(wipe.wipeId)
       expect(mapEvents).toEqual([])
     })
 
@@ -91,10 +85,7 @@ describe('getMapEventMessagesToBeUpdated()', () => {
         discordMessageLastUpdatedAt: DateTime.local().toSQL()
       })
 
-      const mapEvents = await getMapEventMessagesToBeUpdated(
-        'LARGE_OIL_RIG_CRATE_HACKED',
-        wipe.wipeId
-      )
+      const mapEvents = await getMapEventMessagesToBeUpdated(wipe.wipeId)
       expect(mapEvents).toEqual([mapEvent])
     })
 
@@ -107,10 +98,7 @@ describe('getMapEventMessagesToBeUpdated()', () => {
           .toSQL()
       })
 
-      const mapEvents = await getMapEventMessagesToBeUpdated(
-        'LARGE_OIL_RIG_CRATE_HACKED',
-        wipe.wipeId
-      )
+      const mapEvents = await getMapEventMessagesToBeUpdated(wipe.wipeId)
       expect(mapEvents).toEqual([])
     })
   })
