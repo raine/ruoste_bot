@@ -107,6 +107,32 @@ describe('formatMapEvent()', () => {
       ).toBe('📦 Locked Crate gone')
     })
   })
+
+  describe('large oilrig crate hacked', () => {
+    test('no timer', () => {
+      expect(
+        formatMapEvent({
+          ...dbMapEventBase,
+          type: 'LARGE_OIL_RIG_CRATE_HACKED',
+          data: null
+        })
+      ).toEqual('💻 Large Oil Rig Crate hacked')
+    })
+
+    test('timer', () => {
+      expect(
+        formatMapEvent({
+          ...dbMapEventBase,
+          type: 'LARGE_OIL_RIG_CRATE_HACKED',
+          data: null,
+          createdAt: DateTime.local()
+            // added milliseconds are to have it always floor down to 9:59
+            .minus({ minutes: 5, milliseconds: 100 })
+            .toString()
+        })
+      ).toEqual('💻 Large Oil Rig Crate hacked (9:59)')
+    })
+  })
 })
 
 describe('formatSmartAlarmAlert()', () => {
