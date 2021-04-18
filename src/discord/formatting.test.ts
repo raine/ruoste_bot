@@ -7,9 +7,15 @@ import {
 } from './formatting'
 
 describe('formatMapEvent()', () => {
+  const dbMapEventBase = {
+    mapEventId: 1,
+    wipeId: 2
+  }
+
   test('cargo ship entered', () => {
     expect(
       formatMapEvent({
+        ...dbMapEventBase,
         type: 'CARGO_SHIP_ENTERED',
         data: {
           previousSpawn: DateTime.local()
@@ -23,8 +29,9 @@ describe('formatMapEvent()', () => {
   test('cargo ship left', () => {
     expect(
       formatMapEvent({
+        ...dbMapEventBase,
         type: 'CARGO_SHIP_LEFT',
-        data: undefined
+        data: null
       })
     ).toBe('🚢 Cargo Ship left the map')
   })
@@ -32,8 +39,9 @@ describe('formatMapEvent()', () => {
   test('bradley apc destroyed', () => {
     expect(
       formatMapEvent({
+        ...dbMapEventBase,
         type: 'BRADLEY_APC_DESTROYED',
-        data: undefined
+        data: null
       })
     ).toBe('💥 Bradley APC destroyed')
   })
@@ -41,8 +49,9 @@ describe('formatMapEvent()', () => {
   test('patrol heli down', () => {
     expect(
       formatMapEvent({
+        ...dbMapEventBase,
         type: 'PATROL_HELI_DOWN',
-        data: undefined
+        data: null
       })
     ).toBe('💥 Patrol Helicopter taken down')
   })
@@ -51,6 +60,7 @@ describe('formatMapEvent()', () => {
     test('spawned to large oil rig', () => {
       expect(
         formatMapEvent({
+          ...dbMapEventBase,
           type: 'CRATE_SPAWNED',
           data: { monument: 'large_oil_rig', onCargoShip: false }
         })
@@ -60,6 +70,7 @@ describe('formatMapEvent()', () => {
     test('spawned to no monument', () => {
       expect(
         formatMapEvent({
+          ...dbMapEventBase,
           type: 'CRATE_SPAWNED',
           data: { monument: null, onCargoShip: false }
         })
@@ -69,6 +80,7 @@ describe('formatMapEvent()', () => {
     test('spawned to seemingly wrong monument has token as name', () => {
       expect(
         formatMapEvent({
+          ...dbMapEventBase,
           type: 'CRATE_SPAWNED',
           data: { monument: 'fishing_village_display_name', onCargoShip: false }
         })
@@ -78,6 +90,7 @@ describe('formatMapEvent()', () => {
     test('gone from large oil rig', () => {
       expect(
         formatMapEvent({
+          ...dbMapEventBase,
           type: 'CRATE_GONE',
           data: { monument: 'large_oil_rig', onCargoShip: false }
         })
@@ -87,6 +100,7 @@ describe('formatMapEvent()', () => {
     test('gone from no monument', () => {
       expect(
         formatMapEvent({
+          ...dbMapEventBase,
           type: 'CRATE_GONE',
           data: { monument: null, onCargoShip: false }
         })
