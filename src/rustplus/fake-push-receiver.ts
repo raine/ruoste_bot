@@ -154,10 +154,15 @@ class FakePushReceiver extends TypedEmitter<FakePushReceiverEvents> {
 
     process.nextTick(() => {
       this.emit('connect')
-
-      setTimeout(() => {
-        onFcmNotification(FAKE_EVENTS.storageMonitor)
-      }, 1000)
+      const eventKey = process.env.FAKE_FCM_EVENT as
+        | keyof typeof FAKE_EVENTS
+        | undefined
+      const notification = eventKey ? FAKE_EVENTS[eventKey] : undefined
+      if (notification) {
+        setTimeout(() => {
+          onFcmNotification(notification)
+        }, 5000)
+      }
     })
   }
 
