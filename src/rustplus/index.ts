@@ -19,14 +19,12 @@ import {
   updateEntity
 } from './entity'
 import { fcmListen } from './fcm'
-import { saveMapIfNotExist } from './map'
 import { trackMapEvents } from './map-events'
 import { onMapEvent } from './map-events/on-map-event'
 import { updateMapEventDiscordMessagesLoop } from './map-events/update-discord-messages'
 import * as socket from './rustplus-socket'
 import { makeScriptApi } from './script-api'
 import {
-  createWipeIfNotExist,
   getCurrentServer,
   getServerId,
   getWipeById,
@@ -110,16 +108,14 @@ export async function init(discord: DiscordAPI): Promise<void> {
     log.info(event, 'Got player event')
   })
 
-  events.on('connected', async (serverInfo) => {
+  events.on('connected', async (serverInfo, server, wipeId) => {
     log.info(serverInfo, 'Connected to rust server')
-    const wipe = await createWipeIfNotExist(serverInfo)
-    state.wipeId = wipe.wipeId
+    state.wipeId = wipeId
     state.serverInfo = serverInfo
-    await saveMapIfNotExist(serverInfo, state.wipeId)
-    void trackMapEvents(serverInfo, wipe.wipeId, events)
-    void updateMapEventDiscordMessagesLoop(discord, wipe.wipeId)
-    void trackUpkeepLoop(discord, serverInfo, state.wipeId)
-    void initSwitchesChannel(discord, events, state.wipeId)
+    void trackMapEvents(serverInfo, wipeId, events)
+    void updateMapEventDiscordMessagesLoop(discord, wipeId)
+    void trackUpkeepLoop(discord, serverInfo, wipeId)
+    void initSwitchesChannel(discord, events, wipeId)
   })
 
   await initEmptyConfig()

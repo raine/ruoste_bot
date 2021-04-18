@@ -17,8 +17,9 @@ import {
 } from './types'
 import protobuf, { Message } from 'protobufjs'
 import { events } from './'
-import { Server } from './server'
+import { createWipeIfNotExist, Server } from './server'
 import { logAndCapture } from '../errors'
+import { saveMapIfNotExist } from './map'
 
 export let socket: any
 export let socketConnectedP: Promise<void>
@@ -196,7 +197,9 @@ export async function listen(server: Server) {
       resolve() // sendRequestAsync pends on this promise
       try {
         const info = await getServerInfo()
-        events.emit('connected', info, server)
+        const { wipeId } = await createWipeIfNotExist(info)
+        await saveMapIfNotExist(info, wipeId)
+        events.emit('connected', info, server, wipeId)
       } catch (err) {
         log.error(err)
       }

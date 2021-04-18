@@ -278,7 +278,7 @@ export interface RustPlusEvents {
   entityPaired: (data: Entity) => void
   team: (data: TeamNotificationData) => void
   mapEvent: (data: DbMapEvent) => void
-  connected: (serverInfo: ServerInfo, server: Server) => void
+  connected: (serverInfo: ServerInfo, server: Server, wipeId: number) => void
   entityChanged: (data: AppEntityChanged) => void
   entityHandleUpdated: (data: Entity) => void
   teamChanged: (data: AppTeamChanged) => void
