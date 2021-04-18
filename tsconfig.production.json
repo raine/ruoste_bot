@@ -1,4 +1,7 @@
 {
   "extends": "./tsconfig",
-  "exclude": ["**/*.test.ts"]
+  "exclude": ["**/*.test.ts"],
+  "compilerOptions": {
+    "plugins": [{ "transform": "@zerollup/ts-transform-paths" }]
+  }
 }

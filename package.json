@@ -45,6 +45,7 @@
     "@types/uuid": "^8.3.0",
     "@typescript-eslint/eslint-plugin": "^4.21.0",
     "@typescript-eslint/parser": "^4.21.0",
+    "@zerollup/ts-transform-paths": "^1.7.18",
     "dedent": "^0.7.0",
     "eslint": "^7.23.0",
     "eslint-config-prettier": "^8.1.0",
@@ -58,6 +59,7 @@
     "ts-node": "^9.1.1",
     "ts-node-dev": "^1.1.6",
     "tsconfig-paths": "^3.9.0",
+    "ttypescript": "^1.5.12",
     "typescript": "^4.2.4"
   },
   "scripts": {
@@ -67,7 +69,7 @@
     "test:jest": "yarn jest --runInBand",
     "test:jest:watch": "yarn test:jest --watch",
     "test:lint": "eslint src/",
-    "build": "rm -rf dist/ && tsc --build tsconfig.production.json",
+    "build": "rm -rf dist/ && ttsc -P tsconfig.production.json",
     "run-script-dev": "ts-node-dev -r tsconfig-paths/register --files --no-notify --respawn --project tsconfig.json",
     "dev": "yarn run-script-dev src/main.ts"
   }
