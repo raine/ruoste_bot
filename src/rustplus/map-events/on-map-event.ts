@@ -14,6 +14,10 @@ export async function onMapEvent(discord: DiscordAPI, mapEvent: DbMapEvent) {
   if (
     ((mapEvent.type === 'CRATE_SPAWNED' || mapEvent.type === 'CRATE_GONE') &&
       mapEvent.data.onCargoShip) ||
+    (mapEvent.type === 'CRATE_GONE' &&
+      !['oil_rig_small', 'large_oil_rig'].includes(
+        mapEvent.data.monument ?? ''
+      )) ||
     mapEvent.type === 'CARGO_SHIP_LEFT'
   )
     return
