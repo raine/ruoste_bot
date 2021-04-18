@@ -5,8 +5,9 @@ import { resetDb } from '../test/utils'
 import { configure, initEmptyConfig } from './config'
 import { getEntityInfo } from './socket'
 import { createWipeIfNotExist, upsertServer } from './server'
-import { ServerInfo } from './types'
+import { RustPlusEvents, ServerInfo } from './types'
 import { getUpkeepDiscordMessageId, trackUpkeep } from './upkeep'
+import { TypedEmitter } from 'tiny-typed-emitter'
 
 jest.mock('./socket', () => ({
   __esModule: true,
@@ -57,6 +58,7 @@ const STORAGE_MONITOR_ENTITY_INFO = {
 describe('upkeep tracking', () => {
   let wipeId: number
   let discord: any
+  const events = new TypedEmitter<RustPlusEvents>()
 
   beforeEach(async () => {
     await resetDb()
@@ -77,7 +79,7 @@ describe('upkeep tracking', () => {
 
   test('sends message to channel if there is a working storage monitor', async () => {
     discord.sendOrEditMessage.mockResolvedValue({ id: 'asdf' })
-    await trackUpkeep(SERVER_INFO, discord, wipeId)
+    await trackUpkeep(SERVER_INFO, discord, wipeId, events)
     expect(discord.sendOrEditMessage).toHaveBeenCalledWith(
       '123',
       expect.objectContaining({ embed: expect.anything() }),
@@ -96,7 +98,7 @@ describe('upkeep tracking', () => {
       `insert into upkeep_discord_messages (wipe_id, discord_message_id) values ($[wipeId], 'asdf')`,
       { wipeId }
     )
-    await trackUpkeep(SERVER_INFO, discord, wipeId)
+    await trackUpkeep(SERVER_INFO, discord, wipeId, events)
     expect(discord.sendOrEditMessage).toHaveBeenCalledWith(
       '123',
       expect.objectContaining({ embed: expect.anything() }),
@@ -104,19 +106,41 @@ describe('upkeep tracking', () => {
     )
   })
 
-  test('sets not_found_at if storage monitor cant be found', async () => {
-    mockedGetEntityInfo.mockClear()
-    mockedGetEntityInfo.mockRejectedValue({ error: 'not_found' })
-    await trackUpkeep(SERVER_INFO, discord, wipeId)
-    await expect(db.one(`select * from entities`)).resolves.toEqual({
-      handle: null,
-      wipeId: 1,
-      entityId: 1,
-      entityType: 3,
-      createdAt: expect.any(String),
-      notFoundAt: expect.any(String),
-      discordSwitchMessageId: null,
-      discordPairingMessageId: null
+  describe('entity not found', () => {
+    test('sets not_found_at if storage monitor cant be found', async () => {
+      mockedGetEntityInfo.mockClear()
+      mockedGetEntityInfo.mockRejectedValue({ error: 'not_found' })
+      await trackUpkeep(SERVER_INFO, discord, wipeId, events)
+      await expect(db.one(`select * from entities`)).resolves.toEqual({
+        handle: null,
+        wipeId: 1,
+        entityId: 1,
+        entityType: 3,
+        createdAt: expect.any(String),
+        notFoundAt: expect.any(String),
+        discordSwitchMessageId: null,
+        discordPairingMessageId: null
+      })
+    })
+
+    test('emits storageMonitorUnresponsive event with entity', async () => {
+      mockedGetEntityInfo.mockClear()
+      mockedGetEntityInfo.mockRejectedValue({ error: 'not_found' })
+      const event = new Promise((resolve) =>
+        events.once('storageMonitorUnresponsive', resolve)
+      )
+      await trackUpkeep(SERVER_INFO, discord, wipeId, events)
+      await expect(event).resolves.toEqual({
+        createdAt: expect.any(String),
+        discordPairingMessageId: null,
+        discordSwitchMessageId: null,
+        entityId: 1,
+        entityInfo: { error: 'not_found' },
+        entityType: 3,
+        handle: null,
+        notFoundAt: null,
+        wipeId: 1
+      })
     })
   })
 })

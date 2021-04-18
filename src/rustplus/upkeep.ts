@@ -1,6 +1,6 @@
 import * as t from 'io-ts'
 import { DateTime } from 'luxon'
-import { AppEntityInfo, ServerInfo } from '.'
+import { AppEntityInfo, RustPlusEventEmitter, ServerInfo } from '.'
 import db from '../db'
 import { DiscordAPI } from '../discord'
 import { formatEntitiesUpkeep } from '../discord/formatting'
@@ -25,7 +25,8 @@ const NotFoundError = t.type({ error: t.literal('not_found') })
 export async function trackUpkeep(
   serverInfo: ServerInfo,
   discord: DiscordAPI,
-  wipeId: number
+  wipeId: number,
+  events: RustPlusEventEmitter
 ) {
   const storageMonitors = await getEntities(EntityType.StorageMonitor)
   const storageMonitorsWithEntityInfo = await Promise.all(
@@ -51,6 +52,10 @@ export async function trackUpkeep(
         updateEntity({ ...entity, notFoundAt: DateTime.local().toSQL() })
       )
     )
+
+    notFound.forEach((entity) => {
+      events.emit('storageMonitorUnresponsive', entity)
+    })
   }
 
   const { discordUpkeepChannelId } = await getConfig()
@@ -75,13 +80,14 @@ let timeoutId: NodeJS.Timeout | undefined
 export function trackUpkeepLoop(
   discord: DiscordAPI,
   serverInfo: ServerInfo,
-  wipeId: number
+  wipeId: number,
+  events: RustPlusEventEmitter
 ) {
   log.info('Starting to track upkeep')
   if (timeoutId) clearTimeout(timeoutId)
 
   return (async function loop(): Promise<void> {
-    await trackUpkeep(serverInfo, discord, wipeId).catch(logAndCapture)
+    await trackUpkeep(serverInfo, discord, wipeId, events).catch(logAndCapture)
     timeoutId = global.setTimeout(loop, UPKEEP_UPDATE_INTERVAL)
   })()
 }

@@ -282,6 +282,7 @@ export interface RustPlusEvents {
   entityChanged: (data: AppEntityChanged) => void
   entityHandleUpdated: (data: Entity) => void
   teamChanged: (data: AppTeamChanged) => void
+  storageMonitorUnresponsive: (data: Entity) => void
 }
 
 export type RustPlusEventEmitter = TypedEmitter<RustPlusEvents>
