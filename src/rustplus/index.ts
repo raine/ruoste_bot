@@ -115,7 +115,7 @@ export async function init(discord: DiscordAPI): Promise<void> {
     void trackMapEvents(serverInfo, wipeId, events)
     void updateMapEventDiscordMessagesLoop(discord, wipeId)
     void trackUpkeepLoop(discord, serverInfo, wipeId)
-    void initSwitchesChannel(discord, events, wipeId)
+    void initSwitchesChannel(discord, events)
   })
 
   await initEmptyConfig()

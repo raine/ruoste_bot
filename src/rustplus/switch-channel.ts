@@ -15,7 +15,7 @@ import {
   getAllEntities,
   getEntities,
   getEntityByDiscordSwitchMessageId,
-  getEntityWithWipeAndEntityId,
+  getEntityById,
   updateEntity
 } from './entity'
 import { getEntityInfo, setEntityValueAsync } from './socket'
@@ -34,8 +34,7 @@ let cleanUp: (() => void) | undefined
 
 export async function initSwitchesChannel(
   discord: DiscordAPI,
-  events: RustPlusEventEmitter,
-  wipeId: number
+  events: RustPlusEventEmitter
 ): Promise<void> {
   if (cleanUp) cleanUp()
 
@@ -88,7 +87,7 @@ export async function initSwitchesChannel(
   )
 
   if (switchesNotFound.length)
-    await deleteNotFoundSwitches(wipeId, channel, switchesNotFound)
+    await deleteNotFoundSwitches(channel, switchesNotFound)
 
   await Promise.all(
     switchesWithEntityInfoOk.map((entity) =>
@@ -98,11 +97,7 @@ export async function initSwitchesChannel(
 
   const onEntityChanged = async (changedEntity: AppEntityChanged) => {
     try {
-      const entity = await getEntityWithWipeAndEntityId(
-        wipeId,
-        changedEntity.entityId
-      )
-
+      const entity = await getEntityById(changedEntity.entityId)
       if (entity.discordSwitchMessageId) {
         await discord.sendOrEditMessage(
           channel.id,
@@ -204,7 +199,6 @@ async function upsertSwitchMessage(
 }
 
 async function deleteNotFoundSwitches(
-  wipeId: number,
   channel: DiscordTextChannel,
   switches: EntityWithError[]
 ): Promise<void> {
@@ -214,10 +208,7 @@ async function deleteNotFoundSwitches(
       .filter((s) => s.discordSwitchMessageId)
       .map((s) => deleteDiscordMessage(channel, s.discordSwitchMessageId!))
   )
-  await deleteEntities(
-    wipeId,
-    switches.map((e) => e.entityId)
-  )
+  await deleteEntities(switches.map((e) => e.entityId))
 }
 
 async function deleteDiscordMessage(

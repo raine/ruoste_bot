@@ -83,16 +83,19 @@ export async function createEntityFromPairing({
       log.info(created, 'Entity created')
       return created
     } else {
-      return getEntityWithWipeAndEntityId(wipeId, entityId, tx)
+      return getEntityById(entityId, wipeId, tx)
     }
   })
 }
 
-export async function getEntityWithWipeAndEntityId(
-  wipeId: number,
+export async function getEntityById(
   entityId: number,
+  wipeId?: number,
   tx: Db = db
 ): Promise<Entity> {
+  wipeId = wipeId ?? (await getCurrentWipe(tx))?.wipeId
+  if (!wipeId) throw new Error('No current wipe')
+
   return validateP(
     Entity,
     tx.one(
@@ -104,6 +107,7 @@ export async function getEntityWithWipeAndEntityId(
     )
   )
 }
+
 export async function updateEntity(entity: Partial<Entity>): Promise<Entity> {
   return db.one(
     pgp.helpers.update(entity, entitiesColumnSet) +
@@ -161,9 +165,12 @@ export async function getEntities(
 }
 
 export async function deleteEntities(
-  wipeId: number,
-  entityIds: number[]
+  entityIds: number[],
+  wipeId?: number
 ): Promise<void> {
+  wipeId = wipeId ?? (await getCurrentWipe())?.wipeId
+  if (!wipeId) throw new Error('No current wipe')
+
   await db.none(
     `delete from entities
       where wipe_id = $[wipeId]
