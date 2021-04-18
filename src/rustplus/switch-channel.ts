@@ -18,7 +18,7 @@ import {
   getEntityWithWipeAndEntityId,
   updateEntity
 } from './entity'
-import { getEntityInfo, setEntityValueAsync } from './rustplus-socket'
+import { getEntityInfo, setEntityValueAsync } from './socket'
 import { AppEntityChanged, RustPlusEventEmitter } from './types'
 
 const TOGGLE_SWITCH_EMOJI = '🔀'

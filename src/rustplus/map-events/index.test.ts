@@ -15,13 +15,13 @@ import {
 } from '.'
 import { saveMapIfNotExist } from '../map'
 
-jest.mock('../rustplus-socket', () => ({
+jest.mock('../socket', () => ({
   __esModule: true,
   getMapMarkers: jest.fn(),
   getMap: jest.fn()
 }))
 
-import { getMapMarkers, getMap } from '../rustplus-socket'
+import { getMapMarkers, getMap } from '../socket'
 import { createWipeIfNotExist, upsertServer, Wipe } from '../server'
 const mockedGetMapMarkers = mocked(getMapMarkers, true)
 const mockedGetMap = mocked(getMap, true)

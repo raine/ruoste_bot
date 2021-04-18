@@ -140,7 +140,7 @@ export async function getCurrentServer(tx: Db = db): Promise<Server | null> {
         where server_id = (
           select current_server_id
             from rustplus_config
-          )`
+        )`
     )
   )
 }

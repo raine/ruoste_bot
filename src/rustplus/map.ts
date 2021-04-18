@@ -1,5 +1,5 @@
 import { Monument, MonumentToken, ServerInfo } from './types'
-import { getMap } from '.'
+import { socket } from './'
 import db from '../db'
 import log from '../logger'
 import _ from 'lodash'
@@ -16,7 +16,7 @@ export async function saveMapIfNotExist(
       { wipeId }
     )
     if (!existing) {
-      const map = await getMap()
+      const map = await socket.getMap()
       const mapWithoutJpgImage = _.omit(map, 'jpgImage')
       await t.none(
         `insert into maps (wipe_id, data)

@@ -4,7 +4,7 @@ import * as _ from 'lodash'
 import { TypedEmitter } from 'tiny-typed-emitter'
 import db, { DEFAULT, pgp, skip } from '../../db'
 import log from '../../logger'
-import { getMapMarkers } from '../rustplus-socket'
+import { getMapMarkers } from '../socket'
 import { getWipeId } from '../server'
 import {
   AppMarker,

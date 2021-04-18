@@ -22,7 +22,7 @@ import { fcmListen } from './fcm'
 import { trackMapEvents } from './map-events'
 import { onMapEvent } from './map-events/on-map-event'
 import { updateMapEventDiscordMessagesLoop } from './map-events/update-discord-messages'
-import * as socket from './rustplus-socket'
+import * as socket from './socket'
 import { makeScriptApi } from './script-api'
 import {
   getCurrentServer,
@@ -42,8 +42,8 @@ import {
 import { trackUpkeepLoop } from './upkeep'
 
 export * from './config'
-export * from './rustplus-socket'
 export * from './types'
+export * as socket from './socket'
 
 type State = {
   serverInfo?: ServerInfo

@@ -9,7 +9,7 @@ import log from '../logger'
 import { validate, validateP } from '../validate'
 import { getConfig } from './config'
 import { EntityType, EntityWithInfo, getEntities, updateEntity } from './entity'
-import { getEntityInfo } from './rustplus-socket'
+import { getEntityInfo } from './socket'
 
 const UPKEEP_UPDATE_INTERVAL = 300 * 1000
 

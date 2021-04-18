@@ -1,4 +1,4 @@
-import * as socket from './rustplus-socket'
+import * as socket from './socket'
 import * as rustplus from './'
 import * as B from 'baconjs'
 import { AppEntityChanged } from './types'

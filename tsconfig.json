@@ -17,7 +17,10 @@
     "outDir": "dist/",
     "strict": true,
     "target": "esnext",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "paths": {
+      "@ruoste_bot/*": ["./src/*"]
+    }
   },
   "include": ["src/**/*.ts"]
 }

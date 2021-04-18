@@ -1,4 +1,4 @@
-import * as socket from './rustplus-socket'
+import * as socket from './socket'
 import * as B from 'baconjs'
 import { AppTime } from './types'
 

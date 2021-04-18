@@ -170,8 +170,8 @@ const BOT_STATUS_UPDATE_INTERVAL = 60000
 async function updateBotActivity(client: Discord.Client): Promise<void> {
   try {
     const [serverInfo, teamInfo] = await Promise.all([
-      rustplus.getServerInfo(),
-      rustplus.getTeamInfo()
+      rustplus.socket.getServerInfo(),
+      rustplus.socket.getTeamInfo()
     ])
     const text = formatBotActivityText(serverInfo, teamInfo)
     await client.user?.setActivity(text, { type: 'PLAYING' })
@@ -289,7 +289,7 @@ export default function start(): DiscordAPI {
 
       // The promise may not exist if there's configuration missing at start
       // We need this because rust server is connected to before event above is bound
-      void rustplus.socketConnectedP
+      void rustplus.socket.socketConnectedP
         ?.then(onRustSocketConnected)
         .catch(log.error)
     })

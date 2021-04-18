@@ -3,12 +3,12 @@ import { mocked } from 'ts-jest/utils'
 import db from '../db'
 import { resetDb } from '../test/utils'
 import { configure, initEmptyConfig } from './config'
-import { getEntityInfo } from './rustplus-socket'
+import { getEntityInfo } from './socket'
 import { createWipeIfNotExist, upsertServer } from './server'
 import { ServerInfo } from './types'
 import { getUpkeepDiscordMessageId, trackUpkeep } from './upkeep'
 
-jest.mock('./rustplus-socket', () => ({
+jest.mock('./socket', () => ({
   __esModule: true,
   getEntityInfo: jest.fn()
 }))
