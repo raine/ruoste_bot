@@ -11,7 +11,7 @@ import { getConfig } from './config'
 import { EntityType, EntityWithInfo, getEntities, updateEntity } from './entity'
 import { getEntityInfo } from './socket'
 
-const UPKEEP_UPDATE_INTERVAL = 300 * 1000
+const UPKEEP_UPDATE_INTERVAL = 60 * 1000
 
 const UpkeepDiscordMessage = t.type({
   wipeId: t.number,
@@ -46,7 +46,6 @@ export async function trackUpkeep(
   )
 
   if (notFound.length) {
-    log.info(notFound, 'Failed to get entity info for entities')
     await Promise.all(
       notFound.map((entity) =>
         updateEntity({ ...entity, notFoundAt: DateTime.local().toSQL() })
@@ -54,6 +53,7 @@ export async function trackUpkeep(
     )
 
     notFound.forEach((entity) => {
+      log.info(entity, 'Failed to get entity info for storage monitor')
       events.emit('storageMonitorUnresponsive', entity)
     })
   }
