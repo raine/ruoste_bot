@@ -5,6 +5,7 @@ import { validateP } from '../validate'
 import { XY } from '../math'
 
 export const Server = t.type({
+  serverId: t.number,
   host: t.string,
   port: t.number,
   playerToken: t.number,
@@ -30,16 +31,17 @@ export function upsertServer(
     playerToken: number
     playerSteamId: string
   }
-): Promise<any> {
-  return db.task(async (t) => {
-    await t.none(
+): Promise<Server> {
+  return db.task(async (t) =>
+    t.one(
       `insert into servers (host, port, player_token, player_steam_id)
        values ($[host], $[port], $[playerToken], $[playerSteamId])
        on conflict (host, port)
-       do update set player_token = excluded.player_token, player_steam_id = excluded.player_steam_id`,
+       do update set player_token = excluded.player_token, player_steam_id = excluded.player_steam_id
+       returning *`,
       server
     )
-  })
+  )
 }
 
 export function createWipeIfNotExist(serverInfo: ServerInfo): Promise<Wipe> {
@@ -129,6 +131,23 @@ export async function getServerId(
   )
 
   return serverId
+}
+
+export async function getCurrentWipe(tx: Db = db): Promise<Wipe | null> {
+  return validateP(
+    Wipe,
+    tx.oneOrNone(
+      `with current_server as (
+         select current_server_id as server_id
+           from rustplus_config
+       )
+       select wipes.* from current_server
+         join servers using (server_id)
+         join wipes using (server_id)
+        order by wiped_at desc
+        limit 1`
+    )
+  )
 }
 
 export async function getCurrentServer(tx: Db = db): Promise<Server | null> {

@@ -27,7 +27,7 @@ export async function trackUpkeep(
   discord: DiscordAPI,
   wipeId: number
 ) {
-  const storageMonitors = await getEntities(wipeId, EntityType.StorageMonitor)
+  const storageMonitors = await getEntities(EntityType.StorageMonitor)
   const storageMonitorsWithEntityInfo = await Promise.all(
     storageMonitors.map(async (entity) => ({
       ...entity,

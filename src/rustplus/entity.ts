@@ -5,7 +5,7 @@ import db, { Db, DEFAULT, pgp, skip } from '../db'
 import { isMessageReply } from '../discord'
 import log from '../logger'
 import { validateP } from '../validate'
-import { getCurrentWipeForServer } from './server'
+import { getCurrentWipe, getCurrentWipeForServer } from './server'
 import {
   AppEntityInfo,
   EntityPairingNotificationData,
@@ -141,9 +141,12 @@ export async function getEntityByDiscordSwitchMessageId(
 }
 
 export async function getEntities(
-  wipeId: number,
-  entityType: EntityType
+  entityType: EntityType,
+  wipeId?: number
 ): Promise<Entity[]> {
+  wipeId = wipeId ?? (await getCurrentWipe())?.wipeId
+  if (!wipeId) throw new Error('No current wipe')
+
   return validateP(
     t.array(Entity),
     db.any(

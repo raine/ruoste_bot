@@ -48,7 +48,7 @@ export async function initSwitchesChannel(
   const allSwitchesWithMessage = (await getAllEntities(1)).filter(
     (s) => s.discordSwitchMessageId
   )
-  const switches = await getEntities(wipeId, 1)
+  const switches = await getEntities(1)
   // Delete messages in the channel that are from another wipe
   const switchesWithMessageToBeDeleted = _.differenceBy(
     allSwitchesWithMessage,
