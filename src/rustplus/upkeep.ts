@@ -54,7 +54,7 @@ export async function trackUpkeep(
 
     notFound.forEach((entity) => {
       log.info(entity, 'Failed to get entity info for storage monitor')
-      events.emit('storageMonitorUnresponsive', entity)
+      events.emit('storageMonitorNotFound', entity)
     })
   }
 

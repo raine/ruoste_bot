@@ -127,7 +127,7 @@ describe('upkeep tracking', () => {
       mockedGetEntityInfo.mockClear()
       mockedGetEntityInfo.mockRejectedValue({ error: 'not_found' })
       const event = new Promise((resolve) =>
-        events.once('storageMonitorUnresponsive', resolve)
+        events.once('storageMonitorNotFound', resolve)
       )
       await trackUpkeep(SERVER_INFO, discord, wipeId, events)
       await expect(event).resolves.toEqual({
