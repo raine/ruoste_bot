@@ -104,8 +104,8 @@ export async function init(discord: DiscordAPI): Promise<void> {
   })
 
   events.on('mapEvent', (mapEvent) => onMapEvent(discord, mapEvent))
-  events.on('killedWhileOffline', (event) => {
-    log.info(event, 'Killed')
+  events.on('killedWhileOffline', async (event) => {
+    log.info({ ...event, teamInfo: await socket.getTeamInfo() }, 'Killed')
   })
 
   events.on('connected', async (serverInfo, server, wipeId) => {
