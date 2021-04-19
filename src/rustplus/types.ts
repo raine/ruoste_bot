@@ -274,7 +274,7 @@ export type ServerHostPort = { host: string; port: number }
 export interface RustPlusEvents {
   alarm: (data: SmartAlarmNotificationData) => void
   pairing: (data: PairingNotificationData) => void
-  player: (data: PlayerNotificationData) => void
+  killedWhileOffline: (data: PlayerNotificationData) => void
   entityPaired: (data: Entity) => void
   team: (data: TeamNotificationData) => void
   mapEvent: (data: DbMapEvent) => void

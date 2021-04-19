@@ -104,8 +104,8 @@ export async function init(discord: DiscordAPI): Promise<void> {
   })
 
   events.on('mapEvent', (mapEvent) => onMapEvent(discord, mapEvent))
-  events.on('player', (event) => {
-    log.info(event, 'Got player event')
+  events.on('killedWhileOffline', (event) => {
+    log.info(event, 'Killed')
   })
 
   events.on('connected', async (serverInfo, server, wipeId) => {
@@ -182,6 +182,10 @@ async function sendServerPairingMessage(
     })
     await msg.react('✅')
   }
+}
+
+export async function setSwitch(entityId: number, value: boolean) {
+  return socket.setEntityValueAsync(entityId, value)
 }
 
 async function loadScripts() {

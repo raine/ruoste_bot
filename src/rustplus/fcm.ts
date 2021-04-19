@@ -30,8 +30,20 @@ async function onFcmNotification(raw: any) {
     // Still need the server pairing notification though
     if (!isNotificationFromCurrentServer && !isServerPairingNotification) return
 
+    switch (data.notification.data.channelId) {
+      case 'player': {
+        // Use a more fitting name for the event
+        events.emit('killedWhileOffline', data.notification.data)
+        break
+      }
+      default: {
+        events.emit(
+          data.notification.data.channelId,
+          data.notification.data as any
+        )
+      }
+    }
     //@ts-ignore
-    events.emit(data.notification.data.channelId, data.notification.data)
   } catch (err) {
     log.warn(err)
     Sentry.captureException(err)
