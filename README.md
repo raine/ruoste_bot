@@ -12,7 +12,7 @@ A discord bot for [Rust](https://rust.facepunch.com/)
   - Post map events to a channel (e.g. cargo ship spawned)
   - Upkeep tracking on a channel through storage monitors
   - Control smart switches with reactions
-  - Some kind of support for controlling smart switches through script API (TBD)
+  - Custom scripts
 
 ![](https://raine.github.io/ruoste_bot/wipes.png?1)
 ![](https://raine.github.io/ruoste_bot/discord.png)
@@ -23,6 +23,7 @@ A discord bot for [Rust](https://rust.facepunch.com/)
 - `/nextwipes` - List servers that will be wiped in future.
 - `/rustplus configure <option> <value>`
     - Where `<option>` is one of `fcm`, `alerts_channel` or `events_channel`
+- `/rustplus setbase` - Set the base location to coordinates of your player in game.
 
 ## deployment
 
