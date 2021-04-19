@@ -191,7 +191,9 @@ export async function setSwitch(entityId: number, value: boolean) {
 async function loadScripts() {
   const scriptApi = makeScriptApi()
   const scriptsDir = path.join(__dirname, 'scripts')
-  const scripts = await fs.readdir(scriptsDir)
+  const scripts = (await fs.readdir(scriptsDir)).filter(
+    (script) => !script.includes('.example.')
+  )
   await Promise.all(
     scripts.map((script) =>
       import(path.join(scriptsDir, script)).then((module) => {
