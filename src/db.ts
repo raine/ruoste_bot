@@ -1,4 +1,4 @@
-import pgPromise from 'pg-promise'
+import pgPromise, { IColumnConfig } from 'pg-promise'
 import { camelCase, memoize } from 'lodash'
 import { DateTime } from 'luxon'
 
@@ -37,6 +37,13 @@ export type Db = pgPromise.IBaseProtocol<unknown>
 export const pgp = pgPromise({
   receive: camelizeColumnNames
 })
+
+export function withCamelCaseProps(columnConfig: IColumnConfig<unknown>[]) {
+  return columnConfig.map((column) => ({
+    ...column,
+    prop: camelCase(column.name)
+  }))
+}
 
 // Convert timestamptz field to ISO 8601
 pgp.pg.types.setTypeParser(1184, (str) =>

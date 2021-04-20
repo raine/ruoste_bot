@@ -3,3 +3,4 @@ nockBack.fixtures = __dirname + '/data/'
 nockBack.setMode('record')
 
 process.env.DATABASE_URL = 'postgres://localhost:5432/ruoste_bot_test'
+process.env.LOG_LEVEL = 'error'

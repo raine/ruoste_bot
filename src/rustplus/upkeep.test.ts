@@ -1,13 +1,14 @@
 import { DateTime } from 'luxon'
+import { TypedEmitter } from 'tiny-typed-emitter'
 import { mocked } from 'ts-jest/utils'
 import db from '../db'
 import { resetDb } from '../test/utils'
 import { configure, initEmptyConfig } from './config'
-import { getEntityInfo } from './socket'
+import { Entity, getEntityById } from './entity'
 import { createWipeIfNotExist, upsertServer } from './server'
+import { getEntityInfo } from './socket'
 import { RustPlusEvents, ServerInfo } from './types'
 import { getUpkeepDiscordMessageId, trackUpkeep } from './upkeep'
-import { TypedEmitter } from 'tiny-typed-emitter'
 
 jest.mock('./socket', () => ({
   __esModule: true,
@@ -39,7 +40,7 @@ const SERVER_INFO: ServerInfo = {
   port: 28083
 }
 
-const STORAGE_MONITOR_ENTITY_INFO = {
+const STORAGE_MONITOR_ENTITY_INFO_POWERED = {
   type: 'StorageMonitor' as const,
   payload: {
     value: false,
@@ -55,10 +56,34 @@ const STORAGE_MONITOR_ENTITY_INFO = {
   }
 }
 
+const STORAGE_MONITOR_ENTITY_INFO_UNPOWERED = {
+  type: 'StorageMonitor' as const,
+  payload: {
+    value: false,
+    items: [],
+    capacity: 0,
+    hasProtection: false,
+    protectionExpiry: 0
+  }
+}
+
 describe('upkeep tracking', () => {
   let wipeId: number
   let discord: any
   const events = new TypedEmitter<RustPlusEvents>()
+
+  async function insertStorageMonitor(entity: Partial<Entity> = {}) {
+    entity = {
+      wipeId: 1,
+      storageMonitorPoweredAt: null,
+      ...entity
+    }
+    await db.none(
+      `insert into entities (wipe_id, entity_id, entity_type, storage_monitor_powered_at)
+      values ($[wipeId], 1, 3, $[storageMonitorPoweredAt])`,
+      entity
+    )
+  }
 
   beforeEach(async () => {
     await resetDb()
@@ -69,15 +94,12 @@ describe('upkeep tracking', () => {
       currentServerId: server.serverId
     })
     wipeId = (await createWipeIfNotExist(SERVER_INFO)).wipeId
-    mockedGetEntityInfo.mockResolvedValue(STORAGE_MONITOR_ENTITY_INFO)
-    await db.none(
-      `insert into entities (wipe_id, entity_id, entity_type) values ($[wipeId], 1, 3)`,
-      { wipeId }
-    )
+    mockedGetEntityInfo.mockResolvedValue(STORAGE_MONITOR_ENTITY_INFO_POWERED)
     discord = { sendOrEditMessage: jest.fn() }
   })
 
-  test('sends message to channel if there is a working storage monitor', async () => {
+  test('sends message to channel if there is a working storage monitor powered at least once', async () => {
+    await insertStorageMonitor()
     discord.sendOrEditMessage.mockResolvedValue({ id: 'asdf' })
     await trackUpkeep(SERVER_INFO, discord, wipeId, events)
     expect(discord.sendOrEditMessage).toHaveBeenCalledWith(
@@ -92,7 +114,38 @@ describe('upkeep tracking', () => {
     })
   })
 
+  test('updates storage_monitor_powered_at if powered', async () => {
+    await insertStorageMonitor()
+    await trackUpkeep(SERVER_INFO, discord, wipeId, events)
+    await expect(getEntityById(1)).resolves.toMatchObject({
+      storageMonitorPoweredAt: expect.any(String)
+    })
+  })
+
+  test('does not include unpowered storage monitor not powered once', async () => {
+    await insertStorageMonitor({ storageMonitorPoweredAt: null })
+    mockedGetEntityInfo
+      .mockClear()
+      .mockResolvedValue(STORAGE_MONITOR_ENTITY_INFO_UNPOWERED)
+    discord.sendOrEditMessage.mockResolvedValue({ id: 'asdf' })
+    await trackUpkeep(SERVER_INFO, discord, wipeId, events)
+    expect(discord.sendOrEditMessage).not.toHaveBeenCalled()
+  })
+
+  test('include unpowered storage monitor if powered once', async () => {
+    await insertStorageMonitor({
+      storageMonitorPoweredAt: DateTime.local().toISO()
+    })
+    mockedGetEntityInfo
+      .mockClear()
+      .mockResolvedValue(STORAGE_MONITOR_ENTITY_INFO_UNPOWERED)
+    discord.sendOrEditMessage.mockResolvedValue({ id: 'asdf' })
+    await trackUpkeep(SERVER_INFO, discord, wipeId, events)
+    expect(discord.sendOrEditMessage).toHaveBeenCalled()
+  })
+
   test('updates an existing message if found', async () => {
+    await insertStorageMonitor()
     discord.sendOrEditMessage.mockResolvedValue({ id: 'asdf' })
     await db.none(
       `insert into upkeep_discord_messages (wipe_id, discord_message_id) values ($[wipeId], 'asdf')`,
@@ -108,22 +161,17 @@ describe('upkeep tracking', () => {
 
   describe('entity not found', () => {
     test('sets not_found_at if storage monitor cant be found', async () => {
+      await insertStorageMonitor()
       mockedGetEntityInfo.mockClear()
       mockedGetEntityInfo.mockRejectedValue({ error: 'not_found' })
       await trackUpkeep(SERVER_INFO, discord, wipeId, events)
-      await expect(db.one(`select * from entities`)).resolves.toEqual({
-        handle: null,
-        wipeId: 1,
-        entityId: 1,
-        entityType: 3,
-        createdAt: expect.any(String),
-        notFoundAt: expect.any(String),
-        discordSwitchMessageId: null,
-        discordPairingMessageId: null
+      await expect(db.one(`select * from entities`)).resolves.toMatchObject({
+        notFoundAt: expect.any(String)
       })
     })
 
     test('emits storageMonitorUnresponsive event with entity', async () => {
+      await insertStorageMonitor()
       mockedGetEntityInfo.mockClear()
       mockedGetEntityInfo.mockRejectedValue({ error: 'not_found' })
       const event = new Promise((resolve) =>
@@ -131,15 +179,8 @@ describe('upkeep tracking', () => {
       )
       await trackUpkeep(SERVER_INFO, discord, wipeId, events)
       await expect(event).resolves.toEqual({
-        createdAt: expect.any(String),
-        discordPairingMessageId: null,
-        discordSwitchMessageId: null,
-        entityId: 1,
-        entityInfo: { error: 'not_found' },
-        entityType: 3,
-        handle: null,
-        notFoundAt: null,
-        wipeId: 1
+        ...(await getEntityById(1)),
+        notFoundAt: expect.any(String)
       })
     })
   })

@@ -252,6 +252,7 @@ describe('formatEntitiesUpkeep()', () => {
     entityType: 3 as const,
     discordSwitchMessageId: null,
     discordPairingMessageId: null,
+    storageMonitorPoweredAt: DateTime.local().toISO(),
     notFoundAt: null,
     handle: 'Kaappi'
   }
@@ -341,6 +342,7 @@ describe('formatEntitiesUpkeep()', () => {
         entityType: 3,
         discordSwitchMessageId: null,
         discordPairingMessageId: null,
+        storageMonitorPoweredAt: DateTime.local().toISO(),
         handle: 'foo',
         notFoundAt: null,
         entityInfo: entityInfo({
@@ -355,6 +357,7 @@ describe('formatEntitiesUpkeep()', () => {
         entityType: 3,
         discordSwitchMessageId: null,
         discordPairingMessageId: null,
+        storageMonitorPoweredAt: DateTime.local().toISO(),
         handle: 'bar',
         notFoundAt: null,
         entityInfo: entityInfo({

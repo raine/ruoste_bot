@@ -53,8 +53,9 @@ create table entities (
   handle        text,
   created_at    timestamptz default now() not null,
   not_found_at  timestamptz,
-  discord_switch_message_id  text,
-  discord_pairing_message_id text,
+  storage_monitor_powered_at  timestamptz,
+  discord_switch_message_id   text,
+  discord_pairing_message_id  text,
   unique(wipe_id, entity_type, entity_id),
   unique(wipe_id, entity_type, handle)
 );

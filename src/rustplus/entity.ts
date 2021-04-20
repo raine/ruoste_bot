@@ -1,7 +1,7 @@
 import * as Discord from 'discord.js'
 import * as t from 'io-ts'
 import { TypedEmitter } from 'tiny-typed-emitter'
-import db, { Db, DEFAULT, pgp, skip } from '../db'
+import db, { Db, DEFAULT, pgp, skip, withCamelCaseProps } from '../db'
 import { isMessageReply } from '../discord'
 import log from '../logger'
 import { validateP } from '../validate'
@@ -25,30 +25,22 @@ export const Entity = t.type({
   handle: t.union([t.string, t.null]),
   discordSwitchMessageId: t.union([t.string, t.null]),
   discordPairingMessageId: t.union([t.string, t.null]),
+  storageMonitorPoweredAt: t.union([t.string, t.null]),
   notFoundAt: t.union([t.string, t.null])
 })
 
 const entitiesColumnSet = new pgp.helpers.ColumnSet(
-  [
-    { name: 'created_at', prop: 'createdAt', def: DEFAULT, skip },
-    { name: 'not_found_at', prop: 'notFoundAt', skip },
-    { name: 'wipe_id', prop: 'wipeId', skip },
-    { name: 'entity_id', prop: 'entityId', skip },
-    { name: 'entity_type', prop: 'entityType', skip },
+  withCamelCaseProps([
+    { name: 'created_at', def: DEFAULT, skip },
+    { name: 'not_found_at', skip },
+    { name: 'wipe_id', skip },
+    { name: 'entity_id', skip },
+    { name: 'entity_type', skip },
     { name: 'handle', skip },
-    {
-      name: 'discord_switch_message_id',
-      prop: 'discordSwitchMessageId',
-      def: null,
-      skip
-    },
-    {
-      name: 'discord_pairing_message_id',
-      prop: 'discordPairingMessageId',
-      def: null,
-      skip
-    }
-  ],
+    { name: 'discord_switch_message_id', def: null, skip },
+    { name: 'discord_pairing_message_id', def: null, skip },
+    { name: 'storage_monitor_powered_at', def: null, skip }
+  ]),
   { table: 'entities' }
 )
 

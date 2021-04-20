@@ -10,6 +10,8 @@ import { validate, validateP } from '../validate'
 import { getConfig } from './config'
 import { EntityType, EntityWithInfo, getEntities, updateEntity } from './entity'
 import { getEntityInfo } from './socket'
+import { pipe } from 'fp-ts/lib/function'
+import { filter, map } from 'fp-ts/lib/Array'
 
 const UPKEEP_UPDATE_INTERVAL = 60 * 1000
 
@@ -21,6 +23,8 @@ const UpkeepDiscordMessage = t.type({
 export type UpkeepDiscordMessage = t.TypeOf<typeof UpkeepDiscordMessage>
 
 const NotFoundError = t.type({ error: t.literal('not_found') })
+
+const then = <A>(fn: (x: A) => A) => (p: Promise<A>) => p.then(fn)
 
 export async function trackUpkeep(
   serverInfo: ServerInfo,
@@ -38,32 +42,53 @@ export async function trackUpkeep(
       })
     }))
   )
-  const ok = storageMonitorsWithEntityInfo.filter(
-    (entity): entity is EntityWithInfo => !('error' in entity.entityInfo)
-  )
+
   const notFound = storageMonitorsWithEntityInfo.filter(
     (entity) => 'error' in entity.entityInfo
+  )
+
+  const poweredStorageMonitors = await pipe(
+    storageMonitorsWithEntityInfo,
+    filter(
+      (entity): entity is EntityWithInfo => !('error' in entity.entityInfo)
+    ),
+    map(async (entity) =>
+      !isStorageMonitorUnpowered(entity.entityInfo) &&
+      entity.storageMonitorPoweredAt === null
+        ? {
+            ...(await updateEntity({
+              ...entity,
+              storageMonitorPoweredAt: DateTime.local().toSQL()
+            })),
+            entityInfo: entity.entityInfo
+          }
+        : entity
+    ),
+    (xs) => Promise.all(xs),
+    then((entities) =>
+      entities.filter((entity) => entity.storageMonitorPoweredAt)
+    )
   )
 
   if (notFound.length) {
     await Promise.all(
       notFound.map((entity) =>
-        updateEntity({ ...entity, notFoundAt: DateTime.local().toSQL() })
+        updateEntity({ ...entity, notFoundAt: DateTime.local().toSQL() }).then(
+          (entity) => {
+            log.info(entity, 'Failed to get entity info for storage monitor')
+            events.emit('storageMonitorNotFound', entity)
+          }
+        )
       )
     )
-
-    notFound.forEach((entity) => {
-      log.info(entity, 'Failed to get entity info for storage monitor')
-      events.emit('storageMonitorNotFound', entity)
-    })
   }
 
   const { discordUpkeepChannelId } = await getConfig()
-  if (!discordUpkeepChannelId || !ok.length) return
+  if (!discordUpkeepChannelId || !poweredStorageMonitors.length) return
   const messageId = (await getUpkeepDiscordMessageId(wipeId))?.discordMessageId
   const message = await discord.sendOrEditMessage(
     discordUpkeepChannelId,
-    formatEntitiesUpkeep(serverInfo, ok),
+    formatEntitiesUpkeep(serverInfo, poweredStorageMonitors),
     messageId
   )
 
