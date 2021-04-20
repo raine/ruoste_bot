@@ -199,9 +199,11 @@ async function loadScripts() {
   )
   await Promise.all(
     scripts.map((script) =>
-      import(path.join(scriptsDir, script)).then((module) => {
-        module.default(scriptApi)
-      })
+      import(path.join(scriptsDir, script))
+        .then((module) => module.default(scriptApi))
+        .catch((err) => {
+          log.error(err, 'Failed to load script')
+        })
     )
   )
   log.info(scripts, 'Scripts loaded')
