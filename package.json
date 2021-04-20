@@ -51,6 +51,7 @@
     "eslint-plugin-prettier": "^3.3.1",
     "jest": "^26.6.3",
     "nock": "^13.0.11",
+    "node-pg-migrate": "^5.9.0",
     "npm-run-all": "^4.1.5",
     "pino-pretty": "^4.7.1",
     "prettier": "^2.2.1",
@@ -71,6 +72,8 @@
     "test:lint": "eslint src/",
     "build": "rm -rf dist/ && ttsc -P tsconfig.production.json",
     "run-script-dev": "ts-node-dev -r tsconfig-paths/register --files --no-notify --respawn --project tsconfig.json",
-    "dev": "yarn run-script-dev src/main.ts"
+    "dev": "yarn run-script-dev src/main.ts",
+    "db:migrate": "node-pg-migrate -m sql/migrations",
+    "db:migrate:create": "yarn db:migrate create -j sql"
   }
 }
