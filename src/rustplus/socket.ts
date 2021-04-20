@@ -1,7 +1,13 @@
 import RustPlus from '@liamcottle/rustplus.js'
+import pMemoize from '../p-memoize'
 import * as t from 'io-ts'
-import { validate } from '../validate'
+import protobuf, { Message } from 'protobufjs'
+import { logAndCapture } from '../errors'
 import log from '../logger'
+import { validate } from '../validate'
+import { events } from './'
+import { saveMapIfNotExist } from './map'
+import { createWipeIfNotExist, Server } from './server'
 import {
   AppBroadcast,
   AppEntityInfo,
@@ -11,15 +17,10 @@ import {
   AppMarker,
   AppTeamInfo,
   AppTime,
+  isMessageBroadcast,
   ServerHostPort,
-  ServerInfo,
-  isMessageBroadcast
+  ServerInfo
 } from './types'
-import protobuf, { Message } from 'protobufjs'
-import { events } from './'
-import { createWipeIfNotExist, Server } from './server'
-import { logAndCapture } from '../errors'
-import { saveMapIfNotExist } from './map'
 
 export let socket: any
 export let socketConnectedP: Promise<void>
@@ -105,12 +106,14 @@ export async function getServerInfo(): Promise<ServerInfo> {
   }))
 }
 
-export async function getTime(): Promise<AppTime> {
+export async function _getTime(): Promise<AppTime> {
   return parseResponse(
     t.type({ seq: t.number, time: AppTime }),
     await sendRequestAsync({ getTime: {} })
   ).then((res) => res.time)
 }
+
+export const getTime = pMemoize(_getTime, 5000)
 
 export async function getTeamInfo(): Promise<AppTeamInfo> {
   return parseResponse(
