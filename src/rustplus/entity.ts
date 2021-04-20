@@ -88,11 +88,12 @@ export async function createEntityFromPairing({
   })
 }
 
-export async function getEntityById(
-  entityId: number,
+async function getEntity(
+  column: string,
+  value: unknown,
   wipeId?: number,
   tx: Db = db
-): Promise<Entity> {
+) {
   wipeId = wipeId ?? (await getCurrentWipe(tx))?.wipeId
   if (!wipeId) throw new Error('No current wipe')
 
@@ -102,10 +103,28 @@ export async function getEntityById(
       `select *
          from entities
         where wipe_id = $[wipeId]
-          and entity_id = $[entityId]`,
-      { wipeId, entityId }
+          and $[column:name] = $[value]`,
+      { column, wipeId, value }
     )
   )
+}
+
+export async function getEntityById(
+  entityId: number,
+  wipeId?: number,
+  tx: Db = db
+): Promise<Entity> {
+  return getEntity('entity_id', entityId, wipeId, tx)
+}
+
+export async function getEntityByHandle(
+  handle: string,
+  wipeId?: number,
+  tx: Db = db
+): Promise<Entity> {
+  return getEntity('handle', handle, wipeId, tx).catch(() => {
+    throw new Error(`Could not find an entity by the handle "${handle}"`)
+  })
 }
 
 export async function updateEntity(entity: Partial<Entity>): Promise<Entity> {

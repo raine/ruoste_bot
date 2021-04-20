@@ -2,6 +2,7 @@ import * as socket from './socket'
 import * as rustplus from './'
 import * as B from 'baconjs'
 import { AppEntityChanged } from './types'
+import { getEntityByHandle } from './entity'
 
 export interface SmartSwitch extends B.Property<boolean> {
   switchOn: () => Promise<void>
@@ -9,7 +10,13 @@ export interface SmartSwitch extends B.Property<boolean> {
   switchTo: (bool: boolean) => Promise<void>
 }
 
-export async function SmartSwitch(entityId: number): Promise<SmartSwitch> {
+export async function SmartSwitch(
+  handleOrEntityId: string | number
+): Promise<SmartSwitch> {
+  const entityId =
+    typeof handleOrEntityId === 'number'
+      ? handleOrEntityId
+      : (await getEntityByHandle(handleOrEntityId)).entityId
   const entityInfo = await socket.getEntityInfo(entityId)
   const initialValue = entityInfo.payload.value as boolean
 
