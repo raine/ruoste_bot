@@ -98,8 +98,11 @@ export async function init(discord: DiscordAPI): Promise<void> {
       const msg = await discord.sendMessageToBotOwner(
         formatEntityPairing(pairing)
       )
-      await updateEntity({ ...entity, discordPairingMessageId: msg.id })
-      events.emit('entityPaired', entity)
+      const updatedEntity = await updateEntity({
+        ...entity,
+        discordPairingMessageId: msg.id
+      })
+      events.emit('entityPaired', updatedEntity)
     }
   })
 
