@@ -1,9 +1,9 @@
 require('dotenv').config()
-import db, { pgp } from './db'
+import db, { pgp } from '../../db'
 import _ from 'lodash'
-import { getMonuments } from './rustplus/map'
+import { getMonuments } from '../map'
 import { DateTime } from 'luxon'
-import { distance } from './math'
+import { distance } from '../../math'
 
 const host = '178.33.128.186'
 const port = 28108

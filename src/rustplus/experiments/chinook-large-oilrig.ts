@@ -1,10 +1,10 @@
 require('dotenv').config()
-import db, { pgp } from './db'
-import { getMonuments } from './rustplus/map'
+import db, { pgp } from '../../db'
+import { getMonuments } from '../map'
 import { DateTime } from 'luxon'
-import { distance, XY } from './math'
-import { AppMarker, Monument } from './rustplus'
-import { getNewMarkers } from './rustplus/map-events'
+import { distance, XY } from '../../math'
+import { AppMarker, Monument } from '../'
+import { getNewMarkers } from '../map-events'
 
 const host = '95.216.17.108'
 const port = 28082

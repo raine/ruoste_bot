@@ -1,7 +1,7 @@
 require('dotenv').config()
-import db, { pgp } from './db'
-import { distance, XY } from './math'
-import { AppMarker } from './rustplus'
+import db, { pgp } from '../../db'
+import { distance, XY } from '../../math'
+import { AppMarker } from '../'
 
 const host = '178.33.128.186'
 const port = 28108

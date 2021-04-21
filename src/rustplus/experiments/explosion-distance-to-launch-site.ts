@@ -1,7 +1,7 @@
 require('dotenv').config()
-import db from './db'
+import db from '../../db'
 import _ from 'lodash'
-import { distance } from './math'
+import { distance } from '../../math'
 
 const host = '178.33.128.186'
 const port = 28108
