@@ -23,7 +23,7 @@ import { trackMapEvents } from './map-events'
 import { onMapEvent } from './map-events/on-map-event'
 import { updateMapEventDiscordMessagesLoop } from './map-events/update-discord-messages'
 import * as socket from './socket'
-import { makeScriptApi } from './script-api'
+import { makeScriptAPI } from './script-api'
 import {
   getCurrentServer,
   getServerId,
@@ -135,7 +135,7 @@ export async function init(discord: DiscordAPI): Promise<void> {
 
   const currentServer = await getCurrentServer()
   if (currentServer) void socket.listen(currentServer)
-  await loadScripts()
+  await loadScripts(discord)
 }
 
 export async function connectToServer(server: ServerHostPort) {
@@ -191,8 +191,7 @@ export async function setSwitch(entityId: number, value: boolean) {
   return socket.setEntityValueAsync(entityId, value)
 }
 
-async function loadScripts() {
-  const scriptApi = makeScriptApi()
+async function loadScripts(discord: DiscordAPI) {
   const scriptsDir = path.join(__dirname, 'scripts')
   const scripts = (await fs.readdir(scriptsDir)).filter(
     (script) => !script.includes('.example.')
@@ -200,7 +199,7 @@ async function loadScripts() {
   await Promise.all(
     scripts.map((script) =>
       import(path.join(scriptsDir, script))
-        .then((module) => module.default(scriptApi))
+        .then((module) => module.default(makeScriptAPI(discord)))
         .catch((err) => {
           log.error(err, 'Failed to load script')
         })
