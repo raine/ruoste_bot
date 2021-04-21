@@ -8,7 +8,13 @@ import { logAndCapture } from '../errors'
 import log from '../logger'
 import { validate, validateP } from '../validate'
 import { getConfig } from './config'
-import { EntityType, EntityWithInfo, getEntities, updateEntity } from './entity'
+import {
+  deleteEntities,
+  EntityType,
+  EntityWithInfo,
+  getEntities,
+  updateEntity
+} from './entity'
 import { getEntityInfo } from './socket'
 import { pipe } from 'fp-ts/lib/function'
 import { filter, map } from 'fp-ts/lib/Array'
@@ -71,29 +77,41 @@ export async function trackUpkeep(
   )
 
   if (notFound.length) {
-    await Promise.all(
-      notFound.map((entity) =>
-        updateEntity({ ...entity, notFoundAt: DateTime.local().toSQL() }).then(
-          (entity) => {
-            log.info(entity, 'Failed to get entity info for storage monitor')
-            events.emit('storageMonitorNotFound', entity)
-          }
-        )
-      )
-    )
+    notFound.forEach((entity) => {
+      log.info(entity, 'Failed to get entity info for storage monitor')
+      events.emit('storageMonitorNotFound', entity)
+    })
+
+    await deleteEntities(notFound.map((e) => e.entityId))
   }
 
   const { discordUpkeepChannelId } = await getConfig()
   if (!discordUpkeepChannelId || !poweredStorageMonitors.length) return
   const messageId = (await getUpkeepDiscordMessageId(wipeId))?.discordMessageId
-  const message = await discord.sendOrEditMessage(
-    discordUpkeepChannelId,
-    formatEntitiesUpkeep(serverInfo, poweredStorageMonitors),
-    messageId
-  )
+  const message = await discord
+    .sendOrEditMessage(
+      discordUpkeepChannelId,
+      formatEntitiesUpkeep(serverInfo, poweredStorageMonitors),
+      messageId
+    )
+    .catch((err) => {
+      // Unknown Message
+      // ---
+      // Message id from db does not exist in discord, consider it deleted
+      if (err.code === 10008) {
+        log.info(err, 'Upkeep message deleted?')
+        return discord.sendOrEditMessage(
+          discordUpkeepChannelId,
+          formatEntitiesUpkeep(serverInfo, poweredStorageMonitors),
+          undefined
+        )
+      } else {
+        throw new Error(err)
+      }
+    })
 
-  if (!messageId && message) {
-    await createUpkeepDiscordMessageId({
+  if ((!messageId && message) || (message && message.id !== messageId)) {
+    await upsertUpkeepDiscordMessageId({
       wipeId,
       discordMessageId: message.id
     })
@@ -131,12 +149,15 @@ export async function getUpkeepDiscordMessageId(
   )
 }
 
-async function createUpkeepDiscordMessageId(
+async function upsertUpkeepDiscordMessageId(
   upkeepDiscordMessage: UpkeepDiscordMessage
-): Promise<void> {
-  await db.none(
+): Promise<UpkeepDiscordMessage> {
+  return db.one(
     `insert into upkeep_discord_messages
-     values ($[wipeId], $[discordMessageId])`,
+     values ($[wipeId], $[discordMessageId])
+     on conflict (wipe_id)
+     do update set discord_message_id = excluded.discord_message_id
+     returning *`,
     upkeepDiscordMessage
   )
 }

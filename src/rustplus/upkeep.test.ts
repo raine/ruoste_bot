@@ -115,6 +115,7 @@ describe('upkeep tracking', () => {
   })
 
   test('updates storage_monitor_powered_at if powered', async () => {
+    discord.sendOrEditMessage.mockResolvedValue({ id: 'asdf' })
     await insertStorageMonitor()
     await trackUpkeep(SERVER_INFO, discord, wipeId, events)
     await expect(getEntityById(1)).resolves.toMatchObject({
@@ -160,14 +161,14 @@ describe('upkeep tracking', () => {
   })
 
   describe('entity not found', () => {
-    test('sets not_found_at if storage monitor cant be found', async () => {
+    test('deletes storage monitor entity', async () => {
       await insertStorageMonitor()
       mockedGetEntityInfo.mockClear()
       mockedGetEntityInfo.mockRejectedValue({ error: 'not_found' })
       await trackUpkeep(SERVER_INFO, discord, wipeId, events)
-      await expect(db.one(`select * from entities`)).resolves.toMatchObject({
-        notFoundAt: expect.any(String)
-      })
+      await expect(db.oneOrNone(`select * from entities`)).resolves.toEqual(
+        null
+      )
     })
 
     test('emits storageMonitorUnresponsive event with entity', async () => {
@@ -178,9 +179,13 @@ describe('upkeep tracking', () => {
         events.once('storageMonitorNotFound', resolve)
       )
       await trackUpkeep(SERVER_INFO, discord, wipeId, events)
-      await expect(event).resolves.toEqual({
-        ...(await getEntityById(1)),
-        notFoundAt: expect.any(String)
+      await expect(event).resolves.toMatchObject({
+        createdAt: expect.any(String),
+        entityId: 1,
+        entityInfo: { error: 'not_found' },
+        entityType: 3,
+        handle: null,
+        wipeId: 1
       })
     })
   })

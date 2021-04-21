@@ -25,14 +25,12 @@ export const Entity = t.type({
   handle: t.union([t.string, t.null]),
   discordSwitchMessageId: t.union([t.string, t.null]),
   discordPairingMessageId: t.union([t.string, t.null]),
-  storageMonitorPoweredAt: t.union([t.string, t.null]),
-  notFoundAt: t.union([t.string, t.null])
+  storageMonitorPoweredAt: t.union([t.string, t.null])
 })
 
 const entitiesColumnSet = new pgp.helpers.ColumnSet(
   withCamelCaseProps([
     { name: 'created_at', def: DEFAULT, skip },
-    { name: 'not_found_at', skip },
     { name: 'wipe_id', skip },
     { name: 'entity_id', skip },
     { name: 'entity_type', skip },
@@ -168,8 +166,7 @@ export async function getEntities(
       `select *
          from entities
         where wipe_id = $[wipeId]
-          and entity_type = $[entityType]
-          and not_found_at is null`,
+          and entity_type = $[entityType]`,
       { wipeId, entityType }
     )
   )

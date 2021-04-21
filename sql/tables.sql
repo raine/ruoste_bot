@@ -52,7 +52,6 @@ create table entities (
   entity_type   integer not null,
   handle        text,
   created_at    timestamptz default now() not null,
-  not_found_at  timestamptz,
   storage_monitor_powered_at  timestamptz,
   discord_switch_message_id   text,
   discord_pairing_message_id  text,
