@@ -9,7 +9,7 @@ async function activateTurrets() {
   )
 }
 
-export default function openTurretsIfRaided() {
+export default function script() {
   events.on('killedWhileOffline', activateTurrets)
   events.on('storageMonitorNotFound', async (storageMonitor) => {
     if (storageMonitor.handle?.match(/main/)) {
