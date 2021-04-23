@@ -6,13 +6,15 @@ A discord bot for [Rust](https://rust.facepunch.com/)
 
 - List recently wiped servers
 - List future wipes calculated based on servers' prior history of wipes
-- Rust+ related features
-  - Show group online status and server player count in the bot activity
-  - Receive smart alarm notifications to a channel
-  - Post map events to a channel (e.g. cargo ship spawned)
-  - Upkeep tracking on a channel through storage monitors
-  - Control smart switches with reactions
-  - [Custom scripts](https://github.com/raine/ruoste_bot/tree/master/src/rustplus/scripts)
+
+### rust+
+
+- Show group online status and server player count in the bot activity
+- Smart alarms posted on a channel
+- Map events (e.g. cargo ship spawned)
+- Upkeep tracking on a channel through storage monitors
+- Control smart switches with reactions
+- [Custom scripts](https://github.com/raine/ruoste_bot/tree/master/src/rustplus/scripts)
 
 ![](https://raine.github.io/ruoste_bot/wipes.png?1)
 ![](https://raine.github.io/ruoste_bot/discord.png)
