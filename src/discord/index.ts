@@ -128,7 +128,7 @@ const commands: (client: Discord.Client) => Commands = () => ({
         break
       }
       case 'setbase': {
-        await rustplus.setBaseLocation(msg.reply.bind(msg))
+        await rustplus.setBaseLocation(msg.reply.bind(msg)).run()
         break
       }
     }

@@ -1,8 +1,18 @@
 import pgPromise, { IColumnConfig } from 'pg-promise'
+import { fold } from 'fp-ts/lib/Either'
+import { pipe } from 'fp-ts/lib/function'
 import { camelCase, memoize } from 'lodash'
 import { DateTime } from 'luxon'
+import * as t from 'io-ts'
 
 import * as path from 'path'
+import { EitherAsync } from 'purify-ts/EitherAsync'
+import { CustomError } from 'ts-custom-error'
+import pg from 'pg-promise/typescript/pg-subset'
+import { Either, Left, Right } from 'purify-ts/Either'
+import { Maybe } from 'purify-ts/Maybe'
+
+export class DbError extends CustomError {}
 
 // Based on https://github.com/vitaly-t/pg-promise/issues/78#issuecomment-171951303
 function camelizeColumnNames(data: any[]) {
@@ -62,3 +72,28 @@ export const DEFAULT = {
 export const skip = ({ exists }: any) => !exists
 
 export default db
+
+export const one = <T>(
+  db: pgPromise.IBaseProtocol<unknown>,
+  query: pgPromise.QueryParam,
+  values?: any
+): EitherAsync<DbError, Maybe<T>> =>
+  EitherAsync<DbError, T | null>(async ({ throwE }) => {
+    try {
+      return await db.oneOrNone<T>(query, values)
+    } catch (e) {
+      return throwE(new DbError(e.message))
+    }
+  }).map((x) => Maybe.fromNullable(x))
+
+export const withDb = <T>(
+  f: (db: pgPromise.IDatabase<unknown, pg.IClient>) => Promise<T>
+): Promise<Either<DbError, T>> =>
+  f(db)
+    .then(Right)
+    .catch((e) => Left(new DbError(e.message)))
+
+// EitherAsync(
+//   async ({ fromPromise }) =>
+//     const x = await fromPromise(withDb((db) => db.oneOrNone(query, values)))
+// )

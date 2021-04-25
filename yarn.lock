@@ -1045,7 +1045,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/json-schema@npm:^7.0.3":
+"@types/json-schema@npm:7.0.7, @types/json-schema@npm:^7.0.3":
   version: 7.0.7
   resolution: "@types/json-schema@npm:7.0.7"
   checksum: b9d2c509fa4e0b82f58e73f5e6ab76c60ff1884ba41bb82f37fb1cece226d4a3e5a62fedf78a43da0005373a6713d9abe61c1e592906402c41c08ad6ab26d52b
@@ -6760,6 +6760,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"purify-ts@npm:^0.16.2":
+  version: 0.16.2
+  resolution: "purify-ts@npm:0.16.2"
+  dependencies:
+    "@types/json-schema": 7.0.7
+  checksum: 41153451c52dec77a8c10869376a60df54c6f9c0553bd5cf38c2eeedc6b280852e5f9ed7c60d558f8cccdcf5d92d3f1f9b3a06642b0f30364c2af5d775df148d
+  languageName: node
+  linkType: hard
+
 "push-receiver@npm:^2.1.0, push-receiver@npm:^2.1.1":
   version: 2.1.1
   resolution: "push-receiver@npm:2.1.1"
@@ -7251,9 +7260,11 @@ __metadata:
     pino-pretty: ^4.7.1
     prettier: ^2.2.1
     protobufjs: ^6.10.2
+    purify-ts: ^0.16.2
     push-receiver: ^2.1.1
     ramda: ^0.27.1
     tiny-typed-emitter: ^2.0.3
+    ts-custom-error: ^3.2.0
     ts-jest: ^26.5.4
     ts-node: ^9.1.1
     ts-node-dev: ^1.1.6
@@ -8109,6 +8120,13 @@ __metadata:
   version: 1.0.0
   resolution: "trim-newlines@npm:1.0.0"
   checksum: acc229ae8f6e7615df28a9cdb33a40db3f385afa9076c8b53a0a2d63d49dd646a6a4827ad93e1bc92ef24286121f66042c00da089f1585e473c010ca88309c78
+  languageName: node
+  linkType: hard
+
+"ts-custom-error@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "ts-custom-error@npm:3.2.0"
+  checksum: 0e865d875cc5095aad9a165950b693d48e9a7921a1a5c1575096797a29447c4f0cb24c9d1cbb0aec7ed1d27bcbdc9a6d4acffd71050dc8b45deb31b960a10126
   languageName: node
   linkType: hard
 

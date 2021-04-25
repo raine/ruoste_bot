@@ -21,6 +21,9 @@ import {
   ServerHostPort,
   ServerInfo
 } from './types'
+import { EitherAsync } from 'purify-ts/EitherAsync'
+import { CustomError } from 'ts-custom-error'
+import { Either, Left, Right } from 'purify-ts/Either'
 
 export let socket: any
 export let socketConnectedP: Promise<void>
@@ -67,7 +70,7 @@ async function parseBroadcast<T>(
   )
 }
 
-export async function sendRequestAsync(...args: any[]): Promise<any> {
+export async function sendRequestAsync(...args: any[]): Promise<Message<any>> {
   log.debug(args?.[0], 'Sending rustplus request')
   if (socketConnectedP) await socketConnectedP
   else throw new Error('Rust socket not connected')
@@ -121,6 +124,18 @@ export async function getTeamInfo(): Promise<AppTeamInfo> {
     await sendRequestAsync({ getTeamInfo: {} })
   ).then((res) => res.teamInfo)
 }
+
+export class RustPlusSocketError extends CustomError {}
+
+export const getTeamInfoE = async (): Promise<
+  Either<RustPlusSocketError, AppTeamInfo>
+> =>
+  sendRequestAsync({ getTeamInfo: {} })
+    .then((res) =>
+      parseResponse(t.type({ seq: t.number, teamInfo: AppTeamInfo }), res)
+    )
+    .then((res) => Right(res.teamInfo))
+    .catch((e) => Left(new RustPlusSocketError(e.message)))
 
 export async function getMap(): Promise<AppMap> {
   return parseResponse(

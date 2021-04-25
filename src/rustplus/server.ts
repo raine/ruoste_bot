@@ -1,8 +1,9 @@
 import * as t from 'io-ts'
-import { ServerHostPort, ServerInfo } from './types'
-import db, { Db } from '../db'
-import { validateP } from '../validate'
+import { Either, EitherAsync, Maybe } from 'purify-ts'
+import db, * as Db from '../db'
 import { XY } from '../math'
+import { validateP } from '../validate'
+import { ServerHostPort, ServerInfo } from './types'
 
 export const Server = t.type({
   serverId: t.number,
@@ -75,7 +76,7 @@ export function createWipeIfNotExist(serverInfo: ServerInfo): Promise<Wipe> {
 
 export async function getWipeId(
   serverInfo: ServerInfo,
-  tx: Db = db
+  tx: Db.Db = db
 ): Promise<number> {
   const { wipeId } = await tx.one<{ wipeId: number }>(
     `select wipe_id
@@ -90,7 +91,10 @@ export async function getWipeId(
   return wipeId
 }
 
-export async function getWipeById(wipeId: number, tx: Db = db): Promise<Wipe> {
+export async function getWipeById(
+  wipeId: number,
+  tx: Db.Db = db
+): Promise<Wipe> {
   return validateP(
     Wipe,
     tx.one(`select * from wipes where wipe_id = $[wipeId]`, { wipeId })
@@ -99,7 +103,7 @@ export async function getWipeById(wipeId: number, tx: Db = db): Promise<Wipe> {
 
 export async function getCurrentWipeForServer(
   server: Pick<ServerInfo, 'host' | 'port'>,
-  tx: Db = db
+  tx: Db.Db = db
 ) {
   const wipe = await validateP(
     Wipe,
@@ -118,49 +122,45 @@ export async function getCurrentWipeForServer(
   return wipe
 }
 
-export async function getServerId(
+export function getServerId(
   server: Pick<ServerInfo, 'host' | 'port'>,
-  tx: Db = db
-): Promise<number> {
-  const { serverId } = await tx.one<{ serverId: number }>(
+  tx: Db.Db = db
+): EitherAsync<Db.DbError, Maybe<number>> {
+  return Db.one<{ serverId: number }>(
+    tx,
     `select server_id
        from servers
       where host = $[host]
         and port = $[port]`,
     server
-  )
-
-  return serverId
+  ).map((m) => m.map((obj) => obj.serverId))
 }
 
-export async function getCurrentWipe(tx: Db = db): Promise<Wipe | null> {
-  return validateP(
-    Wipe,
-    tx.oneOrNone(
-      `with current_server as (
-         select current_server_id as server_id
-           from rustplus_config
-       )
-       select wipes.* from current_server
-         join servers using (server_id)
-         join wipes using (server_id)
-        order by wiped_at desc
-        limit 1`
-    )
+export function getCurrentWipe(): Promise<Either<Db.DbError, Wipe>> {
+  return Db.one(
+    `with current_server as (
+       select current_server_id as server_id
+         from rustplus_config
+     )
+     select wipes.* from current_server
+       join servers using (server_id)
+       join wipes using (server_id)
+      order by wiped_at desc
+      limit 1`
   )
 }
 
-export async function getCurrentServer(tx: Db = db): Promise<Server | null> {
-  return validateP(
-    t.union([Server, t.null]),
-    tx.oneOrNone(
-      `select *
-         from servers
-        where server_id = (
-          select current_server_id
-            from rustplus_config
-        )`
-    )
+export function getCurrentServer(
+  tx: Db.Db = db
+): EitherAsync<Db.DbError, Maybe<Server>> {
+  return Db.one(
+    tx,
+    `select *
+       from servers
+      where server_id = (
+        select current_server_id
+          from rustplus_config
+      )`
   )
 }
 
