@@ -1,18 +1,16 @@
-import pgPromise, { IColumnConfig } from 'pg-promise'
-import { fold } from 'fp-ts/lib/Either'
+import * as E from 'fp-ts/Either'
 import { pipe } from 'fp-ts/lib/function'
+import * as O from 'fp-ts/Option'
+import * as TE from 'fp-ts/TaskEither'
 import { camelCase, memoize } from 'lodash'
 import { DateTime } from 'luxon'
-import * as t from 'io-ts'
-
 import * as path from 'path'
-import { EitherAsync } from 'purify-ts/EitherAsync'
+import pgPromise, { IColumnConfig } from 'pg-promise'
 import { CustomError } from 'ts-custom-error'
-import pg from 'pg-promise/typescript/pg-subset'
-import { Either, Left, Right } from 'purify-ts/Either'
-import { Maybe } from 'purify-ts/Maybe'
+import { isError } from './errors'
 
 export class DbError extends CustomError {}
+export class QueryResultDbError extends CustomError {}
 
 // Based on https://github.com/vitaly-t/pg-promise/issues/78#issuecomment-171951303
 function camelizeColumnNames(data: any[]) {
@@ -77,23 +75,32 @@ export const one = <T>(
   db: pgPromise.IBaseProtocol<unknown>,
   query: pgPromise.QueryParam,
   values?: any
-): EitherAsync<DbError, Maybe<T>> =>
-  EitherAsync<DbError, T | null>(async ({ throwE }) => {
-    try {
-      return await db.oneOrNone<T>(query, values)
-    } catch (e) {
-      return throwE(new DbError(e.message))
-    }
-  }).map((x) => Maybe.fromNullable(x))
+): TE.TaskEither<DbError, O.Option<T>> =>
+  pipe(
+    TE.tryCatch(
+      () => db.oneOrNone<T>(query, values),
+      (err: unknown) => new DbError(isError(err) ? err.message : 'Query error')
+    ),
+    TE.map(O.fromNullable)
+  )
 
-export const withDb = <T>(
-  f: (db: pgPromise.IDatabase<unknown, pg.IClient>) => Promise<T>
-): Promise<Either<DbError, T>> =>
-  f(db)
-    .then(Right)
-    .catch((e) => Left(new DbError(e.message)))
+export const noResultToError = <A>(
+  te: TE.TaskEither<DbError, O.Option<A>>
+): TE.TaskEither<DbError | QueryResultDbError, A> =>
+  pipe(
+    te,
+    TE.map(
+      E.fromOption(
+        () => new QueryResultDbError('Expected query to return a row')
+      )
+    ),
+    TE.chainW(TE.fromEither)
+  )
 
-// EitherAsync(
-//   async ({ fromPromise }) =>
-//     const x = await fromPromise(withDb((db) => db.oneOrNone(query, values)))
-// )
+export const connect = () =>
+  pipe(
+    TE.tryCatch(
+      () => db.connect(),
+      (err: unknown) => new DbError(isError(err) ? err.message : 'Query error')
+    )
+  )

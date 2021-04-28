@@ -1,16 +1,21 @@
 import Discord from 'discord.js'
+import * as AP from 'fp-ts/lib/Apply'
+import * as E from 'fp-ts/lib/Either'
+import { identity, pipe } from 'fp-ts/lib/function'
+import * as T from 'fp-ts/lib/Task'
+import { findFirst } from 'fp-ts/lib/Array'
+import * as TE from 'fp-ts/lib/TaskEither'
 import { promises as fs } from 'fs'
-import _ from 'lodash'
 import * as path from 'path'
 import { TypedEmitter } from 'tiny-typed-emitter'
-import db, { DbError } from '../db'
+import { noResultToError as noResultAsError } from '../db'
 import { DiscordAPI } from '../discord'
 import {
   formatEntityPairing,
   formatServerPairing,
   formatSmartAlarmAlert
 } from '../discord/formatting'
-import { logAndCapture } from '../errors'
+import { logAndCapture, toUnexpectedError } from '../errors'
 import log from '../logger'
 import { configure, getConfig, initEmptyConfig } from './config'
 import {
@@ -22,7 +27,6 @@ import { fcmListen } from './fcm'
 import { trackMapEvents } from './map-events'
 import { onMapEvent } from './map-events/on-map-event'
 import { updateMapEventDiscordMessagesLoop } from './map-events/update-discord-messages'
-import * as socket from './socket'
 import { makeScriptAPI } from './script-api'
 import {
   getCurrentServer,
@@ -30,9 +34,9 @@ import {
   getServerId,
   getWipeById,
   updateWipeBaseLocation,
-  upsertServer,
-  Wipe
+  upsertServer
 } from './server'
+import * as socket from './socket'
 import { initSwitchesChannel } from './switch-channel'
 import {
   isServerPairingNotification,
@@ -43,12 +47,11 @@ import {
   ServerPairingNotificationData
 } from './types'
 import { trackUpkeepLoop } from './upkeep'
-import { EitherAsync } from 'purify-ts/EitherAsync'
-import { Maybe } from 'purify-ts/Maybe'
+import _ from 'lodash'
 
 export * from './config'
-export * from './types'
 export * as socket from './socket'
+export * from './types'
 
 type State = {
   serverInfo?: ServerInfo
@@ -112,9 +115,25 @@ export async function init(discord: DiscordAPI): Promise<void> {
   })
 
   events.on('mapEvent', (mapEvent) => onMapEvent(discord, mapEvent))
-  events.on('killedWhileOffline', async (event) => {
-    log.info({ ...event, teamInfo: await socket.getTeamInfo() }, 'Killed')
-  })
+  events.on(
+    'killedWhileOffline',
+    (event): Promise<void> => {
+      return pipe(
+        socket.getTeamInfoE(),
+        T.map(
+          E.fold(
+            (err) => {
+              log.error(err)
+            },
+            (teamInfo) => {
+              log.info({ ...event, teamInfo }, 'Killed')
+            }
+          )
+        ),
+        (task) => task()
+      )
+    }
+  )
 
   events.on('connected', async (serverInfo, server, wipeId) => {
     log.info(serverInfo, 'Connected to rust server')
@@ -143,59 +162,64 @@ export async function init(discord: DiscordAPI): Promise<void> {
   await loadScripts(discord)
 }
 
-export async function connectToServer(server: ServerHostPort) {
-  return db.tx(async (t) =>
-    EitherAsync<DbError | 'error1' | 'error2', void>(
-      async ({ liftEither, fromPromise }) => {
-        const id = await liftEither(
-          await fromPromise(
-            getServerId(server, t).map((m) => m.toEither('error1'))
-          )
-        )
-        await configure({ currentServerId: id }, t)
-        const currentServer = await liftEither(
-          await fromPromise(
-            getCurrentServer(t).map((m) => m.toEither('error2'))
-          )
-        )
-        void socket.listen(currentServer)
-      }
+export const connectToServer = (server: ServerHostPort): Promise<void> => {
+  const task = pipe(
+    noResultAsError(getServerId(server)),
+    TE.chainW((serverId) =>
+      TE.tryCatch(
+        () => configure({ currentServerId: serverId }),
+        toUnexpectedError
+      )
+    ),
+    TE.chainW(() => noResultAsError(getCurrentServer())),
+    T.map(
+      E.fold(
+        (err) => log.error(err),
+        (server) => socket.listen(server)
+      )
     )
   )
+
+  return task()
 }
 
-// const x = getServerId(server, t).map((x) =>
-//   x.toEither('Could not get server')
-// )
-// return x
-// await configure({ currentServerId: id }, t)
-// const currentServer = await getCurrentServer(t)
-// if (currentServer) void socket.listen(currentServer)
+export function setBaseLocation(
+  reply: typeof Discord.Message.prototype.reply
+): Promise<void> {
+  return pipe(
+    AP.sequenceT(TE.taskEither)(
+      noResultAsError(getCurrentServer()),
+      noResultAsError(getCurrentWipe()),
+      socket.getTeamInfoE()
+    ),
+    TE.chainW(([server, wipe, teamInfo]) => {
+      const botOwner = findFirst<Member>(
+        (m) => m.steamId === server.playerSteamId
+      )(teamInfo.members)
 
-export function setBaseLocation(reply: typeof Discord.Message.prototype.reply) {
-  return EitherAsync<Error, { wipe: Wipe; botOwner: Member }>(
-    async ({ fromPromise, liftEither }) => {
-      const server = await fromPromise(getCurrentServer())
-      const wipe = await fromPromise(getCurrentWipe())
-      const teamInfo = await fromPromise(socket.getTeamInfoE())
-      const botOwner = await liftEither(
-        Maybe.fromNullable(
-          teamInfo.members.find((m) => m.steamId === server.playerSteamId)
-        ).toEither(new Error('Unable to find bot owner in team'))
+      return pipe(
+        botOwner,
+        TE.fromOption(() => new Error('Bot owner not in team')),
+        TE.map((botOwner) => ({ botOwner, wipe }))
       )
-      return { wipe, botOwner }
-    }
+    }),
+    TE.chain(({ botOwner, wipe }) =>
+      TE.tryCatch(async () => {
+        await updateWipeBaseLocation(wipe.wipeId, _.pick(botOwner, ['x', 'y']))
+        await reply(
+          `Base location updated to current location of ${botOwner.name}`
+        )
+      }, E.toError)
+    ),
+    TE.orElse((err) =>
+      TE.tryCatch(async () => {
+        log.error(err, 'Failed to update based location')
+        await reply('Could not update base location')
+      }, E.toError)
+    ),
+    T.map(E.fold((err: any) => log.error(err), identity)),
+    (task) => task()
   )
-    .ifRight(async ({ wipe, botOwner }) => {
-      await updateWipeBaseLocation(wipe.wipeId, _.pick(botOwner, ['x', 'y']))
-      await reply(
-        `Base location updated to current location of ${botOwner.name}`
-      )
-    })
-    .ifLeft((err) => {
-      log.error(err, 'Failed to update based location')
-      return reply('Could not update base location')
-    })
 }
 
 async function sendServerPairingMessage(
@@ -218,7 +242,7 @@ async function sendServerPairingMessage(
 }
 
 export async function setSwitch(entityId: number, value: boolean) {
-  return socket.setEntityValueAsync(entityId, value)
+  return socket.setEntityValueE(entityId, value)()
 }
 
 async function loadScripts(discord: DiscordAPI) {

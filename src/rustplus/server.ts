@@ -1,5 +1,7 @@
+import { pipe } from 'fp-ts/function'
+import * as O from 'fp-ts/Option'
+import * as TE from 'fp-ts/TaskEither'
 import * as t from 'io-ts'
-import { Either, EitherAsync, Maybe } from 'purify-ts'
 import db, * as Db from '../db'
 import { XY } from '../math'
 import { validateP } from '../validate'
@@ -125,19 +127,25 @@ export async function getCurrentWipeForServer(
 export function getServerId(
   server: Pick<ServerInfo, 'host' | 'port'>,
   tx: Db.Db = db
-): EitherAsync<Db.DbError, Maybe<number>> {
-  return Db.one<{ serverId: number }>(
-    tx,
-    `select server_id
-       from servers
-      where host = $[host]
-        and port = $[port]`,
-    server
-  ).map((m) => m.map((obj) => obj.serverId))
+): TE.TaskEither<Db.DbError, O.Option<number>> {
+  return pipe(
+    Db.one<{ serverId: number }>(
+      tx,
+      `select server_id
+         from servers
+        where host = $[host]
+          and port = $[port]`,
+      server
+    ),
+    TE.map(O.map((row) => row.serverId))
+  )
 }
 
-export function getCurrentWipe(): Promise<Either<Db.DbError, Wipe>> {
+export function getCurrentWipe(
+  tx: Db.Db = db
+): TE.TaskEither<Db.DbError, O.Option<Wipe>> {
   return Db.one(
+    tx,
     `with current_server as (
        select current_server_id as server_id
          from rustplus_config
@@ -152,7 +160,7 @@ export function getCurrentWipe(): Promise<Either<Db.DbError, Wipe>> {
 
 export function getCurrentServer(
   tx: Db.Db = db
-): EitherAsync<Db.DbError, Maybe<Server>> {
+): TE.TaskEither<Db.DbError, O.Option<Server>> {
   return Db.one(
     tx,
     `select *

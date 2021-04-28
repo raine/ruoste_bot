@@ -1,9 +1,21 @@
 import RustPlus from '@liamcottle/rustplus.js'
-import pMemoize from '../p-memoize'
+import * as E from 'fp-ts/Either'
+import { pipe } from 'fp-ts/function'
+import * as T from 'fp-ts/Task'
+import * as TE from 'fp-ts/TaskEither'
 import * as t from 'io-ts'
 import protobuf, { Message } from 'protobufjs'
-import { logAndCapture } from '../errors'
+import { CustomError } from 'ts-custom-error'
+import {
+  FormattedValidationError,
+  isError,
+  logAndCapture,
+  RustPlusSocketError,
+  toUnexpectedError,
+  UnexpectedError
+} from '../errors'
 import log from '../logger'
+import { getPropSafe } from '../object'
 import { validate } from '../validate'
 import { events } from './'
 import { saveMapIfNotExist } from './map'
@@ -14,16 +26,11 @@ import {
   AppInfo,
   AppMap,
   AppMapMarkers,
-  AppMarker,
   AppTeamInfo,
   AppTime,
   isMessageBroadcast,
-  ServerHostPort,
-  ServerInfo
+  ServerHostPort
 } from './types'
-import { EitherAsync } from 'purify-ts/EitherAsync'
-import { CustomError } from 'ts-custom-error'
-import { Either, Left, Right } from 'purify-ts/Either'
 
 export let socket: any
 export let socketConnectedP: Promise<void>
@@ -33,25 +40,20 @@ const RUSTPLUS_PROTO_PATH = require.resolve(
   '@liamcottle/rustplus.js/rustplus.proto'
 )
 
-async function parseResponse<T>(
-  type: t.Decoder<unknown, T>,
+function appResponseToObject(
   response: Message<any>
-): Promise<T> {
-  const proto = await protobuf.load(RUSTPLUS_PROTO_PATH)
-  const AppResponse = proto.lookupType('rustplus.AppResponse')
-  try {
-    return validate(
-      type,
+): TE.TaskEither<UnexpectedError, unknown> {
+  return pipe(
+    TE.tryCatch(() => protobuf.load(RUSTPLUS_PROTO_PATH), toUnexpectedError),
+    TE.map((proto) => proto.lookupType('rustplus.AppResponse')),
+    TE.map((AppResponse) =>
       AppResponse.toObject(response, {
         longs: String,
         enums: String,
         bytes: String
       })
     )
-  } catch (err) {
-    log.error(response, 'Failed to validate response')
-    throw new Error(err)
-  }
+  )
 }
 
 async function parseBroadcast<T>(
@@ -77,79 +79,68 @@ export async function sendRequestAsync(...args: any[]): Promise<Message<any>> {
   return socket.sendRequestAsync(...args)
 }
 
-export async function setEntityValueAsync(
-  entityId: number,
-  value: any
-): Promise<unknown> {
-  return sendRequestAsync({
-    entityId: entityId,
-    setEntityValue: {
-      value: value
-    }
-  })
-}
+type RustPlusSocketOp =
+  | 'getTeamInfo'
+  | 'getMap'
+  | 'getMapMarkers'
+  | 'getTime'
+  | 'getInfo'
+  | 'getEntityInfo'
+  | 'setEntityValue'
 
-export async function getEntityInfo(entityId: number): Promise<AppEntityInfo> {
-  return parseResponse(
-    t.type({ seq: t.number, entityInfo: AppEntityInfo }),
-    await sendRequestAsync({
-      entityId,
-      getEntityInfo: {}
-    })
-  ).then((res) => res.entityInfo)
-}
+export const sendRequestT = (
+  op: RustPlusSocketOp,
+  opts: Record<string, unknown> = {}
+): TE.TaskEither<RustPlusSocketError, Message<any>> =>
+  TE.tryCatch(
+    () => sendRequestAsync({ [op]: {}, ...opts }),
+    (err) =>
+      isError(err)
+        ? new RustPlusSocketError(err.message)
+        : toUnexpectedError(err)
+  )
 
-export async function getServerInfo(): Promise<ServerInfo> {
-  return parseResponse(
-    t.type({ seq: t.number, info: AppInfo }),
-    await sendRequestAsync({ getInfo: {} })
-  ).then((res) => ({
-    ...res.info,
-    ...connectedServer!
-  }))
-}
-
-export async function _getTime(): Promise<AppTime> {
-  return parseResponse(
-    t.type({ seq: t.number, time: AppTime }),
-    await sendRequestAsync({ getTime: {} })
-  ).then((res) => res.time)
-}
-
-export const getTime = pMemoize(_getTime, 5000)
-
-export async function getTeamInfo(): Promise<AppTeamInfo> {
-  return parseResponse(
-    t.type({ seq: t.number, teamInfo: AppTeamInfo }),
-    await sendRequestAsync({ getTeamInfo: {} })
-  ).then((res) => res.teamInfo)
-}
-
-export class RustPlusSocketError extends CustomError {}
-
-export const getTeamInfoE = async (): Promise<
-  Either<RustPlusSocketError, AppTeamInfo>
+export const makeSocketFn = <T>(
+  type: t.Decoder<unknown, T>,
+  socketOp: RustPlusSocketOp,
+  prop: string
+) => (
+  opts: Record<string, unknown> = {}
+): TE.TaskEither<
+  RustPlusSocketError | UnexpectedError | FormattedValidationError,
+  T
 > =>
-  sendRequestAsync({ getTeamInfo: {} })
-    .then((res) =>
-      parseResponse(t.type({ seq: t.number, teamInfo: AppTeamInfo }), res)
+  pipe(
+    sendRequestT(socketOp, opts),
+    TE.chainW((res) => appResponseToObject(res)),
+    T.map(E.chainW((obj) => getPropSafe(prop, obj))),
+    T.map(
+      E.chainW((obj) =>
+        pipe(
+          type.decode(obj),
+          E.mapLeft((errors) => new FormattedValidationError(errors))
+        )
+      )
     )
-    .then((res) => Right(res.teamInfo))
-    .catch((e) => Left(new RustPlusSocketError(e.message)))
+  )
 
-export async function getMap(): Promise<AppMap> {
-  return parseResponse(
-    t.type({ seq: t.number, map: AppMap }),
-    await sendRequestAsync({ getMap: {} })
-  ).then((res) => res.map)
-}
-
-export async function getMapMarkers(): Promise<AppMarker[]> {
-  return parseResponse(
-    t.type({ seq: t.number, mapMarkers: AppMapMarkers }),
-    await sendRequestAsync({ getMapMarkers: {} })
-  ).then((res) => res.mapMarkers.markers)
-}
+export const setEntityValueE = (entityId: number, value: boolean) =>
+  makeSocketFn(
+    t.unknown,
+    'setEntityValue',
+    'entityInfo'
+  )({ setEntityValue: value, entityId })
+export const getEntityInfoE = (entityId: number) =>
+  makeSocketFn(AppEntityInfo, 'getEntityInfo', 'entityInfo')({ entityId })
+export const getTimeE = makeSocketFn(AppTime, 'getTime', 'time')
+export const getServerInfoE = makeSocketFn(AppInfo, 'getInfo', 'info')
+export const getTeamInfoE = makeSocketFn(AppTeamInfo, 'getTeamInfo', 'teamInfo')
+export const getMapE = makeSocketFn(AppMap, 'getMap', 'map')
+export const getMapMarkersE = makeSocketFn(
+  AppMapMarkers,
+  'getMapMarkers',
+  'mapMarkers'
+)
 
 let connectAttempts = 0
 let backOffDelayTimeout: NodeJS.Timeout
