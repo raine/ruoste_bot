@@ -93,23 +93,23 @@ export async function getWipeId(
   return wipeId
 }
 
-export async function getWipeById(
+export function getWipeById(
   wipeId: number,
   tx: Db.Db = db
-): Promise<Wipe> {
-  return validateP(
-    Wipe,
-    tx.one(`select * from wipes where wipe_id = $[wipeId]`, { wipeId })
-  )
+): TE.TaskEither<Db.DbError | Db.DbResultValidationError, O.Option<Wipe>> {
+  return Db.one(tx, Wipe, `select * from wipes where wipe_id = $[wipeId]`, {
+    wipeId
+  })
 }
 
-export async function getCurrentWipeForServer(
+export function getCurrentWipeForServer(
   server: Pick<ServerInfo, 'host' | 'port'>,
   tx: Db.Db = db
-) {
-  const wipe = await validateP(
-    Wipe,
-    tx.one(
+): TE.TaskEither<Db.DbError | Db.DbResultValidationError, O.Option<Wipe>> {
+  return pipe(
+    Db.one(
+      tx,
+      Wipe,
       `select *
          from servers
          join wipes using (server_id)
@@ -120,17 +120,16 @@ export async function getCurrentWipeForServer(
       server
     )
   )
-
-  return wipe
 }
 
 export function getServerId(
   server: Pick<ServerInfo, 'host' | 'port'>,
   tx: Db.Db = db
-): TE.TaskEither<Db.DbError, O.Option<number>> {
+): TE.TaskEither<Db.DbError | Db.DbResultValidationError, O.Option<number>> {
   return pipe(
-    Db.one<{ serverId: number }>(
+    Db.one(
       tx,
+      t.type({ serverId: t.number }),
       `select server_id
          from servers
         where host = $[host]
@@ -143,9 +142,10 @@ export function getServerId(
 
 export function getCurrentWipe(
   tx: Db.Db = db
-): TE.TaskEither<Db.DbError, O.Option<Wipe>> {
+): TE.TaskEither<Db.DbError | Db.DbResultValidationError, O.Option<Wipe>> {
   return Db.one(
     tx,
+    Wipe,
     `with current_server as (
        select current_server_id as server_id
          from rustplus_config
@@ -160,9 +160,10 @@ export function getCurrentWipe(
 
 export function getCurrentServer(
   tx: Db.Db = db
-): TE.TaskEither<Db.DbError, O.Option<Server>> {
+): TE.TaskEither<Db.DbError | Db.DbResultValidationError, O.Option<Server>> {
   return Db.one(
     tx,
+    Server,
     `select *
        from servers
       where server_id = (

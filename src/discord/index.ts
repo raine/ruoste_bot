@@ -1,6 +1,10 @@
 import * as Discord from 'discord.js'
+import * as TE from 'fp-ts/lib/TaskEither'
+import * as T from 'fp-ts/lib/Task'
+import * as E from 'fp-ts/lib/Either'
+import { pipe } from 'fp-ts/lib/function'
 import { DateTime, Interval } from 'luxon'
-import { logAndCapture } from '../errors'
+import { logAndCapture, toUnexpectedError } from '../errors'
 import { getNextWipes } from '../get-next-wipes'
 import { parseMaxGroupOption } from '../input'
 import {
@@ -128,7 +132,18 @@ const commands: (client: Discord.Client) => Commands = () => ({
         break
       }
       case 'setbase': {
-        await rustplus.setBaseLocation(msg.reply.bind(msg)).run()
+        const fail = () => msg.reply('Could not update base location')
+        const success = (botOwnerName: string) =>
+          msg.reply(
+            `Base location updated to current location of ${botOwnerName}`
+          )
+        await pipe(
+          rustplus.setBaseLocation(),
+          T.chain((e) =>
+            TE.tryCatch(() => E.fold(fail, success)(e), toUnexpectedError)
+          ),
+          TE.orElse((err) => TE.leftIO(() => log.error(err)))
+        )()
         break
       }
     }

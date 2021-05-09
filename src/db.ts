@@ -1,16 +1,26 @@
 import * as E from 'fp-ts/Either'
-import { pipe } from 'fp-ts/lib/function'
+import * as t from 'io-ts'
+import * as T from 'fp-ts/Task'
+import { constant, constUndefined, pipe } from 'fp-ts/lib/function'
 import * as O from 'fp-ts/Option'
 import * as TE from 'fp-ts/TaskEither'
 import { camelCase, memoize } from 'lodash'
 import { DateTime } from 'luxon'
 import * as path from 'path'
 import pgPromise, { IColumnConfig } from 'pg-promise'
+import pg from 'pg-promise/typescript/pg-subset'
 import { CustomError } from 'ts-custom-error'
-import { isError } from './errors'
+import { FormattedValidationError, isError } from './errors'
 
-export class DbError extends CustomError {}
-export class QueryResultDbError extends CustomError {}
+export class DbError extends CustomError {
+  type = 'DbError' as const
+}
+export class DbQueryResultError extends CustomError {
+  type = 'DbQueryResultError' as const
+}
+export class DbResultValidationError extends FormattedValidationError {
+  type = 'DbResultValidationError' as const
+}
 
 // Based on https://github.com/vitaly-t/pg-promise/issues/78#issuecomment-171951303
 function camelizeColumnNames(data: any[]) {
@@ -71,36 +81,78 @@ export const skip = ({ exists }: any) => !exists
 
 export default db
 
-export const one = <T>(
+export const toDbError = (err: unknown): DbError =>
+  new DbError(isError(err) ? err.message : 'Query error')
+
+export const none = (
   db: pgPromise.IBaseProtocol<unknown>,
   query: pgPromise.QueryParam,
   values?: any
-): TE.TaskEither<DbError, O.Option<T>> =>
+): TE.TaskEither<DbError, void> =>
   pipe(
-    TE.tryCatch(
-      () => db.oneOrNone<T>(query, values),
-      (err: unknown) => new DbError(isError(err) ? err.message : 'Query error')
-    ),
-    TE.map(O.fromNullable)
+    TE.tryCatch(() => db.none(query, values), toDbError),
+    TE.map(constUndefined)
+  )
+
+export const one = <A>(
+  db: pgPromise.IBaseProtocol<unknown>,
+  type: t.Decoder<unknown, A>,
+  query: pgPromise.QueryParam,
+  values?: any
+): TE.TaskEither<DbError | DbResultValidationError, O.Option<A>> =>
+  pipe(
+    TE.tryCatch(() => db.oneOrNone<A>(query, values), toDbError),
+    TE.map(O.fromNullable),
+    T.map(
+      E.chainW(
+        O.fold(
+          () => E.right(O.none),
+          (a) =>
+            pipe(
+              type.decode(a),
+              E.mapLeft((errors) => new DbResultValidationError(errors)),
+              E.map(O.some)
+            )
+        )
+      )
+    )
   )
 
 export const noResultToError = <A>(
   te: TE.TaskEither<DbError, O.Option<A>>
-): TE.TaskEither<DbError | QueryResultDbError, A> =>
+): TE.TaskEither<DbError | DbQueryResultError, A> =>
   pipe(
     te,
     TE.map(
       E.fromOption(
-        () => new QueryResultDbError('Expected query to return a row')
+        () => new DbQueryResultError('Expected query to return a row')
       )
     ),
     TE.chainW(TE.fromEither)
   )
 
-export const connect = () =>
+// eslint-disable-next-line @typescript-eslint/ban-types
+export type DbPoolClient = pgPromise.IConnected<{}, pg.IClient>
+
+export const connect = (): TE.TaskEither<DbError, DbPoolClient> =>
+  TE.tryCatch(() => db.connect(), toDbError)
+
+export const withTransaction = <E, A>(
+  program: (db: DbPoolClient) => TE.TaskEither<E, A>
+): TE.TaskEither<E | DbError, A> =>
   pipe(
-    TE.tryCatch(
-      () => db.connect(),
-      (err: unknown) => new DbError(isError(err) ? err.message : 'Query error')
+    connect(),
+    TE.chainW((db) =>
+      pipe(
+        none(db, 'BEGIN'),
+        TE.chainW(() => program(db)),
+        TE.chainW((a) => pipe(none(db, 'COMMIT'), TE.map(constant(a)))),
+        TE.orElseW((err) =>
+          pipe(
+            none(db, 'ROLLBACK'),
+            TE.chain(() => TE.left(err))
+          )
+        )
+      )
     )
   )

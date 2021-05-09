@@ -10,19 +10,17 @@ export function logAndCapture(err: Error, message?: string) {
 }
 
 export class UnexpectedError extends CustomError {
-  type = 'UnexpectedError'
+  type = 'UnexpectedError' as const
 }
 
 export class FormattedValidationError extends CustomError {
-  type = 'FormattedValidationError'
-
   public constructor(public errors: t.Errors) {
     super(formatValidationErrors(errors).join('\n'))
   }
 }
 
 export class RustPlusSocketError extends CustomError {
-  type = 'RustPlusSocketError'
+  type = 'RustPlusSocketError' as const
 }
 
 export const isError = (err: unknown): err is Error =>

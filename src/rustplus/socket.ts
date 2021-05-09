@@ -5,7 +5,6 @@ import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import * as t from 'io-ts'
 import protobuf, { Message } from 'protobufjs'
-import { CustomError } from 'ts-custom-error'
 import {
   FormattedValidationError,
   isError,
@@ -31,6 +30,10 @@ import {
   isMessageBroadcast,
   ServerHostPort
 } from './types'
+
+export class RustPlusSocketValidationError extends FormattedValidationError {
+  type = 'RustPlusSocketValidationError' as const
+}
 
 export let socket: any
 export let socketConnectedP: Promise<void>
@@ -91,7 +94,7 @@ type RustPlusSocketOp =
 export const sendRequestT = (
   op: RustPlusSocketOp,
   opts: Record<string, unknown> = {}
-): TE.TaskEither<RustPlusSocketError, Message<any>> =>
+): TE.TaskEither<RustPlusSocketError | UnexpectedError, Message<any>> =>
   TE.tryCatch(
     () => sendRequestAsync({ [op]: {}, ...opts }),
     (err) =>
@@ -107,7 +110,7 @@ export const makeSocketFn = <T>(
 ) => (
   opts: Record<string, unknown> = {}
 ): TE.TaskEither<
-  RustPlusSocketError | UnexpectedError | FormattedValidationError,
+  RustPlusSocketError | UnexpectedError | RustPlusSocketValidationError,
   T
 > =>
   pipe(
@@ -118,7 +121,7 @@ export const makeSocketFn = <T>(
       E.chainW((obj) =>
         pipe(
           type.decode(obj),
-          E.mapLeft((errors) => new FormattedValidationError(errors))
+          E.mapLeft((errors) => new RustPlusSocketValidationError(errors))
         )
       )
     )

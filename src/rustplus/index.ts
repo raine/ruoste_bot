@@ -1,21 +1,21 @@
-import Discord from 'discord.js'
 import * as AP from 'fp-ts/lib/Apply'
-import * as E from 'fp-ts/lib/Either'
-import { identity, pipe } from 'fp-ts/lib/function'
-import * as T from 'fp-ts/lib/Task'
 import { findFirst } from 'fp-ts/lib/Array'
+import * as E from 'fp-ts/lib/Either'
+import { pipe } from 'fp-ts/lib/function'
+import * as T from 'fp-ts/lib/Task'
 import * as TE from 'fp-ts/lib/TaskEither'
 import { promises as fs } from 'fs'
+import _ from 'lodash'
 import * as path from 'path'
 import { TypedEmitter } from 'tiny-typed-emitter'
-import { noResultToError as noResultAsError } from '../db'
+import * as Db from '../db'
 import { DiscordAPI } from '../discord'
 import {
   formatEntityPairing,
   formatServerPairing,
   formatSmartAlarmAlert
 } from '../discord/formatting'
-import { logAndCapture, toUnexpectedError } from '../errors'
+import { logAndCapture, toUnexpectedError, UnexpectedError } from '../errors'
 import log from '../logger'
 import { configure, getConfig, initEmptyConfig } from './config'
 import {
@@ -47,7 +47,6 @@ import {
   ServerPairingNotificationData
 } from './types'
 import { trackUpkeepLoop } from './upkeep'
-import _ from 'lodash'
 
 export * from './config'
 export * as socket from './socket'
@@ -157,39 +156,50 @@ export async function init(discord: DiscordAPI): Promise<void> {
 
   if (config.fcmCredentials) await fcmListen(config.fcmCredentials)
 
-  const currentServer = await getCurrentServer()
-  if (currentServer) void socket.listen(currentServer)
-  await loadScripts(discord)
-}
-
-export const connectToServer = (server: ServerHostPort): Promise<void> => {
-  const task = pipe(
-    noResultAsError(getServerId(server)),
-    TE.chainW((serverId) =>
-      TE.tryCatch(
-        () => configure({ currentServerId: serverId }),
-        toUnexpectedError
-      )
+  await pipe(
+    getCurrentServer(),
+    Db.noResultToError,
+    TE.chainW((server) =>
+      TE.tryCatch(() => socket.listen(server), toUnexpectedError)
     ),
-    TE.chainW(() => noResultAsError(getCurrentServer())),
     T.map(
       E.fold(
         (err) => log.error(err),
-        (server) => socket.listen(server)
+        (_): void => _
+      )
+    )
+  )()
+
+  await loadScripts(discord)
+}
+
+export const connectToServer = (
+  server: ServerHostPort
+): TE.TaskEither<Db.DbError | UnexpectedError | Db.DbQueryResultError, void> =>
+  Db.withTransaction((db) =>
+    pipe(
+      Db.noResultToError(getServerId(server, db)),
+      TE.chainW((serverId) =>
+        TE.tryCatch(
+          () => configure({ currentServerId: serverId }, db),
+          toUnexpectedError
+        )
+      ),
+      TE.chainW(() => Db.noResultToError(getCurrentServer())),
+      TE.chainW((server) =>
+        TE.tryCatch(() => socket.listen(server), toUnexpectedError)
       )
     )
   )
 
-  return task()
-}
-
-export function setBaseLocation(
-  reply: typeof Discord.Message.prototype.reply
-): Promise<void> {
+export function setBaseLocation(): TE.TaskEither<
+  Db.DbError | Db.DbQueryResultError | UnexpectedError,
+  string
+> {
   return pipe(
     AP.sequenceT(TE.taskEither)(
-      noResultAsError(getCurrentServer()),
-      noResultAsError(getCurrentWipe()),
+      Db.noResultToError(getCurrentServer()),
+      Db.noResultToError(getCurrentWipe()),
       socket.getTeamInfoE()
     ),
     TE.chainW(([server, wipe, teamInfo]) => {
@@ -199,26 +209,22 @@ export function setBaseLocation(
 
       return pipe(
         botOwner,
-        TE.fromOption(() => new Error('Bot owner not in team')),
+        TE.fromOption(() => new UnexpectedError('Bot owner not in team')),
         TE.map((botOwner) => ({ botOwner, wipe }))
       )
     }),
-    TE.chain(({ botOwner, wipe }) =>
+    TE.chainW(({ botOwner, wipe }) =>
       TE.tryCatch(async () => {
         await updateWipeBaseLocation(wipe.wipeId, _.pick(botOwner, ['x', 'y']))
-        await reply(
-          `Base location updated to current location of ${botOwner.name}`
-        )
-      }, E.toError)
+        return botOwner.name
+      }, toUnexpectedError)
     ),
     TE.orElse((err) =>
-      TE.tryCatch(async () => {
+      TE.leftIO(() => {
         log.error(err, 'Failed to update based location')
-        await reply('Could not update base location')
-      }, E.toError)
-    ),
-    T.map(E.fold((err: any) => log.error(err), identity)),
-    (task) => task()
+        return err
+      })
+    )
   )
 }
 
@@ -236,7 +242,7 @@ async function sendServerPairingMessage(
     await connectToServer({
       host: pairing.body.ip,
       port: pairing.body.port
-    })
+    })().then(E.mapLeft((err) => log.error(err, 'Failed to connect to server')))
     await msg.react('✅')
   }
 }
