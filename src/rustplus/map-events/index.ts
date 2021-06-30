@@ -94,7 +94,8 @@ export async function checkMapEvents(
     (marker) => !['VendingMachine', 'Player'].includes(marker.type)
   )
 
-  if (markers.length) {
+  // eslint-disable-next-line no-constant-condition
+  if (/* markers.length */ false) {
     const wipeId = await getWipeId(serverInfo)
     await db.none(
       `insert into map_markers (wipe_id, markers)
