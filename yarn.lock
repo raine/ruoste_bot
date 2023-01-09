@@ -5467,10 +5467,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"luxon@npm:^1.26.0":
-  version: 1.26.0
-  resolution: "luxon@npm:1.26.0"
-  checksum: e12bb8bfdd69707f0f3e57b1b2ff39042c67904bdc437602064519f3eb87d3267497bc56cc0b7611faa40e22019991440a8e8e179d4c6a0440e9f226571fce46
+"luxon@npm:^1.28.1":
+  version: 1.28.1
+  resolution: "luxon@npm:1.28.1"
+  checksum: c7e02b18b9f686f2437a70429d545aca100515679ad5f242ef2cb0981ddbee3ce002cfe4dd28f78f5794e10d03e57c2e9a1b32dd97bed823f87c02903f2c299d
   languageName: node
   linkType: hard
 
@@ -7240,7 +7240,7 @@ __metadata:
     javascript-time-ago: ^2.3.4
     jest: ^26.6.3
     lodash: ^4.17.21
-    luxon: ^1.26.0
+    luxon: ^1.28.1
     memoizee: ^0.4.15
     nock: ^13.0.11
     node-pg-migrate: ^5.9.0
