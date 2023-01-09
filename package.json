@@ -19,7 +19,7 @@
     "io-ts-types": "^0.5.16",
     "javascript-time-ago": "^2.3.4",
     "lodash": "^4.17.21",
-    "luxon": "^1.26.0",
+    "luxon": "^2.5.2",
     "memoizee": "^0.4.15",
     "p-map": "^4.0.0",
     "pg-promise": "^10.10.1",
